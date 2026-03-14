@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Account - InsightFlow</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body onload="loadAccount()">
+
+<div class="container">
+
+<!-- Sidebar -->
+
+<div class="sidebar">
+<h2>InsightFlow</h2>
+
+<ul>
+<li onclick="goDashboard()">Dashboard</li>
+<li class="active">Account</li>
+<li onclick="logout()">Logout</li>
+</ul>
+
+</div>
+
+
+<!-- Main Content -->
+
+<div class="main">
+
+<h1>Account Settings</h1>
+
+<div class="account-card">
+
+<h2 id="username">User Name</h2>
+
+<p id="email">user@email.com</p>
+
+<div class="account-actions">
+
+<button class="change-btn">
+Change Password
+</button>
+
+<button class="logout-btn" onclick="logout()">
+Logout
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
