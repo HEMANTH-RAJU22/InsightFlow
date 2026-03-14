@@ -1,135 +1,128 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 <meta charset="UTF-8">
 <title>InsightFlow Dashboard</title>
-
-<!-- connect CSS -->
 <link rel="stylesheet" href="style.css">
-
 </head>
 
 <body>
 
 <!-- Top Navigation -->
-
 <div class="topbar">
-
-<div class="logo">INSIGHTFLOW</div>
-
-<div class="nav-links">
-<span onclick="goAccount()">Account</span>
-<span onclick="logout()">Logout</span>
+  <div class="logo">INSIGHTFLOW</div>
+  <div class="nav-links">
+    <span onclick="goAccount()">Account</span>
+    <span onclick="logout()">Logout</span>
+  </div>
 </div>
-
-</div>
-
-
-<!-- Dashboard -->
 
 <div class="dashboard">
 
-<h1>Upload Dataset</h1>
+  <h1>Upload Dataset</h1>
 
-<!-- Upload -->
-<div class="upload-box">
+  <!-- 1. Upload Box — always visible -->
+  <div class="upload-box">
+    <label for="fileInput" class="upload-label">📂 Select Dataset</label>
+    <input type="file" id="fileInput" accept=".csv,.txt,.xlsx,.sql">
+    <button onclick="uploadFile()">Upload</button>
+    <button class="clear-btn" id="clearBtn" onclick="clearDataset()" style="display:none">✕ Clear</button>
+  </div>
 
-<label for="fileInput" class="upload-label">
-📂 Select Dataset
-</label>
+  <!-- Loading Overlay -->
+  <div id="loadingOverlay" style="display:none">
+    <div class="loading-box">
+      <div class="spinner"></div>
+      <p class="loading-text">Analyzing dataset<span class="loading-dots"></span></p>
+      <p class="loading-sub" id="loadingFileName"></p>
+    </div>
+  </div>
 
-<input type="file" id="fileInput" accept=".csv,.txt,.xlsx,.sql">
+  <!-- 2. Dataset Preview — hidden until upload -->
+  <div class="preview-section" id="previewSection" style="display:none">
+    <h2>Dataset Preview</h2>
+    <div class="table-container">
+      <table id="dataTable">
+        <thead></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="pagination">
+      <button onclick="prevPage()">Previous</button>
+      <span id="pageInfo">Page 1</span>
+      <button onclick="nextPage()">Next</button>
+    </div>
+  </div>
 
-<button onclick="uploadFile()">Upload</button>
+  <!-- 3. KPI Cards — always visible with zeros, animate after upload -->
+  <div class="data-overview" id="dataOverview" style="display:block">
+    <h2>Data Overview</h2>
+    <div class="kpi-container" id="kpiContainer" style="display:flex; flex-wrap:wrap; gap:20px;">
+
+      <div class="kpi-card dataset-card">
+        <h3>Dataset</h3>
+        <p id="fileName">No file</p>
+        <p class="dataset-meta">
+          <span id="fileSize">—</span> • <span id="fileType">—</span>
+        </p>
+      </div>
+
+      <div class="kpi-card">
+        <h3>Total Rows</h3>
+        <p id="totalRows">0</p>
+      </div>
+
+      <div class="kpi-card">
+        <h3>Total Columns</h3>
+        <p id="totalColumns">0</p>
+      </div>
+
+      <div class="kpi-card">
+        <h3>Missing Values</h3>
+        <p id="missingValues">0</p>
+      </div>
+
+      <div class="kpi-card">
+        <h3>Duplicate Rows</h3>
+        <p id="duplicateRows">0</p>
+      </div>
+
+      <div class="kpi-card">
+        <h3>Numeric Columns</h3>
+        <p id="numericColumns">0</p>
+      </div>
+
+      <div class="kpi-card">
+        <h3>Categorical Columns</h3>
+        <p id="categoricalColumns">0</p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 4. Analyze with AI — hidden until upload -->
+  <div class="ai-cta" id="aiCta" style="display:none">
+    <div class="ai-cta-inner">
+      <div class="ai-cta-text">
+        <span class="ai-cta-icon">✦</span>
+        <div>
+          <h3>Ready for AI Analysis</h3>
+          <p>Let the AI analyst explore your dataset, find patterns, and surface insights.</p>
+        </div>
+      </div>
+      <button class="ai-cta-btn" onclick="goToChatbot()">
+        Analyze with AI
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+          <polyline points="12 5 19 12 12 19"></polyline>
+        </svg>
+      </button>
+    </div>
+  </div>
 
 </div>
 
-<!-- DATASET PREVIEW -->
-
-<div class="preview-section">
-
-<h2>Dataset Preview</h2>
-
-<div class="table-container">
-
-<table id="dataTable">
-<thead></thead>
-<tbody></tbody>
-</table>
-
-</div>
-
-</div>
-
-<div class="pagination">
-
-<button onclick="prevPage()">Previous</button>
-
-<span id="pageInfo">Page 1</span>
-
-<button onclick="nextPage()">Next</button>
-
-</div>
-
-
-<!-- KPI CARDS -->
-<div class="data-overview">
-
-<h2>Data Overview</h2>
-
-<div class="kpi-container">
-
-<div class="kpi-card dataset-card">
-
-<h3>Dataset</h3>
-
-<p id="fileName">No file</p>
-
-<p class="dataset-meta">
-<span id="fileSize">0 KB</span> • <span id="fileType">-</span>
-</p>
-
-</div>
-
-<div class="kpi-card">
-<h3>Total Rows</h3>
-<p id="totalRows">0</p>
-</div>
-
-<div class="kpi-card">
-<h3>Total Columns</h3>
-<p id="totalColumns">0</p>
-</div>
-
-<div class="kpi-card">
-<h3>Missing Values</h3>
-<p id="missingValues">0</p>
-</div>
-
-<div class="kpi-card">
-<h3>Duplicate Rows</h3>
-<p id="duplicateRows">0</p>
-</div>
-
-<div class="kpi-card">
-<h3>Numeric Columns</h3>
-<p id="numericColumns">0</p>
-</div>
-
-<div class="kpi-card">
-<h3>Categorical Columns</h3>
-<p id="categoricalColumns">0</p>
-</div>
-
-</div>
-
-</div>
-
-
-<!-- connect JavaScript -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="script.js"></script>
-
 </body>
 </html>

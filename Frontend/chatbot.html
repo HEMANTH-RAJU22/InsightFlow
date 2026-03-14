@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AI Analyst - InsightFlow</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<!-- Top Navigation -->
+<div class="topbar">
+  <div class="logo">INSIGHTFLOW</div>
+  <div class="nav-links">
+    <span onclick="window.location.href='dashboard.html'">← Dashboard</span>
+    <span onclick="goAccount()">Account</span>
+    <span onclick="logout()">Logout</span>
+  </div>
+</div>
+
+<!-- Chatbot Page -->
+<div class="chatbot-page">
+
+  <!-- Header -->
+  <div class="chatbot-header">
+    <div class="chatbot-header-left">
+      <div class="ai-badge">✦ AI</div>
+      <div>
+        <h1 class="chatbot-title">Data Analyst</h1>
+        <p class="chatbot-subtitle" id="datasetLabel">No dataset loaded</p>
+      </div>
+    </div>
+    <div class="chatbot-stats" id="chatbotStats" style="display:none">
+      <div class="stat-chip" id="statRows">— rows</div>
+      <div class="stat-chip" id="statCols">— cols</div>
+      <div class="stat-chip" id="statMissing">— missing</div>
+    </div>
+  </div>
+
+  <!-- Chat Window -->
+  <div class="chat-window" id="chatWindow"></div>
+
+  <!-- Input Area -->
+  <div class="chatbot-input-area">
+
+    <div class="quick-prompts">
+      <button class="quick-btn" onclick="sendQuick('Give me a full summary of this dataset')">📊 Summarize</button>
+      <button class="quick-btn" onclick="sendQuick('What patterns or trends do you see in the data?')">🔍 Patterns</button>
+      <button class="quick-btn" onclick="sendQuick('Are there any anomalies or outliers I should know about?')">⚠️ Anomalies</button>
+      <button class="quick-btn" onclick="sendQuick('What are the top business insights from this data?')">💡 Insights</button>
+      <button class="quick-btn" onclick="sendQuick('Which columns have the most missing values and what should I do?')">🧹 Data Quality</button>
+      <button class="quick-btn" onclick="sendQuick('What machine learning models would work best for this dataset?')">🤖 ML Ideas</button>
+    </div>
+
+    <div class="chat-input-row">
+      <input
+        type="text"
+        id="chatInput"
+        class="chat-input"
+        placeholder="Ask anything about your data..."
+        onkeydown="if(event.key==='Enter') sendChat()"
+      >
+      <button class="send-btn" onclick="sendChat()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="22" y1="2" x2="11" y2="13"></line>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        </svg>
+      </button>
+    </div>
+
+  </div>
+
+</div>
+
+<script src="chatbot.js"></script>
+</body>
+</html>
