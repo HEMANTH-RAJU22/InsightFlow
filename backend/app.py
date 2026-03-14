@@ -2,11 +2,18 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import pandas as pd
 import warnings
-import anthropic
 import os
+import requests
+from groq import Groq
 import re
 
 warnings.filterwarnings("ignore")
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+# ── API Keys ──
+if not os.environ.get("GROQ_API_KEY"):
+    os.environ["GROQ_API_KEY"] = "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"  # ← paste your key here
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=False)
@@ -215,39 +222,84 @@ def chat():
     if not user_message:
         return jsonify({"error": "No message provided"}), 400
 
-    messages = history + [{"role": "user", "content": user_message}]
+    messages = history[-4:] + [{"role": "user", "content": user_message}]
 
-    system_prompt = f"""You are InsightFlow's AI Data Analyst — a sharp, concise data expert embedded in a data analytics dashboard.
+    # Trim dataset context to reduce token usage
+    ctx_lines = dataset_ctx.split("\n")
+    short_ctx = "\n".join(ctx_lines[:20])  # max 20 lines of context
 
-Dataset context:
-{dataset_ctx}
+    system_prompt = f"""You are a data analyst. Dataset: {short_ctx}. Be concise, use bullet points, max 150 words."""
 
-Guidelines:
-- Be direct and insightful. Lead with the key finding.
-- Use bullet points for lists, keep answers scannable.
-- If no dataset is loaded, politely ask the user to upload one first.
-- Format numbers clearly. Highlight anomalies, patterns, and actionable insights.
-- Keep responses under 250 words unless the user asks for more detail."""
+    api_key = os.environ.get("GROQ_API_KEY", "")
+    if not api_key:
+        return jsonify({"error": "GROQ_API_KEY not set.\n\nAdd it in PyCharm:\nEdit Configurations → Environment Variables → GROQ_API_KEY=gsk_..."}), 401
 
     try:
-        client   = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
-        response = client.messages.create(
-            model="claude-sonnet-4-20250514",
+        client = Groq(api_key=api_key)
+
+        # Build messages with system prompt
+        groq_messages = [{"role": "system", "content": system_prompt}] + messages
+
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=groq_messages,
             max_tokens=1000,
-            system=system_prompt,
-            messages=messages
+            temperature=0.7
         )
-        return jsonify({"reply": response.content[0].text})
 
-    except anthropic.AuthenticationError:
-        return jsonify({"error": "Invalid API key. Set ANTHROPIC_API_KEY env variable."}), 401
-
-    except anthropic.RateLimitError:
-        return jsonify({"error": "Rate limit reached. Please wait a moment."}), 429
+        reply = response.choices[0].message.content
+        return jsonify({"reply": reply})
 
     except Exception as e:
-        print("CHAT ERROR:", str(e))
-        return jsonify({"error": "AI request failed", "details": str(e)}), 500
+        import traceback
+        print("CHAT ERROR:", traceback.format_exc())
+        return jsonify({"error": str(e)}), 500
+
+
+# -------------------------
+# GEMINI MODELS LIST
+# -------------------------
+
+@app.route("/list-models")
+def list_models():
+    api_key = os.environ.get("GEMINI_API_KEY", "")
+    url = f"https://generativelanguage.googleapis.com/v1beta/models?key={api_key}"
+    resp = requests.get(url, timeout=10, verify=False)
+    if resp.status_code != 200:
+        return jsonify({"error": resp.text})
+    models = [m["name"] for m in resp.json().get("models", []) if "generateContent" in m.get("supportedGenerationMethods", [])]
+    return jsonify({"models": models})
+
+
+# -------------------------
+# GEMINI TEST ROUTE
+# -------------------------
+
+@app.route("/test-gemini")
+def test_gemini():
+    api_key = os.environ.get("GEMINI_API_KEY", "")
+    if not api_key:
+        return jsonify({"error": "GEMINI_API_KEY not set"})
+
+    models = [
+        "gemini-2.0-flash",
+        "gemini-1.5-flash",
+        "gemini-1.5-flash-8b",
+        "gemini-pro"
+    ]
+
+    results = {}
+    for model in models:
+        try:
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+            resp = requests.post(url, json={
+                "contents": [{"role":"user","parts":[{"text":"say hi"}]}]
+            }, timeout=10, verify=False)
+            results[model] = resp.status_code
+        except Exception as e:
+            results[model] = str(e)
+
+    return jsonify(results)
 
 
 # -------------------------
