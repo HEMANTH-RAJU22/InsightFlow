@@ -5,8 +5,7 @@
 <title>AI Analyst - InsightFlow</title>
 <link rel="stylesheet" href="style.css">
 </head>
-
-<body>
+<body class="chatbot-body">
 
 <!-- Top Navigation -->
 <div class="topbar">
@@ -24,17 +23,12 @@
   <!-- Header -->
   <div class="chatbot-header">
     <div class="chatbot-header-left">
-      <div class="ai-badge">✦ AI</div>
+      <div class="ai-badge">AI</div>
       <div>
         <h1 class="chatbot-title">Data Analyst</h1>
-        <p class="chatbot-subtitle" id="datasetLabel">No dataset loaded</p>
       </div>
     </div>
-    <div class="chatbot-stats" id="chatbotStats" style="display:none">
-      <div class="stat-chip" id="statRows">— rows</div>
-      <div class="stat-chip" id="statCols">— cols</div>
-      <div class="stat-chip" id="statMissing">— missing</div>
-    </div>
+
   </div>
 
   <!-- Chat Window -->
@@ -43,7 +37,7 @@
   <!-- Input Area -->
   <div class="chatbot-input-area">
 
-    <div class="quick-prompts">
+    <div class="quick-prompts" id="quickPrompts">
       <button class="quick-btn" onclick="sendQuick('Give me a full summary of this dataset')">📊 Summarize</button>
       <button class="quick-btn" onclick="sendQuick('What patterns or trends do you see in the data?')">🔍 Patterns</button>
       <button class="quick-btn" onclick="sendQuick('Are there any anomalies or outliers I should know about?')">⚠️ Anomalies</button>
@@ -58,9 +52,10 @@
         id="chatInput"
         class="chat-input"
         placeholder="Ask anything about your data..."
-        onkeydown="if(event.key==='Enter') sendChat()"
+        onkeydown="if(event.key==='Enter' && !event.shiftKey) sendChat()"
+        autocomplete="off"
       >
-      <button class="send-btn" onclick="sendChat()">
+      <button class="send-btn" id="sendBtn" onclick="sendChat()">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <line x1="22" y1="2" x2="11" y2="13"></line>
           <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
@@ -72,6 +67,6 @@
 
 </div>
 
-<script src="chatbot.js"></script>
+<script src="script.js"></script>
 </body>
 </html>

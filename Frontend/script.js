@@ -11,7 +11,7 @@ let rowsPerPage = 10
 
 /* ── KPI counter animation ─────────────────────────────────── */
 function animateKPI(id, value){
-  let el  = document.getElementById(id)
+  let el = document.getElementById(id)
   if(!el) return
   let start = 0, steps = 60, duration = 2000
   let inc = Math.ceil(value / steps)
@@ -23,25 +23,23 @@ function animateKPI(id, value){
 }
 
 
-/* ── Show all dashboard sections ───────────────────────────── */
+/* ── Loading spinner ───────────────────────────────────────── */
 function showLoading(fileName){
   let overlay = document.getElementById("loadingOverlay")
   let sub     = document.getElementById("loadingFileName")
   if(overlay) overlay.style.display = "flex"
   if(sub)     sub.innerText = fileName
-  /* disable upload button */
-  let btn = document.querySelector(".upload-box button")
-  if(btn){ btn.disabled = true; btn.style.opacity = "0.5" }
+  document.querySelectorAll(".upload-box button").forEach(b => { b.disabled = true; b.style.opacity = "0.5" })
 }
 
 function hideLoading(){
   let overlay = document.getElementById("loadingOverlay")
   if(overlay) overlay.style.display = "none"
-  /* re-enable upload button */
-  let btn = document.querySelector(".upload-box button")
-  if(btn){ btn.disabled = false; btn.style.opacity = "1" }
+  document.querySelectorAll(".upload-box button").forEach(b => { b.disabled = false; b.style.opacity = "1" })
 }
 
+
+/* ── Show sections after upload ────────────────────────────── */
 function showSections(){
   document.getElementById("previewSection").style.display = "block"
   document.getElementById("aiCta").style.display          = "block"
@@ -49,37 +47,29 @@ function showSections(){
   document.getElementById("clearBtn").style.display       = "inline-block"
 }
 
+
+/* ── Clear dataset ─────────────────────────────────────────── */
 function clearDataset(){
-  /* reset state */
-  dataset     = []
-  headers     = []
-  currentPage = 1
+  dataset = []; headers = []; currentPage = 1
 
-  /* reset file input */
-  document.getElementById("fileInput").value = ""
-
-  /* hide sections */
+  document.getElementById("fileInput").value              = ""
   document.getElementById("previewSection").style.display = "none"
   document.getElementById("aiCta").style.display          = "none"
   document.getElementById("clearBtn").style.display       = "none"
+  document.querySelector("#dataTable thead").innerHTML    = ""
+  document.querySelector("#dataTable tbody").innerHTML    = ""
 
-  /* clear table */
-  document.querySelector("#dataTable thead").innerHTML = ""
-  document.querySelector("#dataTable tbody").innerHTML = ""
-
-  /* reset KPI values */
-  document.getElementById("fileName").innerText        = "No file"
-  document.getElementById("fileSize").innerText        = "—"
-  document.getElementById("fileType").innerText        = "—"
-  document.getElementById("totalRows").innerText       = "0"
-  document.getElementById("totalColumns").innerText    = "0"
-  document.getElementById("missingValues").innerText   = "0"
-  document.getElementById("duplicateRows").innerText   = "0"
-  document.getElementById("numericColumns").innerText  = "0"
+  document.getElementById("fileName").innerText           = "No file"
+  document.getElementById("fileSize").innerText           = "—"
+  document.getElementById("fileType").innerText           = "—"
+  document.getElementById("totalRows").innerText          = "0"
+  document.getElementById("totalColumns").innerText       = "0"
+  document.getElementById("missingValues").innerText      = "0"
+  document.getElementById("duplicateRows").innerText      = "0"
+  document.getElementById("numericColumns").innerText     = "0"
   document.getElementById("categoricalColumns").innerText = "0"
 
-  /* clear sessionStorage */
-  sessionStorage.removeItem("insightflow_dataset")
+  localStorage.removeItem("insightflow_dataset")
 }
 
 
@@ -99,9 +89,8 @@ function showDashboard(data, fileName){
   animateKPI("numericColumns",     data.numeric)
   animateKPI("categoricalColumns", data.categorical)
 
-  /* save for chatbot page */
   try {
-    sessionStorage.setItem("insightflow_dataset", JSON.stringify({
+    localStorage.setItem("insightflow_dataset", JSON.stringify({
       fileName,
       rows:        data.rows,
       columns:     data.columns,
@@ -122,41 +111,33 @@ function uploadFile(){
   let file      = fileInput.files[0]
   if(!file){ alert("Please select a dataset first"); return }
 
-  /* reset previous results */
-  dataset = []
-  headers = []
-  currentPage = 1
+  /* reset previous */
+  dataset = []; headers = []; currentPage = 1
   document.getElementById("previewSection").style.display = "none"
   document.getElementById("aiCta").style.display          = "none"
   document.querySelector("#dataTable thead").innerHTML    = ""
   document.querySelector("#dataTable tbody").innerHTML    = ""
-  document.getElementById("totalRows").innerText       = "0"
-  document.getElementById("totalColumns").innerText    = "0"
-  document.getElementById("missingValues").innerText   = "0"
-  document.getElementById("duplicateRows").innerText   = "0"
-  document.getElementById("numericColumns").innerText  = "0"
+  document.getElementById("totalRows").innerText          = "0"
+  document.getElementById("totalColumns").innerText       = "0"
+  document.getElementById("missingValues").innerText      = "0"
+  document.getElementById("duplicateRows").innerText      = "0"
+  document.getElementById("numericColumns").innerText     = "0"
   document.getElementById("categoricalColumns").innerText = "0"
-  document.getElementById("fileName").innerText        = "No file"
-  document.getElementById("fileSize").innerText        = "—"
-  document.getElementById("fileType").innerText        = "—"
+  document.getElementById("fileName").innerText           = "No file"
+  document.getElementById("fileSize").innerText           = "—"
+  document.getElementById("fileType").innerText           = "—"
 
-  /* validate file size — warn if empty */
-  if(file.size === 0){
-    alert("This file is empty. Please select a valid dataset.")
-    return
-  }
+  if(file.size === 0){ alert("This file is empty. Please select a valid dataset."); return }
 
   /* show file info */
   document.getElementById("fileName").innerText = file.name
   document.getElementById("fileSize").innerText = file.size < 1048576
-    ? (file.size/1024).toFixed(2) + " KB"
-    : (file.size/1048576).toFixed(2) + " MB"
+    ? (file.size / 1024).toFixed(2) + " KB"
+    : (file.size / 1048576).toFixed(2) + " MB"
   document.getElementById("fileType").innerText = file.name.split(".").pop().toUpperCase()
 
-  /* show loading spinner */
   showLoading(file.name)
 
-  /* try Flask backend first */
   let formData = new FormData()
   formData.append("file", file)
 
@@ -171,9 +152,8 @@ function uploadFile(){
       showDashboard(data, file.name)
     })
     .catch(err => {
-      /* Flask down or CORS — fall back to local browser parsing */
       console.warn("Flask unavailable (" + err.message + "), parsing locally")
-      parseLocalFile(file)  /* hideLoading called inside buildAndShow */
+      parseLocalFile(file)
     })
 }
 
@@ -190,12 +170,12 @@ function parseLocalFile(file){
         let ws   = wb.Sheets[wb.SheetNames[0]]
         let json = XLSX.utils.sheet_to_json(ws, {header:1, defval:""})
         if(json.length < 2){ hideLoading(); alert("File appears empty"); return }
-        buildAndShow(json[0].map(String), json.slice(1).filter(r=>r.some(c=>c!=="")), file.name)
+        buildAndShow(json[0].map(String), json.slice(1).filter(r => r.some(c => c !== "")), file.name)
       } catch(err){
         hideLoading()
         let msg = err.message || String(err)
-        if(msg.includes("ZIP") || msg.includes("encryption") || msg.includes("password")){
-          alert("This Excel file is password-protected or encrypted.\n\nPlease remove the password in Excel:\nFile → Info → Protect Workbook → Remove Password\n\nThen try uploading again.")
+        if(msg.includes("ZIP") || msg.includes("encrypt") || msg.includes("password")){
+          alert("This Excel file is password-protected.\n\nRemove password in Excel:\nFile → Info → Protect Workbook → Remove Password")
         } else {
           alert("Could not read Excel file: " + msg)
         }
@@ -218,50 +198,38 @@ function parseLocalFile(file){
 
       function parseLine(line){
         let cols=[], cur="", inQ=false
-        for(let i=0; i<line.length; i++){
-          let ch = line[i]
+        for(let ch of line){
           if(ch === '"'){ inQ = !inQ }
-          else if(ch === delim && !inQ){ cols.push(cur.trim()); cur="" }
+          else if(ch === delim && !inQ){ cols.push(cur.trim()); cur = "" }
           else { cur += ch }
         }
         cols.push(cur.trim())
         return cols
       }
 
-      let hdrs = parseLine(lines[0])
-      let rows = lines.slice(1).map(parseLine)
-      buildAndShow(hdrs, rows, file.name)
+      buildAndShow(parseLine(lines[0]), lines.slice(1).map(parseLine), file.name)
     } catch(e){ hideLoading(); alert("Could not read file: " + e.message) }
   }
   reader.readAsText(file)
 }
 
 
-/* ── Build KPI stats and call showDashboard ─────────────────── */
+/* ── Build KPI stats from local parse ──────────────────────── */
 function buildAndShow(hdrs, rows, fileName){
-  /* validate parsed data */
-  if(!hdrs || hdrs.length === 0){
-    hideLoading()
-    alert("No columns found. Please check your file format.")
-    return
-  }
-  if(!rows || rows.length === 0){
-    hideLoading()
-    alert("No data rows found in this file.")
-    return
-  }
+  if(!hdrs || hdrs.length === 0){ hideLoading(); alert("No columns found. Check your file format."); return }
+  if(!rows || rows.length === 0){ hideLoading(); alert("No data rows found in this file."); return }
 
   let missing=0, dupMap={}, dupes=0, numeric=0, categorical=0
 
   rows.forEach(r => {
-    r.forEach(c => { if(c===""||c===null||c===undefined) missing++ })
+    r.forEach(c => { if(c === "" || c === null || c === undefined) missing++ })
     let key = JSON.stringify(r)
-    dupMap[key] = (dupMap[key]||0)+1
+    dupMap[key] = (dupMap[key] || 0) + 1
   })
-  Object.values(dupMap).forEach(v => { if(v>1) dupes += v-1 })
+  Object.values(dupMap).forEach(v => { if(v > 1) dupes += v - 1 })
 
-  hdrs.forEach((h,i) => {
-    let sample = rows.map(r=>r[i]).find(v=>v!==""&&v!==null&&v!==undefined) ?? ""
+  hdrs.forEach((h, i) => {
+    let sample = rows.map(r => r[i]).find(v => v !== "" && v !== null && v !== undefined) ?? ""
     ;(!isNaN(parseFloat(sample)) && isFinite(sample)) ? numeric++ : categorical++
   })
 
@@ -285,19 +253,17 @@ function renderTable(){
   let tbody = document.querySelector("#dataTable tbody")
   if(!thead || !tbody) return
 
-  /* build header using innerHTML — faster than DOM creation */
   let colWidth = Math.max(120, Math.floor(900 / Math.max(headers.length, 1)))
   thead.innerHTML = "<tr>" +
     headers.map(h => `<th style="min-width:${colWidth}px">${String(h).replace(/</g,"&lt;")}</th>`).join("") +
     "</tr>"
 
-  let start    = (currentPage-1) * rowsPerPage
+  let start    = (currentPage - 1) * rowsPerPage
   let pageData = dataset.slice(start, start + rowsPerPage)
 
-  /* build all rows as one HTML string — fastest possible render */
   let html = pageData.map(row =>
     "<tr>" +
-    headers.map((h,i) => {
+    headers.map((h, i) => {
       let val = (row[i] === null || row[i] === undefined) ? "" : String(row[i])
       return `<td>${val.replace(/</g,"&lt;")}</td>`
     }).join("") +
@@ -311,12 +277,8 @@ function renderTable(){
   })
 }
 
-function nextPage(){
-  if(currentPage * rowsPerPage < dataset.length){ currentPage++; renderTable() }
-}
-function prevPage(){
-  if(currentPage > 1){ currentPage--; renderTable() }
-}
+function nextPage(){ if(currentPage * rowsPerPage < dataset.length){ currentPage++; renderTable() } }
+function prevPage(){ if(currentPage > 1){ currentPage--; renderTable() } }
 
 
 /* ── Navigation ─────────────────────────────────────────────── */
@@ -333,10 +295,8 @@ function logout(){
 function login(){
   let email    = document.getElementById("emailInput").value
   let password = document.getElementById("passwordInput").value
-
   fetch("http://127.0.0.1:5000/login", {
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
+    method:"POST", headers:{"Content-Type":"application/json"},
     body: JSON.stringify({email, password})
   })
   .then(res => res.json())
@@ -355,10 +315,8 @@ function register(){
   let name     = document.getElementById("nameInput").value
   let email    = document.getElementById("emailInput").value
   let password = document.getElementById("passwordInput").value
-
   fetch("http://127.0.0.1:5000/register", {
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
+    method:"POST", headers:{"Content-Type":"application/json"},
     body: JSON.stringify({name, email, password})
   })
   .then(res => res.json())
@@ -408,56 +366,84 @@ function loadAccount(){
 }
 
 
-/* ── Dark mode toggle ───────────────────────────────────────── */
+/* ── Dark mode ──────────────────────────────────────────────── */
 let toggle = document.getElementById("modeToggle")
 if(toggle){ toggle.onclick = () => document.body.classList.toggle("dark-mode") }
 
 
-/* ── Chatbot page functions ─────────────────────────────────── */
+/* ============================================================
+   CHATBOT — used by chatbot.html
+   ============================================================ */
+
 let chatHistory    = []
 let datasetContext = ""
+let isSending      = false
 
+
+/* ── Load dataset from sessionStorage ─────────────────────── */
 function loadDataset(){
   if(!document.getElementById("chatWindow")) return
-  let raw = sessionStorage.getItem("insightflow_dataset")
+
+  const raw = localStorage.getItem("insightflow_dataset")
+
   if(!raw){
-    appendBotMessage("⚠️ No dataset found. Go back to **Dashboard**, upload a dataset, then click **Analyze with AI**.")
+    appendBotMessage("⚠️ No dataset found.\n\nPlease go back to the **Dashboard**, upload a dataset, then click **Analyze with AI**.")
+    disableChatInput("Go to Dashboard to upload a dataset first")
     return
   }
-  let d = JSON.parse(raw)
-  let el = document.getElementById("datasetLabel")
-  if(el) el.innerText = d.fileName || "Dataset loaded"
+
+  let d
+  try { d = JSON.parse(raw) }
+  catch(e){ appendBotMessage("⚠️ Dataset data corrupted. Please re-upload from the Dashboard."); return }
+
+  const { headers: hdrs, dataset: ds, fileName, rows, columns, missing, duplicates, numeric, categorical } = d
+
+  /* update header UI */
+  /* datasetLabel removed from UI */
+
   let stats = document.getElementById("chatbotStats")
   if(stats) stats.style.display = "flex"
+
   let sr = document.getElementById("statRows")
   let sc = document.getElementById("statCols")
   let sm = document.getElementById("statMissing")
-  if(sr) sr.innerText = d.rows.toLocaleString() + " rows"
-  if(sc) sc.innerText = d.columns + " cols"
-  if(sm) sm.innerText = d.missing + " missing"
+  let sd = document.getElementById("statDupes")
+  if(sr) sr.innerText = Number(rows).toLocaleString() + " rows"
+  if(sc) sc.innerText = columns + " cols"
+  if(sm) sm.innerText = missing + " missing"
+  if(sd) sd.innerText = duplicates + " duplicates"
 
-  let preview = d.dataset.slice(0,30)
+  /* build context for AI — 50 sample rows */
+  const sample = (ds || []).slice(0, 50)
   datasetContext =
-    `File: ${d.fileName}\nShape: ${d.rows} rows × ${d.columns} columns\n` +
-    `Missing: ${d.missing} | Duplicates: ${d.duplicates}\n` +
-    `Numeric: ${d.numeric} | Categorical: ${d.categorical}\n` +
-    `Columns: ${d.headers.join(", ")}\n\nSample data:\n` +
-    preview.map(row => d.headers.map((h,i) => `${h}: ${row[i]}`).join(", ")).join("\n")
+    `File: ${fileName}\n` +
+    `Shape: ${rows} rows × ${columns} columns\n` +
+    `Missing values: ${missing} | Duplicate rows: ${duplicates}\n` +
+    `Numeric columns: ${numeric} | Categorical columns: ${categorical}\n` +
+    `Column names: ${(hdrs || []).join(", ")}\n\n` +
+    `Sample data (first ${sample.length} rows):\n` +
+    sample.map(row => (hdrs || []).map((h, i) => `${h}: ${row[i] ?? ""}`).join(", ")).join("\n")
 
-  appendBotMessage(
-    `Dataset **${d.fileName}** ready!\n\n` +
-    `**${d.rows.toLocaleString()} rows** × **${d.columns} columns**` +
-    (d.missing > 0 ? ` — ${d.missing} missing values detected` : "") +
-    `.\n\nAsk me anything about your data.`
-  )
+  /* simple greeting */
+  appendBotMessage("Hi! I'm ready to analyze **" + fileName + "**. Use the quick buttons or ask me anything.")
+
+  enableChatInput()
+  let inp = document.getElementById("chatInput")
+  if(inp) inp.focus()
 }
 
+
+/* ── Send message ──────────────────────────────────────────── */
 function sendChat(){
+  if(isSending) return
   let input   = document.getElementById("chatInput")
   let userMsg = input.value.trim()
   if(!userMsg) return
+
   input.value = ""
   appendUserMessage(userMsg)
+  setChatSending(true)
+
   let typingId = appendTyping()
   chatHistory.push({role:"user", content:userMsg})
 
@@ -466,31 +452,75 @@ function sendChat(){
     headers:{"Content-Type":"application/json"},
     body: JSON.stringify({
       message:         userMsg,
-      history:         chatHistory.slice(0,-1),
+      history:         chatHistory.slice(0, -1),
       dataset_context: datasetContext || "No dataset loaded."
     })
   })
-  .then(res => res.json())
+  .then(res => {
+    if(!res.ok) throw new Error("Server error " + res.status)
+    return res.json()
+  })
   .then(data => {
     removeTyping(typingId)
-    if(data.error){ appendBotMessage("⚠️ " + data.error); chatHistory.pop(); return }
+    setChatSending(false)
+    if(data.error){ appendBotMessage("⚠️ " + data.error + (data.details ? "\n\nDetail: " + data.details.split("\n").slice(-3).join(" ") : "")); chatHistory.pop(); return }
     chatHistory.push({role:"assistant", content:data.reply})
     appendBotMessage(data.reply)
   })
-  .catch(() => {
+  .catch(err => {
     removeTyping(typingId)
-    appendBotMessage("⚠️ Could not reach server. Make sure Flask is running.")
+    setChatSending(false)
     chatHistory.pop()
+    let msg = err.message || ""
+    if(msg.includes("Failed to fetch") || msg.includes("NetworkError") || msg.includes("ERR_CONNECTION")){
+      appendBotMessage("⚠️ Cannot reach Flask server.\n\nMake sure you ran **python app.py** and it shows:\n`Running on http://127.0.0.1:5000`")
+    } else if(msg.includes("401")){
+      appendBotMessage("⚠️ Invalid API key.\n\nSet your key before starting Flask:\n`set ANTHROPIC_API_KEY=sk-ant-...`")
+    } else {
+      appendBotMessage("⚠️ Something went wrong: " + msg)
+    }
   })
 }
 
 function sendQuick(prompt){
+  if(isSending) return
   document.getElementById("chatInput").value = prompt
   sendChat()
 }
 
+
+/* ── Chat input state ──────────────────────────────────────── */
+function setChatSending(state){
+  isSending = state
+  let input = document.getElementById("chatInput")
+  let btn   = document.getElementById("sendBtn")
+  let qbtns = document.querySelectorAll(".quick-btn")
+  if(input){ input.disabled = state }
+  if(btn){   btn.disabled = state; btn.style.opacity = state ? "0.5" : "1" }
+  qbtns.forEach(b => b.disabled = state)
+  if(!state && input) input.focus()
+}
+
+function disableChatInput(placeholder){
+  let input = document.getElementById("chatInput")
+  let btn   = document.getElementById("sendBtn")
+  if(input){ input.disabled = true; input.placeholder = placeholder || "Unavailable" }
+  if(btn){   btn.disabled = true; btn.style.opacity = "0.4" }
+  document.querySelectorAll(".quick-btn").forEach(b => b.disabled = true)
+}
+
+function enableChatInput(){
+  let input = document.getElementById("chatInput")
+  let btn   = document.getElementById("sendBtn")
+  if(input){ input.disabled = false; input.placeholder = "Ask anything about your data..." }
+  if(btn){   btn.disabled = false; btn.style.opacity = "1" }
+}
+
+
+/* ── Message rendering ─────────────────────────────────────── */
 function appendUserMessage(text){
   let win = document.getElementById("chatWindow")
+  if(!win) return
   let div = document.createElement("div")
   div.className = "chat-message user-message"
   div.innerHTML = `<div class="user-avatar">YOU</div><div class="message-bubble">${escapeHtml(text)}</div>`
@@ -500,6 +530,7 @@ function appendUserMessage(text){
 
 function appendBotMessage(text){
   let win = document.getElementById("chatWindow")
+  if(!win) return
   let div = document.createElement("div")
   div.className = "chat-message bot-message"
   div.innerHTML = `<div class="bot-avatar">AI</div><div class="message-bubble">${formatMarkdown(text)}</div>`
@@ -509,6 +540,7 @@ function appendBotMessage(text){
 
 function appendTyping(){
   let win = document.getElementById("chatWindow")
+  if(!win) return ""
   let id  = "typing-" + Date.now()
   let div = document.createElement("div")
   div.className = "chat-message bot-message"
@@ -530,9 +562,10 @@ function escapeHtml(t){
 
 function formatMarkdown(t){
   return escapeHtml(t)
-    .replace(/\*\*(.*?)\*\*/g,"<strong>$1</strong>")
-    .replace(/^- (.*)/gm,"• $1")
-    .replace(/\n/g,"<br>")
+    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+    .replace(/`(.*?)`/g, "<code>$1</code>")
+    .replace(/^- (.*)/gm, "• $1")
+    .replace(/\n/g, "<br>")
 }
 
 
