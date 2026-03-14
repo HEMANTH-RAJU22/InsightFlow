@@ -6,14 +6,24 @@ import os
 import requests
 from groq import Groq
 import re
+from dotenv import load_dotenv
+import bcrypt
+
+load_dotenv()
 
 warnings.filterwarnings("ignore")
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-# ── API Keys ──
-if not os.environ.get("GROQ_API_KEY"):
-    os.environ["GROQ_API_KEY"] = os.environ.get("GROQ_API_KEY", "")  # ← paste your key here
+# ── Validate required environment variables on startup ──
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
+if not GROQ_API_KEY:
+    raise EnvironmentError(
+        "GROQ_API_KEY is not set.\n"
+        "Add it to your .env file:\n"
+        "  GROQ_API_KEY=gsk_your_key_here\n"
+        "Or set it in PyCharm: Run > Edit Configurations > Environment Variables"
+    )
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=False)
@@ -32,10 +42,10 @@ def get_db():
         if db is None or not db.is_connected():
             import mysql.connector
             db = mysql.connector.connect(
-                host="localhost",
-                user="root",
-                password="1234",
-                database="insightflow"
+                host=os.environ.get("DB_HOST", "localhost"),
+                user=os.environ.get("DB_USER", "root"),
+                password=os.environ.get("DB_PASSWORD", ""),
+                database=os.environ.get("DB_NAME", "insightflow")
             )
             cursor = db.cursor(dictionary=True)
     except Exception as e:
@@ -56,9 +66,12 @@ def register():
         return jsonify({"status": "error", "message": "Database unavailable"}), 500
 
     data     = request.json
-    name     = data["name"]
-    email    = data["email"]
-    password = data["password"]
+    name     = data.get("name", "").strip()
+    email    = data.get("email", "").strip().lower()
+    password = data.get("password", "")
+
+    if not name or not email or not password:
+        return jsonify({"status": "error", "message": "All fields are required"})
 
     cursor.execute("SELECT * FROM users WHERE email=%s", (email,))
     existing_user = cursor.fetchone()
@@ -66,9 +79,12 @@ def register():
     if existing_user:
         return jsonify({"status": "error", "message": "Email already registered"})
 
+    # Hash password before storing
+    hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+
     cursor.execute(
-        "INSERT INTO users(name,email,password) VALUES(%s,%s,%s)",
-        (name, email, password)
+        "INSERT INTO users(name, email, password) VALUES(%s, %s, %s)",
+        (name, email, hashed_password)
     )
     db.commit()
 
@@ -86,16 +102,13 @@ def login():
         return jsonify({"status": "error", "message": "Database unavailable"}), 500
 
     data     = request.json
-    email    = data["email"]
-    password = data["password"]
+    email    = data.get("email", "").strip().lower()
+    password = data.get("password", "")
 
-    cursor.execute(
-        "SELECT * FROM users WHERE email=%s AND password=%s",
-        (email, password)
-    )
+    cursor.execute("SELECT * FROM users WHERE email=%s", (email,))
     user = cursor.fetchone()
 
-    if user:
+    if user and bcrypt.checkpw(password.encode("utf-8"), user["password"].encode("utf-8")):
         return jsonify({"status": "success", "name": user["name"], "email": user["email"]})
     else:
         return jsonify({"status": "error", "message": "Invalid email or password"})
@@ -111,7 +124,7 @@ def get_account(email):
     if not db:
         return jsonify({"error": "Database unavailable"}), 500
 
-    cursor.execute("SELECT name,email FROM users WHERE email=%s", (email,))
+    cursor.execute("SELECT name, email FROM users WHERE email=%s", (email,))
     user = cursor.fetchone()
 
     if user:
@@ -140,7 +153,6 @@ def upload():
     filename = file.filename.lower()
 
     try:
-
         if filename.endswith(".csv"):
             df = pd.read_csv(file, low_memory=False)
 
@@ -186,7 +198,7 @@ def upload():
         numeric       = len(df.select_dtypes(include="number").columns)
         categorical   = len(df.select_dtypes(exclude="number").columns)
 
-        # Preview — send all rows for pagination (up to 500)
+        # Preview — send up to 100 rows
         preview = df.head(100).fillna("").values.tolist()
 
         result = {
@@ -213,7 +225,6 @@ def upload():
 
 @app.route("/chat", methods=["POST"])
 def chat():
-
     data         = request.json
     user_message = data.get("message", "")
     history      = data.get("history", [])
@@ -226,18 +237,13 @@ def chat():
 
     # Trim dataset context to reduce token usage
     ctx_lines = dataset_ctx.split("\n")
-    short_ctx = "\n".join(ctx_lines[:20])  # max 20 lines of context
+    short_ctx = "\n".join(ctx_lines[:20])
 
     system_prompt = f"""You are a data analyst. Dataset: {short_ctx}. Be concise, use bullet points, max 150 words."""
 
-    api_key = os.environ.get("GROQ_API_KEY", "")
-    if not api_key:
-        return jsonify({"error": "GROQ_API_KEY not set.\n\nAdd it in PyCharm:\nEdit Configurations → Environment Variables → GROQ_API_KEY=gsk_..."}), 401
-
     try:
-        client = Groq(api_key=api_key)
+        client = Groq(api_key=GROQ_API_KEY)
 
-        # Build messages with system prompt
         groq_messages = [{"role": "system", "content": system_prompt}] + messages
 
         response = client.chat.completions.create(
@@ -263,6 +269,8 @@ def chat():
 @app.route("/list-models")
 def list_models():
     api_key = os.environ.get("GEMINI_API_KEY", "")
+    if not api_key:
+        return jsonify({"error": "GEMINI_API_KEY not set in .env"}), 401
     url = f"https://generativelanguage.googleapis.com/v1beta/models?key={api_key}"
     resp = requests.get(url, timeout=10, verify=False)
     if resp.status_code != 200:
@@ -279,7 +287,7 @@ def list_models():
 def test_gemini():
     api_key = os.environ.get("GEMINI_API_KEY", "")
     if not api_key:
-        return jsonify({"error": "GEMINI_API_KEY not set"})
+        return jsonify({"error": "GEMINI_API_KEY not set in .env"}), 401
 
     models = [
         "gemini-2.0-flash",
@@ -293,7 +301,7 @@ def test_gemini():
         try:
             url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
             resp = requests.post(url, json={
-                "contents": [{"role":"user","parts":[{"text":"say hi"}]}]
+                "contents": [{"role": "user", "parts": [{"text": "say hi"}]}]
             }, timeout=10, verify=False)
             results[model] = resp.status_code
         except Exception as e:
