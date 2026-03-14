@@ -13,7 +13,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # ── API Keys ──
 if not os.environ.get("GROQ_API_KEY"):
-    os.environ["GROQ_API_KEY"] = "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"  # ← paste your key here
+    os.environ["GROQ_API_KEY"] = os.environ.get("GROQ_API_KEY", "")  # ← paste your key here
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=False)
