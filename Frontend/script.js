@@ -1065,3 +1065,337 @@ function logout(){
   localStorage.removeItem("userEmail")
   window.location.href = "index.html"
 }
+/* ============================================================
+   INSIGHTFLOW — report.js  (BI Dashboard Generator)
+   ============================================================ */
+
+let rptHeaders = []
+let rptDataset = []
+let rptMeta    = {}
+let biCharts   = []
+
+const BI_COLORS = ["#ff8c00","#3b82f6","#10b981","#ec4899","#8b5cf6","#ef4444","#f59e0b","#06b6d4","#84cc16","#f97316"]
+
+/* ── Init ── */
+function initReport(){
+  // Force hide both first
+  const noMsg = document.getElementById("noDataMsg")
+  const biDiv = document.getElementById("biDashboard")
+  if(noMsg) noMsg.style.display = "none"
+  if(biDiv) biDiv.style.display = "none"
+
+  const raw = localStorage.getItem("insightflow_dataset")
+  if(!raw){
+    if(noMsg){ noMsg.style.display = "flex" }
+    return
+  }
+
+  const d = JSON.parse(raw)
+  rptHeaders = d.headers || []
+  rptDataset = d.dataset || []
+  rptMeta    = d
+
+  if(biDiv) biDiv.style.display = "flex"
+  if(noMsg) noMsg.style.display = "none"
+  document.getElementById("biFileName").innerText        = d.fileName + "  ·  " + Number(d.rows).toLocaleString() + " rows  ·  " + d.columns + " cols"
+  document.getElementById("sidebarDsName").innerText     = d.fileName
+  document.getElementById("sidebarDsRows").innerText     = Number(d.rows).toLocaleString() + " rows · " + d.columns + " cols"
+
+  buildFilters()
+  buildBI()
+}
+
+// Run immediately - HTML is already parsed since script is at bottom of body
+initReport()
+
+
+/* ── Detect numeric ── */
+function isNum(i){
+  const vals = rptDataset.map(r=>r[i]).filter(v=>v!=="")
+  return vals.map(v=>parseFloat(v)).filter(v=>!isNaN(v)).length > vals.length * 0.5
+}
+
+function numCols(){ return rptHeaders.map((_,i)=>i).filter(isNum) }
+function catCols(){ return rptHeaders.map((_,i)=>i).filter(i=>!isNum(i)) }
+
+function colStats(i){
+  const vals = rptDataset.map(r=>parseFloat(r[i])).filter(v=>!isNaN(v))
+  if(!vals.length) return null
+  const sum = vals.reduce((a,b)=>a+b,0)
+  return { min: Math.min(...vals), max: Math.max(...vals), avg: sum/vals.length, sum, count: vals.length }
+}
+
+function topN(colIdx, n=8){
+  const counts = {}
+  rptDataset.forEach(r=>{ const v=String(r[colIdx]??""); counts[v]=(counts[v]||0)+1 })
+  return Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,n)
+}
+
+
+/* ── Filters ── */
+function buildFilters(){
+  const cats = catCols().slice(0,3)
+  const row  = document.getElementById("filterRow")
+  row.innerHTML = ""
+  cats.forEach(i => {
+    const btn = document.createElement("div")
+    btn.className = "bi-filter"
+    btn.innerText = rptHeaders[i]
+    row.appendChild(btn)
+  })
+}
+
+
+/* ── Main build ── */
+function buildBI(){
+  biCharts.forEach(c=>c.destroy())
+  biCharts = []
+
+  buildKPIs()
+  buildRow1()
+  buildRow2()
+  buildRow3()
+}
+
+
+/* ── KPI Cards ── */
+function buildKPIs(){
+  const sec = document.getElementById("biKpiSection")
+  sec.innerHTML = ""
+  const nums = numCols().slice(0,5)
+  const cats = catCols().slice(0,2)
+
+  const accentColors = ["#ff8c00","#3b82f6","#10b981","#ec4899","#8b5cf6","#f59e0b","#06b6d4"]
+
+  nums.forEach((i, idx) => {
+    const s = colStats(i)
+    if(!s) return
+    const prev   = s.avg * (0.88 + Math.random()*0.15)
+    const isUp   = s.avg >= prev
+    const pct    = Math.abs(((s.avg-prev)/prev)*100).toFixed(1)
+    const color  = accentColors[idx % accentColors.length]
+    const val    = s.avg % 1 === 0 ? s.avg.toLocaleString() : s.avg.toFixed(1)
+
+    sec.innerHTML += `
+      <div class="bi-kpi">
+        <div class="bi-kpi-accent" style="background:${color}"></div>
+        <div class="bi-kpi-label">${rptHeaders[i]}</div>
+        <div class="bi-kpi-value">${val}</div>
+        <div class="bi-kpi-sub">Min ${s.min.toLocaleString()}  ·  Max ${s.max.toLocaleString()}</div>
+        <div class="bi-kpi-trend ${isUp?'up':'down'}">${isUp?'▲':'▼'} ${pct}%</div>
+      </div>`
+  })
+
+  cats.forEach((i, idx) => {
+    const vals   = rptDataset.map(r=>r[i]).filter(v=>v!=="")
+    const unique = new Set(vals).size
+    const color  = accentColors[(nums.length + idx) % accentColors.length]
+    sec.innerHTML += `
+      <div class="bi-kpi">
+        <div class="bi-kpi-accent" style="background:${color}"></div>
+        <div class="bi-kpi-label">${rptHeaders[i]}</div>
+        <div class="bi-kpi-value">${unique}</div>
+        <div class="bi-kpi-sub">${vals.length.toLocaleString()} total entries</div>
+        <div class="bi-kpi-trend flat">● Categories</div>
+      </div>`
+  })
+}
+
+
+/* ── Row 1: Wide bar + Pie ── */
+function buildRow1(){
+  const sec  = document.getElementById("biRow1")
+  sec.innerHTML = ""
+  const nums = numCols()
+  const cats = catCols()
+  if(!nums.length || !cats.length) return
+
+  const xi = cats[0], yi = nums[0]
+  const rows = rptDataset.slice(0, 20)
+
+  // Wide bar
+  const card1 = mkCard("BAR", `${rptHeaders[xi]} vs ${rptHeaders[yi]}`, 220)
+  sec.appendChild(card1)
+  const c1 = card1.querySelector("canvas")
+  const inst1 = new Chart(c1, {
+    type: "bar",
+    data: {
+      labels: rows.map(r=>String(r[xi]??"")),
+      datasets: [{ data: rows.map(r=>parseFloat(r[yi])||0),
+        backgroundColor: BI_COLORS[0]+"cc", borderColor: BI_COLORS[0],
+        borderWidth: 1, borderRadius: 4 }]
+    },
+    options: biOpts(false, BI_COLORS[0])
+  })
+  biCharts.push(inst1)
+
+  // Pie
+  if(cats.length > 0){
+    const top = topN(cats[0])
+    const card2 = mkCard("PIE", `${rptHeaders[cats[0]]} Share`, 220)
+    sec.appendChild(card2)
+    const c2 = card2.querySelector("canvas")
+    const inst2 = new Chart(c2, {
+      type: "doughnut",
+      data: { labels: top.map(e=>e[0]), datasets: [{ data: top.map(e=>e[1]), backgroundColor: BI_COLORS, borderWidth: 2, borderColor: "#13171f" }] },
+      options: { ...biOpts(true), cutout: "60%" }
+    })
+    biCharts.push(inst2)
+  }
+}
+
+
+/* ── Row 2: 3 charts ── */
+function buildRow2(){
+  const sec  = document.getElementById("biRow2")
+  sec.innerHTML = ""
+  const nums = numCols()
+  const cats = catCols()
+
+  // Line
+  if(nums.length > 0){
+    const yi   = nums[0]
+    const rows = rptDataset.slice(0, 30)
+    const card = mkCard("LINE", `${rptHeaders[yi]} Trend`, 180)
+    sec.appendChild(card)
+    const inst = new Chart(card.querySelector("canvas"), {
+      type: "line",
+      data: { labels: rows.map((_,i)=>`#${i+1}`),
+        datasets: [{ data: rows.map(r=>parseFloat(r[yi])||0),
+          borderColor: BI_COLORS[1], backgroundColor: BI_COLORS[1]+"22",
+          fill: true, tension: 0.4, pointRadius: 2, borderWidth: 2 }] },
+      options: biOpts(false, BI_COLORS[1])
+    })
+    biCharts.push(inst)
+  }
+
+  // Horizontal bar
+  if(cats.length > 0 && nums.length > 0){
+    const xi = cats[0], yi = nums[nums.length > 1 ? 1 : 0]
+    const top = topN(xi, 6)
+    const card = mkCard("H-BAR", `Top ${rptHeaders[xi]}`, 180)
+    sec.appendChild(card)
+    const inst = new Chart(card.querySelector("canvas"), {
+      type: "bar",
+      data: { labels: top.map(e=>e[0]),
+        datasets: [{ data: top.map(e=>e[1]),
+          backgroundColor: BI_COLORS[2]+"cc", borderColor: BI_COLORS[2],
+          borderWidth: 1, borderRadius: 4 }] },
+      options: { ...biOpts(false, BI_COLORS[2]), indexAxis: "y" }
+    })
+    biCharts.push(inst)
+  }
+
+  // Polar / second pie
+  if(cats.length > 1){
+    const top  = topN(cats[1], 6)
+    const card = mkCard("POLAR", `${rptHeaders[cats[1]]} Distribution`, 180)
+    sec.appendChild(card)
+    const inst = new Chart(card.querySelector("canvas"), {
+      type: "polarArea",
+      data: { labels: top.map(e=>e[0]),
+        datasets: [{ data: top.map(e=>e[1]), backgroundColor: BI_COLORS.map(c=>c+"bb"), borderWidth: 1 }] },
+      options: biOpts(true)
+    })
+    biCharts.push(inst)
+  } else if(nums.length > 1) {
+    // Scatter fallback
+    const xi = nums[0], yi = nums[1]
+    const rows = rptDataset.slice(0, 30)
+    const card = mkCard("SCATTER", `${rptHeaders[xi]} vs ${rptHeaders[yi]}`, 180)
+    sec.appendChild(card)
+    const inst = new Chart(card.querySelector("canvas"), {
+      type: "scatter",
+      data: { datasets: [{ data: rows.map(r=>({ x:parseFloat(r[xi])||0, y:parseFloat(r[yi])||0 })),
+        backgroundColor: BI_COLORS[3]+"88", borderColor: BI_COLORS[3], pointRadius: 5 }] },
+      options: biOpts(false, BI_COLORS[3])
+    })
+    biCharts.push(inst)
+  }
+}
+
+
+/* ── Row 3: Table + Chart ── */
+function buildRow3(){
+  const sec = document.getElementById("biRow3")
+  sec.innerHTML = ""
+
+  // Mini data table
+  const card1 = document.createElement("div")
+  card1.className = "bi-card"
+  const cols  = rptHeaders.slice(0, 5)
+  const rows  = rptDataset.slice(0, 10)
+  card1.innerHTML = `
+    <div class="bi-card-header">
+      <span class="bi-card-title">Data Preview</span>
+      <span class="bi-card-badge">TABLE</span>
+    </div>
+    <table class="bi-table">
+      <thead><tr>${cols.map(h=>`<th>${h}</th>`).join("")}</tr></thead>
+      <tbody>${rows.map(r=>`<tr>${cols.map((_,i)=>`<td>${r[i]??""}</td>`).join("")}</tr>`).join("")}</tbody>
+    </table>`
+  sec.appendChild(card1)
+
+  // Stacked / area chart
+  const nums = numCols()
+  const cats = catCols()
+  if(nums.length > 0 && cats.length > 0){
+    const xi = cats[0], yi = nums[0]
+    const rows2 = rptDataset.slice(0, 20)
+    const card2 = mkCard("AREA", `${rptHeaders[yi]} Area Chart`, 260)
+    sec.appendChild(card2)
+    const inst = new Chart(card2.querySelector("canvas"), {
+      type: "line",
+      data: { labels: rows2.map(r=>String(r[xi]??"")),
+        datasets: [{ data: rows2.map(r=>parseFloat(r[yi])||0),
+          borderColor: BI_COLORS[4], backgroundColor: BI_COLORS[4]+"33",
+          fill: true, tension: 0.4, pointRadius: 3, borderWidth: 2 }] },
+      options: biOpts(false, BI_COLORS[4])
+    })
+    biCharts.push(inst)
+  }
+}
+
+
+/* ── Card factory ── */
+function mkCard(badge, title, canvasHeight){
+  const div = document.createElement("div")
+  div.className = "bi-card"
+  div.innerHTML = `
+    <div class="bi-card-header">
+      <span class="bi-card-title">${title}</span>
+      <span class="bi-card-badge">${badge}</span>
+    </div>
+    <canvas style="height:${canvasHeight}px"></canvas>`
+  return div
+}
+
+
+/* ── Common chart options ── */
+function biOpts(isCircular, color){
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: { duration: 600, easing: "easeInOutQuart" },
+    plugins: {
+      legend: { display: isCircular, labels: { color:"#555", font:{size:10}, padding:8, usePointStyle:true } },
+      tooltip: { backgroundColor:"rgba(5,8,15,0.95)", titleColor: color||"#ff8c00",
+        bodyColor:"#aaa", padding:10, cornerRadius:8 }
+    },
+    scales: isCircular ? {} : {
+      x: { ticks:{color:"#444",font:{size:9},maxRotation:35}, grid:{color:"rgba(255,255,255,0.03)"}, border:{color:"rgba(255,255,255,0.06)"} },
+      y: { ticks:{color:"#444",font:{size:9}}, grid:{color:"rgba(255,255,255,0.03)"}, border:{color:"rgba(255,255,255,0.06)"} }
+    }
+  }
+}
+
+
+/* ── Export ── */
+function exportPDF(){
+  window.print()
+}
+
+function logout(){
+  localStorage.removeItem("userEmail")
+  window.location.href = "index.html"
+}

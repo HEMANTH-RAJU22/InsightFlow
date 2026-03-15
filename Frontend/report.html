@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Dashboard - InsightFlow</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: #0e1117;
+  color: #e0e0e0;
+  overflow: hidden;
+}
+
+#biDashboard {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+}
+
+/* Sidebar */
+.bi-sidebar {
+  width: 200px;
+  min-width: 200px;
+  background: #13171f;
+  border-right: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.bi-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 16px;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: white;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.bi-logo-icon { color: #ff8c00; font-size: 18px; }
+
+.bi-nav { flex: 1; padding: 10px 8px; display: flex; flex-direction: column; gap: 2px; }
+
+.bi-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #555;
+  transition: all 0.15s;
+}
+
+.bi-nav-item:hover { background: rgba(255,255,255,0.05); color: #aaa; }
+.bi-nav-item.active { background: rgba(255,140,0,0.12); color: #ff8c00; font-weight: 600; }
+
+.bi-sidebar-footer {
+  padding: 14px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.bi-ds-label { font-size: 9px; letter-spacing: 2px; color: #444; font-weight: 700; margin-bottom: 4px; }
+.bi-ds-name  { font-size: 12px; color: #777; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bi-ds-rows  { font-size: 10px; color: #444; margin-top: 2px; }
+
+/* Main */
+.bi-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  height: 100vh;
+}
+
+.bi-main::-webkit-scrollbar { width: 4px; }
+.bi-main::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+/* Topbar */
+.bi-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  background: #13171f;
+  flex-shrink: 0;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.bi-page-title { font-size: 16px; font-weight: 800; color: white; }
+.bi-page-sub { font-size: 11px; color: #444; margin-top: 2px; display: block; }
+
+.bi-topbar-right { display: flex; align-items: center; gap: 8px; }
+
+.bi-export-btn {
+  background: rgba(255,140,0,0.1);
+  border: 1px solid rgba(255,140,0,0.25);
+  color: #ff8c00;
+  padding: 6px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.15s;
+}
+
+.bi-export-btn:hover { background: rgba(255,140,0,0.2); color: white; }
+
+.bi-refresh-btn {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #666;
+  width: 30px; height: 30px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 15px;
+  transition: all 0.15s;
+}
+
+.bi-refresh-btn:hover { color: white; background: rgba(255,255,255,0.1); }
+
+/* KPI */
+.bi-kpi-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 10px;
+  padding: 14px 18px;
+  flex-shrink: 0;
+}
+
+.bi-kpi {
+  background: #13171f;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  padding: 14px 14px 14px 18px;
+  position: relative;
+  overflow: hidden;
+}
+
+.bi-kpi:hover { border-color: rgba(255,140,0,0.2); }
+
+.bi-kpi-accent {
+  position: absolute;
+  top: 0; left: 0;
+  width: 3px; height: 100%;
+  border-radius: 12px 0 0 12px;
+}
+
+.bi-kpi-label { font-size: 9px; font-weight: 700; letter-spacing: 1.5px; color: #444; text-transform: uppercase; margin-bottom: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bi-kpi-value { font-size: 22px; font-weight: 800; color: white; line-height: 1; margin-bottom: 4px; }
+.bi-kpi-sub   { font-size: 9px; color: #444; margin-bottom: 6px; }
+
+.bi-kpi-trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+
+.bi-kpi-trend.up   { background: rgba(16,185,129,0.1); color: #10b981; }
+.bi-kpi-trend.down { background: rgba(239,68,68,0.1);  color: #ef4444; }
+.bi-kpi-trend.flat { background: rgba(255,255,255,0.05); color: #555; }
+
+/* Chart Rows */
+.bi-charts-row1,
+.bi-charts-row2,
+.bi-charts-row3 {
+  padding: 0 18px 12px;
+  display: grid;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.bi-charts-row1 { grid-template-columns: 2fr 1fr; }
+.bi-charts-row2 { grid-template-columns: 1fr 1fr 1fr; }
+.bi-charts-row3 { grid-template-columns: 1fr 1fr; }
+
+/* Card */
+.bi-card {
+  background: #13171f;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+}
+
+.bi-card:hover { border-color: rgba(255,255,255,0.1); }
+
+.bi-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  flex-shrink: 0;
+}
+
+.bi-card-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #777;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 72%;
+}
+
+.bi-card-badge {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #ff8c00;
+  background: rgba(255,140,0,0.1);
+  border: 1px solid rgba(255,140,0,0.15);
+  padding: 2px 6px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.bi-card canvas { width: 100% !important; }
+
+/* Table */
+.bi-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.bi-table th { text-align: left; padding: 5px 7px; color: #444; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.bi-table td { padding: 6px 7px; color: #777; border-bottom: 1px solid rgba(255,255,255,0.03); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100px; }
+.bi-table tr:hover td { color: #ccc; background: rgba(255,255,255,0.02); }
+
+/* No data */
+#noDataMsg {
+  display: none;
+  height: 100vh;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 16px;
+  text-align: center;
+}
+</style>
+</head>
+<body>
+
+<div id="noDataMsg">
+  <div style="font-size:48px">📂</div>
+  <h2 style="color:white">No Dataset Loaded</h2>
+  <p style="color:#aaa">Upload a dataset on the dashboard first.</p>
+  <a href="dashboard.html" style="background:#ff8c00;color:white;padding:10px 24px;border-radius:8px;text-decoration:none;font-weight:600;">Go to Dashboard</a>
+</div>
+
+<div id="biDashboard">
+  <aside class="bi-sidebar">
+    <div class="bi-logo"><span class="bi-logo-icon">⬡</span> InsightFlow</div>
+    <nav class="bi-nav">
+      <div class="bi-nav-item active"><span>▦</span> Overview</div>
+      <div class="bi-nav-item" onclick="location.href='dashboard.html'"><span>⬆</span> Upload</div>
+      <div class="bi-nav-item" onclick="location.href='visualize.html'"><span>◈</span> Visualize</div>
+      <div class="bi-nav-item" onclick="location.href='chatbot.html'"><span>◎</span> AI Analyst</div>
+    </nav>
+    <div class="bi-sidebar-footer">
+      <div class="bi-ds-label">DATASET</div>
+      <div class="bi-ds-name" id="sidebarDsName">—</div>
+      <div class="bi-ds-rows" id="sidebarDsRows">—</div>
+    </div>
+  </aside>
+
+  <main class="bi-main">
+    <header class="bi-topbar">
+      <div>
+        <h1 class="bi-page-title">Overview Dashboard</h1>
+        <span class="bi-page-sub" id="biFileName">Loading...</span>
+      </div>
+      <div class="bi-topbar-right">
+        <button class="bi-export-btn" onclick="window.print()">↓ Export PDF</button>
+        <button class="bi-refresh-btn" onclick="buildBI()">↺</button>
+      </div>
+    </header>
+
+    <section class="bi-kpi-section" id="biKpiSection"></section>
+    <section class="bi-charts-row1" id="biRow1"></section>
+    <section class="bi-charts-row2" id="biRow2"></section>
+    <section class="bi-charts-row3" id="biRow3"></section>
+  </main>
+</div>
+
+<script src="report.js"></script>
+</body>
+</html>
