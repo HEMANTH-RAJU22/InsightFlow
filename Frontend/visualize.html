@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Visualize - InsightFlow</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body>
+
+<!-- Top Navigation -->
+<div class="topbar">
+  <div class="logo">INSIGHTFLOW</div>
+  <div class="nav-links">
+    <span onclick="window.location.href='dashboard.html'">← Dashboard</span>
+    <span onclick="window.location.href='chatbot.html'">🤖 AI Analyst</span>
+    <span onclick="goAccount()">Account</span>
+    <span onclick="logout()">Logout</span>
+  </div>
+</div>
+
+<!-- No dataset -->
+<div id="noDataMsg" style="display:none; padding-top:120px; text-align:center;">
+  <div class="no-data-box">
+    <div style="font-size:48px; margin-bottom:16px;">📂</div>
+    <h2 style="color:white; margin-bottom:8px;">No Dataset Loaded</h2>
+    <p style="color:#aaa; margin-bottom:24px;">Upload a dataset on the dashboard first.</p>
+    <a href="dashboard.html" class="viz-action-btn" style="text-decoration:none; display:inline-block;">Go to Dashboard</a>
+  </div>
+</div>
+
+<!-- Main -->
+<div class="viz-page" id="vizContent">
+
+  <!-- Header -->
+  <div class="viz-header">
+    <div>
+      <h1 class="viz-title"><span class="viz-title-accent">Data</span> <span class="viz-title-accent">Visualizations</span></h1>
+    </div>
+  </div>
+
+  <!-- Builder -->
+  <div class="chart-builder">
+
+    <!-- Left Controls -->
+    <div class="viz-controls">
+
+      <!-- Chart Type Custom Dropdown -->
+      <div class="control-group">
+        <label class="ctrl-label">CHART TYPE</label>
+        <div class="chart-dropdown" id="chartDropdown">
+          <div class="chart-dropdown-selected" onclick="toggleChartDropdown()">
+            <span id="selectedChartLabel">📊 Bar Chart</span>
+            <span class="dropdown-arrow">▾</span>
+          </div>
+          <div class="chart-dropdown-menu" id="chartDropdownMenu">
+            <div class="chart-dd-group">BASIC</div>
+            <div class="chart-dd-item active" onclick="pickChart('bar','📊 Bar Chart',this)"><span>📊</span> Bar Chart</div>
+            <div class="chart-dd-item" onclick="pickChart('horizontalBar','📊 Horizontal Bar',this)"><span>📊</span> Horizontal Bar</div>
+            <div class="chart-dd-item" onclick="pickChart('line','📈 Line Chart',this)"><span>📈</span> Line Chart</div>
+            <div class="chart-dd-item" onclick="pickChart('area','🏔️ Area Chart',this)"><span>🏔️</span> Area Chart</div>
+            <div class="chart-dd-group">CIRCULAR</div>
+            <div class="chart-dd-item" onclick="pickChart('pie','🥧 Pie Chart',this)"><span>🥧</span> Pie Chart</div>
+            <div class="chart-dd-item" onclick="pickChart('doughnut','🍩 Doughnut',this)"><span>🍩</span> Doughnut</div>
+            <div class="chart-dd-item" onclick="pickChart('polarArea','🎯 Polar Area',this)"><span>🎯</span> Polar Area</div>
+            <div class="chart-dd-group">ADVANCED</div>
+            <div class="chart-dd-item" onclick="pickChart('scatter','🔵 Scatter Plot',this)"><span>🔵</span> Scatter Plot</div>
+            <div class="chart-dd-item" onclick="pickChart('bubble','🫧 Bubble',this)"><span>🫧</span> Bubble</div>
+            <div class="chart-dd-item" onclick="pickChart('radar','🕸️ Radar',this)"><span>🕸️</span> Radar</div>
+            <div class="chart-dd-item" onclick="pickChart('stackedBar','📦 Stacked Bar',this)"><span>📦</span> Stacked Bar</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="viz-divider"></div>
+
+      <!-- X Axis Custom Dropdown -->
+      <div class="control-group">
+        <label class="ctrl-label">X AXIS <span class="ctrl-hint">— Category</span></label>
+        <div class="axis-dropdown" id="xAxisDropdown">
+          <div class="chart-dropdown-selected" onclick="toggleAxisDropdown('x')">
+            <span id="xAxisLabel">Select column...</span>
+            <span class="dropdown-arrow">▾</span>
+          </div>
+          <div class="chart-dropdown-menu axis-menu" id="xAxisMenu"></div>
+        </div>
+      </div>
+
+      <!-- Y Axis Custom Dropdown -->
+      <div class="control-group" id="yAxisGroup">
+        <label class="ctrl-label">Y AXIS <span class="ctrl-hint">— Value</span></label>
+        <div class="axis-dropdown" id="yAxisDropdown">
+          <div class="chart-dropdown-selected" onclick="toggleAxisDropdown('y')">
+            <span id="yAxisLabel">Select column...</span>
+            <span class="dropdown-arrow">▾</span>
+          </div>
+          <div class="chart-dropdown-menu axis-menu" id="yAxisMenu"></div>
+        </div>
+      </div>
+
+      <div class="viz-divider"></div>
+
+      <!-- Multi Color Toggle -->
+      <div class="control-group">
+        <label class="ctrl-label">COLOR MODE</label>
+        <div class="toggle-row">
+          <span class="toggle-label">Single Color</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="multiColorToggle" onchange="buildChart()">
+            <span class="toggle-slider"></span>
+          </label>
+          <span class="toggle-label">Multi Color</span>
+        </div>
+      </div>
+
+      <div class="viz-divider"></div>
+
+      <!-- Color Theme -->
+      <div class="control-group">
+        <label class="ctrl-label">COLOR THEME</label>
+        <div class="color-options">
+          <div class="color-dot active" style="background:#ff8c00" onclick="setColor('#ff8c00','#ffb347',this)"></div>
+          <div class="color-dot" style="background:#3b82f6" onclick="setColor('#3b82f6','#60a5fa',this)"></div>
+          <div class="color-dot" style="background:#10b981" onclick="setColor('#10b981','#34d399',this)"></div>
+          <div class="color-dot" style="background:#ec4899" onclick="setColor('#ec4899','#f472b6',this)"></div>
+          <div class="color-dot" style="background:#8b5cf6" onclick="setColor('#8b5cf6','#a78bfa',this)"></div>
+          <div class="color-dot" style="background:#ef4444" onclick="setColor('#ef4444','#f87171',this)"></div>
+          <!-- Custom color picker -->
+          <label class="color-dot custom-color-dot" title="Custom color">
+            <input type="color" id="customColor" value="#ff8c00"
+              oninput="setColor(this.value, this.value+'99', document.querySelector('.custom-color-dot'))">
+            <span>+</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="viz-divider"></div>
+
+      <!-- Data Points -->
+      <div class="control-group">
+        <label class="ctrl-label">DATA POINTS</label>
+        <div class="dp-track">
+          <input type="range" id="maxPoints" min="5" max="50" value="20" class="ctrl-range dp-range"
+            oninput="updateDPDisplay(this.value); buildChart()">
+          <div class="dp-ticks">
+            <span>5</span>
+            <span>15</span>
+            <span>25</span>
+            <span>35</span>
+            <span>50</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="viz-divider"></div>
+
+      <!-- Download Buttons -->
+      <div class="control-group">
+        <label class="ctrl-label">DOWNLOAD CHART</label>
+        <div class="download-btns">
+          <button class="viz-action-btn" onclick="downloadChart('png')">↓ PNG</button>
+          <button class="viz-action-btn" onclick="downloadChart('jpg')">↓ JPG</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Chart Column -->
+    <div class="chart-column">
+
+      <!-- Chart Area -->
+      <div class="chart-area">
+
+        <!-- Placeholder -->
+        <div class="chart-placeholder" id="chartPlaceholder">
+          <div class="placeholder-icon">📊</div>
+          <p>Select columns to generate a chart</p>
+          <p class="placeholder-sub">Choose X and Y axes from the controls on the left</p>
+        </div>
+
+        <!-- Canvas -->
+        <canvas id="myChart" style="display:none"></canvas>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Column Summary -->
+  <div class="viz-stats" id="vizStats" style="display:none">
+    <div class="stats-header">
+      <h2>Column Summary</h2>
+      <p class="viz-subtitle">Statistical overview of all columns</p>
+    </div>
+    <div class="stats-grid" id="statsGrid"></div>
+  </div>
+
+</div>
+
+<script src="script.js"></script>
+<script src="visualize.js"></script>
+</body>
+</html>
