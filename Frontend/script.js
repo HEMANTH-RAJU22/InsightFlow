@@ -574,3 +574,494 @@ window.onload = function(){
   if(document.getElementById("chatWindow")) loadDataset()
   if(document.getElementById("username"))   loadAccount()
 }
+
+/* ============================================================
+   INSIGHTFLOW — visualize.js
+   ============================================================ */
+
+let vizHeaders  = []
+let vizDataset  = []
+let chartType   = "bar"
+let chartColor  = "#ff8c00"
+let chartColor2 = "#ffb347"
+let chartInst   = null
+
+
+/* ── Init ── */
+window.addEventListener("DOMContentLoaded", function(){
+  const raw = localStorage.getItem("insightflow_dataset")
+  if(!raw){
+    document.getElementById("noDataMsg").style.display  = "block"
+    document.getElementById("vizContent").style.display = "none"
+    return
+  }
+
+  const d = JSON.parse(raw)
+  vizHeaders = d.headers || []
+  vizDataset = d.dataset || []
+
+  const nameEl = document.getElementById("vizDatasetName")
+  if(nameEl) nameEl.innerText = d.fileName + " — " + Number(d.rows).toLocaleString() + " rows × " + d.columns + " columns"
+
+  populateSelects()
+  buildSummaryStats(d)
+})
+
+
+/* ── Detect numeric column ── */
+function isNumericCol(colIdx){
+  const vals = vizDataset.map(r => r[colIdx]).filter(v => v !== "" && v !== null && v !== undefined)
+  const nums = vals.map(v => parseFloat(v)).filter(v => !isNaN(v))
+  return nums.length > vals.length * 0.5
+}
+
+
+/* ── Populate selects ── */
+function populateSelects(){
+  const xMenu = document.getElementById("xAxisMenu")
+  const yMenu = document.getElementById("yAxisMenu")
+
+  xMenu.innerHTML = ""
+  yMenu.innerHTML = ""
+
+  let firstCat = -1, firstNum = -1
+
+  vizHeaders.forEach((h, i) => {
+    const isNum = isNumericCol(i)
+
+    const xItem = document.createElement("div")
+    xItem.className = "chart-dd-item"
+    xItem.setAttribute("data-idx", i)
+    xItem.innerHTML = `<span>${isNum ? "🔢" : "🔤"}</span> ${h}`
+    xItem.onclick = () => pickAxisCol("x", i, h)
+    xMenu.appendChild(xItem)
+
+    if(isNum){
+      const yItem = document.createElement("div")
+      yItem.className = "chart-dd-item"
+      yItem.setAttribute("data-idx", i)
+      yItem.innerHTML = `<span>🔢</span> ${h}`
+      yItem.onclick = () => pickAxisCol("y", i, h)
+      yMenu.appendChild(yItem)
+    }
+
+    if(firstCat === -1 && !isNum) firstCat = i
+    if(firstNum === -1 && isNum)  firstNum = i
+  })
+
+  // auto-select
+  const xDefault = firstCat !== -1 ? firstCat : 0
+  const yDefault = firstNum !== -1 ? firstNum : 0
+
+  pickAxisCol("x", xDefault, vizHeaders[xDefault])
+  pickAxisCol("y", yDefault, vizHeaders[yDefault])
+}
+
+
+/* ── Axis dropdown helpers ── */
+let xAxisVal = ""
+let yAxisVal = ""
+
+function toggleAxisDropdown(axis){
+  const menuId = axis === "x" ? "xAxisMenu" : "yAxisMenu"
+  const ddId   = axis === "x" ? "xAxisDropdown" : "yAxisDropdown"
+  const menu   = document.getElementById(menuId)
+  const dd     = document.getElementById(ddId)
+  // close other
+  const otherId = axis === "x" ? "yAxisMenu" : "xAxisMenu"
+  document.getElementById(otherId)?.classList.remove("open")
+  document.getElementById(axis === "x" ? "yAxisDropdown" : "xAxisDropdown")?.classList.remove("open")
+
+  const open = menu.classList.toggle("open")
+  dd.classList.toggle("open", open)
+}
+
+function pickAxisCol(axis, idx, label){
+  if(axis === "x"){
+    xAxisVal = idx
+    document.getElementById("xAxisLabel").innerText = label
+    document.getElementById("xAxisMenu").classList.remove("open")
+    document.getElementById("xAxisDropdown").classList.remove("open")
+    document.querySelectorAll("#xAxisMenu .chart-dd-item").forEach(i => i.classList.remove("active"))
+    document.querySelector(`#xAxisMenu [data-idx="${idx}"]`)?.classList.add("active")
+  } else {
+    yAxisVal = idx
+    document.getElementById("yAxisLabel").innerText = label
+    document.getElementById("yAxisMenu").classList.remove("open")
+    document.getElementById("yAxisDropdown").classList.remove("open")
+    document.querySelectorAll("#yAxisMenu .chart-dd-item").forEach(i => i.classList.remove("active"))
+    document.querySelector(`#yAxisMenu [data-idx="${idx}"]`)?.classList.add("active")
+  }
+  buildChart()
+}
+
+/* ── Custom chart dropdown ── */
+function toggleChartDropdown(){
+  const menu = document.getElementById("chartDropdownMenu")
+  const dd   = document.getElementById("chartDropdown")
+  const open = menu.classList.toggle("open")
+  dd.classList.toggle("open", open)
+}
+
+function pickChart(type, label, el){
+  document.getElementById("selectedChartLabel").innerText = label
+  document.querySelectorAll(".chart-dd-item").forEach(i => i.classList.remove("active"))
+  el.classList.add("active")
+  document.getElementById("chartDropdownMenu").classList.remove("open")
+  document.getElementById("chartDropdown").classList.remove("open")
+  setChartTypeFromSelect(type)
+}
+
+// Close all dropdowns when clicking outside
+document.addEventListener("click", function(e){
+  if(!e.target.closest("#chartDropdown")){
+    document.getElementById("chartDropdownMenu")?.classList.remove("open")
+    document.getElementById("chartDropdown")?.classList.remove("open")
+  }
+  if(!e.target.closest("#xAxisDropdown")){
+    document.getElementById("xAxisMenu")?.classList.remove("open")
+    document.getElementById("xAxisDropdown")?.classList.remove("open")
+  }
+  if(!e.target.closest("#yAxisDropdown")){
+    document.getElementById("yAxisMenu")?.classList.remove("open")
+    document.getElementById("yAxisDropdown")?.classList.remove("open")
+  }
+})
+
+/* ── Update data points display ── */
+function updateDPDisplay(val){
+  const range = document.getElementById("maxPoints")
+  const pct = (val - range.min) / (range.max - range.min) * 100
+  range.style.setProperty("--fill", pct + "%")
+}
+
+/* ── Chart type from dropdown ── */
+function setChartTypeFromSelect(type){
+  chartType = type
+  const noY = ["pie", "doughnut", "polarArea"]
+  document.getElementById("yAxisGroup").style.display =
+    noY.includes(type) ? "none" : "block"
+
+  // multi-color toggle only useful for bar/horizontalBar/stackedBar
+  // pie/doughnut/polarArea already use multi colors by default
+  // line/area/scatter/bubble/radar use single color by nature
+  const showToggle = ["bar","horizontalBar","stackedBar"].includes(type)
+  const toggleRow  = document.getElementById("multiColorToggle")?.closest(".control-group")
+  if(toggleRow) toggleRow.style.display = showToggle ? "block" : "none"
+
+  buildChart()
+}
+
+
+/* ── Set color ── */
+function setColor(c1, c2, el){
+  chartColor  = c1
+  chartColor2 = c2
+  document.querySelectorAll(".color-dot").forEach(d => d.classList.remove("active"))
+  if(el) el.classList.add("active")
+  buildChart()
+}
+
+
+/* ── Build chart ── */
+function buildChart(){
+  const xIdx = parseInt(xAxisVal)
+  const yIdx = parseInt(yAxisVal)
+  const max  = parseInt(document.getElementById("maxPoints").value)
+
+  if(isNaN(xIdx) || (chartType !== "pie" && isNaN(yIdx))){
+    document.getElementById("chartPlaceholder").style.display = "flex"
+    document.getElementById("myChart").style.display = "none"
+    return
+  }
+
+  document.getElementById("chartPlaceholder").style.display = "none"
+  document.getElementById("myChart").style.display          = "block"
+
+  const rows   = vizDataset.slice(0, max)
+  const labels = rows.map(r => String(r[xIdx] ?? ""))
+  const values = rows.map(r => parseFloat(r[yIdx]) || 0)
+
+  if(chartInst) chartInst.destroy()
+
+  const ctx = document.getElementById("myChart").getContext("2d")
+
+  const multiColors = [
+    "#ff8c00","#3b82f6","#10b981","#ec4899","#8b5cf6",
+    "#ef4444","#f59e0b","#06b6d4","#84cc16","#f97316"
+  ]
+
+  const noYTypes   = ["pie","doughnut","polarArea"]
+  const isMultiCol = noYTypes.includes(chartType)
+
+  let dsConfig = {}
+
+  if(isMultiCol){
+    const counts = countOccurrences(labels)
+    dsConfig = {
+      label: vizHeaders[xIdx],
+      data:  Object.values(counts),
+      backgroundColor: multiColors,
+      borderWidth: 2,
+      borderColor: "#0d1117"
+    }
+  } else if(chartType === "scatter"){
+    dsConfig = {
+      label: `${vizHeaders[xIdx]} vs ${vizHeaders[yIdx]}`,
+      data:  rows.map(r => ({ x: parseFloat(r[xIdx])||0, y: parseFloat(r[yIdx])||0 })),
+      backgroundColor: chartColor + "bb",
+      borderColor: chartColor,
+      pointRadius: 6,
+      pointHoverRadius: 8
+    }
+  } else if(chartType === "bubble"){
+    dsConfig = {
+      label: `${vizHeaders[xIdx]} vs ${vizHeaders[yIdx]}`,
+      data:  rows.map((r,i) => ({
+        x: parseFloat(r[xIdx])||i,
+        y: parseFloat(r[yIdx])||0,
+        r: Math.max(3, Math.min(20, (parseFloat(r[yIdx])||10)/10))
+      })),
+      backgroundColor: chartColor + "88",
+      borderColor: chartColor,
+      borderWidth: 1
+    }
+  } else if(chartType === "radar"){
+    dsConfig = {
+      label: vizHeaders[yIdx],
+      data:  values,
+      backgroundColor: chartColor + "33",
+      borderColor: chartColor,
+      borderWidth: 2,
+      pointBackgroundColor: chartColor,
+      pointRadius: 4
+    }
+  } else {
+    const isArea       = chartType === "area"
+    const isHBar       = chartType === "horizontalBar"
+    const isStackedBar = chartType === "stackedBar"
+    const isMultiMode  = document.getElementById("multiColorToggle")?.checked
+
+    const multiColors = [
+      "#ff8c00","#3b82f6","#10b981","#ec4899","#8b5cf6",
+      "#ef4444","#f59e0b","#06b6d4","#84cc16","#f97316",
+      "#14b8a6","#a855f7","#64748b","#fb7185","#38bdf8"
+    ]
+
+    const bgColor = isMultiMode
+      ? values.map((_, i) => multiColors[i % multiColors.length] + "dd")
+      : (isArea || chartType === "line") ? chartColor + "22" : chartColor + "dd"
+
+    const borderCol = isMultiMode
+      ? values.map((_, i) => multiColors[i % multiColors.length])
+      : chartColor
+
+    dsConfig = {
+      label: vizHeaders[yIdx],
+      data:  values,
+      backgroundColor: bgColor,
+      borderColor: borderCol,
+      borderWidth: 2,
+      borderRadius: (chartType === "bar" || isStackedBar) ? 6 : 0,
+      fill: isArea,
+      tension: 0.4,
+      pointBackgroundColor: isMultiMode ? multiColors : chartColor2,
+      pointBorderColor: isMultiMode ? multiColors : chartColor,
+      pointRadius: (chartType === "line" || isArea) ? 4 : 0,
+      pointHoverRadius: 6
+    }
+  }
+
+  const chartData = isMultiCol
+    ? { labels: Object.keys(countOccurrences(labels)), datasets: [dsConfig] }
+    : { labels, datasets: [dsConfig] }
+
+  const noScales     = ["pie","doughnut","polarArea","radar"]
+  const isHBar       = chartType === "horizontalBar"
+  const isStackedBar = chartType === "stackedBar"
+  const isArea       = chartType === "area"
+  const actualType   = isHBar ? "bar" : isStackedBar ? "bar" : isArea ? "line" : chartType
+
+  chartInst = new Chart(ctx, {
+    type: actualType,
+    data: chartData,
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      aspectRatio: 0,
+      layout: {
+        padding: { top: 10, bottom: 10, left: 5, right: 10 }
+      },
+      animation: { duration: 600, easing: "easeInOutQuart" },
+      plugins: {
+        title: {
+          display: true,
+          text: noScales.includes(chartType)
+            ? `${vizHeaders[xIdx]} Distribution`
+            : `${vizHeaders[xIdx]} vs ${vizHeaders[yIdx]}`,
+          color: "#cccccc",
+          font: { size: 13, weight: "600" },
+          padding: { bottom: 16 }
+        },
+        legend: {
+          display: false
+        },
+        tooltip: {
+          backgroundColor: "rgba(10,10,20,0.9)",
+          titleColor: chartColor,
+          bodyColor: "#ffffff",
+          borderColor: chartColor + "44",
+          borderWidth: 1,
+          padding: 12,
+          cornerRadius: 8
+        }
+      },
+      indexAxis: isHBar ? "y" : "x",
+      scales: noScales.includes(chartType) ? {} : {
+        x: {
+          stacked: isStackedBar,
+          title: {
+            display: true,
+            text: isHBar ? vizHeaders[yIdx] : vizHeaders[xIdx],
+            color: "#888",
+            font: { size: 12, weight: "600" },
+            padding: { top: 10 }
+          },
+          ticks: { color: "#666", maxRotation: 40, font: { size: 11 } },
+          grid:  { color: "rgba(255,255,255,0.04)" }
+        },
+        y: {
+          stacked: isStackedBar,
+          title: {
+            display: true,
+            text: isHBar ? vizHeaders[xIdx] : vizHeaders[yIdx],
+            color: "#888",
+            font: { size: 12, weight: "600" },
+            padding: { bottom: 10 }
+          },
+          ticks: { color: "#666", font: { size: 11 } },
+          grid:  { color: "rgba(255,255,255,0.04)" }
+        }
+      }
+    }
+  })
+}
+
+
+/* ── Count for pie ── */
+function countOccurrences(arr){
+  const map = {}
+  arr.forEach(v => { map[v] = (map[v]||0) + 1 })
+  return map
+}
+
+
+/* ── Summary stats ── */
+function buildSummaryStats(d){
+  const grid = document.getElementById("statsGrid")
+  document.getElementById("vizStats").style.display = "block"
+
+  grid.innerHTML = d.headers.map((h, i) => {
+    const vals  = d.dataset.map(r => r[i]).filter(v => v !== "" && v !== null && v !== undefined)
+    const nums  = vals.map(v => parseFloat(v)).filter(v => !isNaN(v))
+    const isNum = nums.length > vals.length * 0.5
+    const miss  = d.dataset.length - vals.length
+
+    let rows = ""
+    if(isNum && nums.length > 0){
+      const min = Math.min(...nums).toLocaleString()
+      const max = Math.max(...nums).toLocaleString()
+      const avg = (nums.reduce((a,b)=>a+b,0)/nums.length).toFixed(2)
+      rows = `
+        <div class="stat-row"><span>Min</span><span>${min}</span></div>
+        <div class="stat-row"><span>Max</span><span>${max}</span></div>
+        <div class="stat-row"><span>Avg</span><span>${avg}</span></div>
+      `
+    } else {
+      rows = `<div class="stat-row"><span>Unique</span><span>${new Set(vals).size}</span></div>`
+    }
+
+    return `
+      <div class="stat-card">
+        <div class="stat-col-name" title="${h}">${h}</div>
+        <div class="stat-type">${isNum ? "Numeric" : "Categorical"}</div>
+        ${rows}
+        <div class="stat-row missing"><span>Missing</span><span>${miss}</span></div>
+      </div>
+    `
+  }).join("")
+}
+
+
+/* ── Download chart ── */
+function downloadChart(format){
+  if(!chartInst){ alert("Generate a chart first"); return }
+
+  const canvas = document.getElementById("myChart")
+  let link = document.createElement("a")
+
+  if(format === "jpg"){
+    // For JPG, draw on white background canvas
+    const tmp = document.createElement("canvas")
+    tmp.width  = canvas.width
+    tmp.height = canvas.height
+    const tCtx = tmp.getContext("2d")
+    tCtx.fillStyle = "#0f172a"
+    tCtx.fillRect(0, 0, tmp.width, tmp.height)
+    tCtx.drawImage(canvas, 0, 0)
+    link.download = "insightflow-chart.jpg"
+    link.href = tmp.toDataURL("image/jpeg", 0.95)
+  } else {
+    link.download = "insightflow-chart.png"
+    link.href = canvas.toDataURL("image/png")
+  }
+
+  link.click()
+}
+
+
+/* ── Theme toggle ── */
+function toggleTheme(){
+  const body = document.body
+  const btn  = document.getElementById("themeToggle")
+  const isLight = body.classList.toggle("light-mode")
+  btn.textContent = isLight ? "🌙" : "☀️"
+  localStorage.setItem("vizTheme", isLight ? "light" : "dark")
+
+  // Update chart colors
+  if(chartInst){
+    const textColor = isLight ? "#333" : "#666"
+    const gridColor = isLight ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.04)"
+    const titleColor = isLight ? "#111" : "#cccccc"
+
+    if(chartInst.options.plugins?.title)
+      chartInst.options.plugins.title.color = titleColor
+    if(chartInst.options.scales?.x){
+      chartInst.options.scales.x.ticks.color = textColor
+      chartInst.options.scales.x.grid.color  = gridColor
+      chartInst.options.scales.x.title.color = textColor
+    }
+    if(chartInst.options.scales?.y){
+      chartInst.options.scales.y.ticks.color = textColor
+      chartInst.options.scales.y.grid.color  = gridColor
+      chartInst.options.scales.y.title.color = textColor
+    }
+    chartInst.update()
+  }
+}
+
+/* ── Restore saved theme ── */
+window.addEventListener("DOMContentLoaded", () => {
+  if(localStorage.getItem("vizTheme") === "light"){
+    document.body.classList.add("light-mode")
+    const btn = document.getElementById("themeToggle")
+    if(btn) btn.textContent = "🌙"
+  }
+})
+
+/* ── Navigation ── */
+function goAccount(){ window.location.href = "account.html" }
+function logout(){
+  localStorage.removeItem("userEmail")
+  window.location.href = "index.html"
+}

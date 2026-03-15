@@ -1472,13 +1472,7 @@ body {
   cursor: not-allowed;
 }
 
-/* ── Chat window auto height ── */
-.chat-window {
-  height: auto !important;
-  min-height: 60px !important;
-  max-height: 65vh;
-  overflow-y: auto;
-}
+
 
 /* ── Chatbot full page layout fix ── */
 
@@ -1519,11 +1513,7 @@ body {
   flex-shrink: 0;
 }
 
-/* ── Chatbot page body — no scroll, fixed height ── */
-body.chatbot-body {
-  overflow: hidden !important;
-  height: 100vh !important;
-}
+
 
 /* ── Bigger chat window ── */
 .chatbot-header {
@@ -1733,3 +1723,1742 @@ body.chatbot-body {
 .quick-btn {
   border-radius: 10px !important;
 }
+
+/* Chart builder layout */
+
+
+/* Controls panel */
+
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.control-group label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #aaa;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.label-hint {
+  color: #666;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.control-group select {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px;
+  color: white;
+  padding: 8px 12px;
+  font-size: 13px;
+  outline: none;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.control-group select:focus {
+  border-color: rgba(255,140,0,0.5);
+}
+
+.control-group select option {
+  background: #1f2a40;
+}
+
+/* Chart type buttons */
+.chart-type-btns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.chart-type-btn {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #aaa;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.chart-type-btn:hover {
+  background: rgba(255,140,0,0.1);
+  border-color: rgba(255,140,0,0.3);
+  color: white;
+}
+
+.chart-type-btn.active {
+  background: rgba(255,140,0,0.15);
+  border-color: #ff8c00;
+  color: #ff8c00;
+  font-weight: 600;
+}
+
+/* Color options */
+.color-options {
+  display: flex;
+  gap: 10px;
+}
+
+.color-dot {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+.color-dot:hover {
+  transform: scale(1.15);
+}
+
+.color-dot.active {
+  border-color: white;
+  transform: scale(1.2);
+}
+
+/* Range input */
+.control-group input[type="range"] {
+  width: 100%;
+  accent-color: #ff8c00;
+}
+
+#rangeVal {
+  font-size: 13px;
+  color: #ff8c00;
+  font-weight: 600;
+}
+
+/* Download button */
+.download-btn {
+  background: linear-gradient(135deg, #ff8c00, #ffb347);
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.2s;
+  margin-top: auto;
+}
+
+.download-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(255,140,0,0.4);
+}
+
+/* Chart area */
+
+
+
+
+
+
+/* Summary stats */
+.viz-stats {
+  margin-top: 10px;
+}
+
+.viz-stats h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 20px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.stat-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.stat-col-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stat-type {
+  font-size: 11px;
+  color: #ff8c00;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #aaa;
+  padding: 3px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+
+.stat-row span:last-child {
+  color: white;
+  font-weight: 500;
+}
+
+.stat-row.missing span:last-child {
+  color: #ff6b6b;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  
+}
+
+/* ── Visualize CTA button ── */
+.viz-cta-btn {
+  background: linear-gradient(135deg, #1f2a40, #2f3e5e) !important;
+  border: 1px solid rgba(255,255,255,0.15) !important;
+  box-shadow: none !important;
+}
+
+.viz-cta-btn:hover {
+  background: linear-gradient(135deg, #2f3e5e, #3f5278) !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3) !important;
+}
+
+.ai-cta-inner {
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* ── Visualize quick button ── */
+.viz-quick-btn {
+  background: rgba(59,130,246,0.1) !important;
+  border-color: rgba(59,130,246,0.3) !important;
+  color: #60a5fa !important;
+}
+
+.viz-quick-btn:hover {
+  background: rgba(59,130,246,0.2) !important;
+  border-color: #3b82f6 !important;
+  color: white !important;
+}
+
+/* ── Visualize quick button — match other quick buttons ── */
+.viz-quick-btn {
+  background: rgba(255,140,0,0.08) !important;
+  border-color: rgba(255,140,0,0.2) !important;
+  color: #ffb347 !important;
+}
+
+.viz-quick-btn:hover {
+  background: rgba(255,140,0,0.2) !important;
+  border-color: #ff8c00 !important;
+  color: white !important;
+}
+
+/* ── Viz page scroll fix ── */
+body:not(.chatbot-body) {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  height: auto !important;
+}
+
+
+
+
+
+
+
+/* ── Chart builder ── */
+
+
+/* ── Controls panel ── */
+
+
+.control-section-title {
+  font-size: 10px;
+  font-weight: 700;
+  color: #555;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.viz-divider {
+  height: 1px;
+  background: rgba(255,255,255,0.06);
+  margin: 2px 0;
+}
+
+/* Chart type grid */
+.chart-type-btns {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 8px !important;
+}
+
+.chart-type-btn {
+  background: rgba(255,255,255,0.04) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  color: #777 !important;
+  padding: 10px 8px !important;
+  border-radius: 10px !important;
+  cursor: pointer !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.3px !important;
+  transition: all 0.2s !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+}
+
+.chart-icon {
+  font-size: 14px;
+}
+
+.chart-type-btn:hover {
+  background: rgba(255,140,0,0.08) !important;
+  border-color: rgba(255,140,0,0.2) !important;
+  color: #ddd !important;
+}
+
+.chart-type-btn.active {
+  background: rgba(255,140,0,0.12) !important;
+  border-color: #ff8c00 !important;
+  color: #ff8c00 !important;
+}
+
+/* Selects */
+.control-group {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+}
+
+.control-group label {
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  color: #888 !important;
+  letter-spacing: 0.5px !important;
+}
+
+.label-hint {
+  color: #555 !important;
+  font-weight: 400 !important;
+}
+
+.control-group select {
+  background: rgba(255,255,255,0.05) !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+  border-radius: 8px !important;
+  color: white !important;
+  padding: 8px 10px !important;
+  font-size: 12px !important;
+  outline: none !important;
+  cursor: pointer !important;
+  transition: 0.2s !important;
+  width: 100% !important;
+}
+
+.control-group select:focus {
+  border-color: rgba(255,140,0,0.4) !important;
+}
+
+.control-group select option {
+  background: #1a2236 !important;
+  color: white !important;
+}
+
+/* Color dots */
+.color-options {
+  display: flex !important;
+  gap: 8px !important;
+  flex-wrap: wrap !important;
+}
+
+.color-dot {
+  width: 24px !important;
+  height: 24px !important;
+  border-radius: 50% !important;
+  cursor: pointer !important;
+  border: 2px solid transparent !important;
+  transition: all 0.2s !important;
+}
+
+.color-dot:hover { transform: scale(1.2) !important; }
+.color-dot.active { border-color: white !important; transform: scale(1.2) !important; }
+
+/* Range */
+.control-group input[type="range"] {
+  width: 100% !important;
+  accent-color: #ff8c00 !important;
+  height: 4px !important;
+}
+
+/* Download */
+.download-btn {
+  background: rgba(255,140,0,0.12) !important;
+  color: #ff8c00 !important;
+  border: 1px solid rgba(255,140,0,0.3) !important;
+  padding: 10px !important;
+  border-radius: 10px !important;
+  cursor: pointer !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.5px !important;
+  transition: all 0.2s !important;
+  text-align: center !important;
+  margin-top: auto !important;
+}
+
+.download-btn:hover {
+  background: rgba(255,140,0,0.2) !important;
+  color: white !important;
+  transform: translateY(-1px) !important;
+}
+
+
+
+
+
+
+
+.chart-placeholder p {
+  font-size: 15px !important;
+  color: #555 !important;
+  margin: 0 0 6px 0 !important;
+}
+
+
+
+
+
+/* ── Column summary ── */
+.viz-stats {
+  margin-top: 10px !important;
+}
+
+.stats-header {
+  margin-bottom: 20px;
+}
+
+.stats-header h2 {
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  color: white !important;
+  margin: 0 0 4px 0 !important;
+}
+
+.stats-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)) !important;
+  gap: 12px !important;
+}
+
+.stat-card {
+  background: rgba(255,255,255,0.03) !important;
+  border: 1px solid rgba(255,255,255,0.07) !important;
+  border-radius: 12px !important;
+  padding: 14px !important;
+  transition: border-color 0.2s !important;
+}
+
+.stat-card:hover {
+  border-color: rgba(255,140,0,0.2) !important;
+}
+
+.stat-col-name {
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  color: white !important;
+  margin-bottom: 3px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.stat-type {
+  font-size: 10px !important;
+  color: #ff8c00 !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+  margin-bottom: 10px !important;
+}
+
+.stat-row {
+  display: flex !important;
+  justify-content: space-between !important;
+  font-size: 11px !important;
+  color: #666 !important;
+  padding: 3px 0 !important;
+  border-bottom: 1px solid rgba(255,255,255,0.04) !important;
+}
+
+.stat-row span:last-child {
+  color: #ccc !important;
+  font-weight: 500 !important;
+}
+
+.stat-row.missing span:last-child {
+  color: #ef4444 !important;
+}
+
+/* ============================================================
+   VIZ CONTROLS — FINAL REDESIGN
+   ============================================================ */
+
+.ctrl-label {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  color: #555 !important;
+  letter-spacing: 1.5px !important;
+  text-transform: uppercase !important;
+  display: block !important;
+  margin-bottom: 6px !important;
+}
+
+.ctrl-hint {
+  color: #444 !important;
+  font-weight: 400 !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+}
+
+.custom-select-wrap {
+  position: relative;
+}
+
+.ctrl-select {
+  width: 100% !important;
+  background: rgba(255,255,255,0.05) !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+  border-radius: 10px !important;
+  color: white !important;
+  padding: 9px 12px !important;
+  font-size: 13px !important;
+  outline: none !important;
+  cursor: pointer !important;
+  appearance: none !important;
+  transition: border-color 0.2s !important;
+}
+
+.ctrl-select:focus {
+  border-color: rgba(255,140,0,0.45) !important;
+}
+
+.ctrl-select option {
+  background: #1a2236 !important;
+}
+
+/* custom color picker dot */
+.custom-color-dot {
+  background: conic-gradient(red, yellow, lime, cyan, blue, magenta, red) !important;
+  cursor: pointer !important;
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+}
+
+.custom-color-dot input[type="color"] {
+  position: absolute !important;
+  opacity: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  cursor: pointer !important;
+}
+
+.custom-color-dot span {
+  color: white !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  pointer-events: none !important;
+  text-shadow: 0 0 4px rgba(0,0,0,0.8) !important;
+}
+
+.ctrl-range {
+  width: 100% !important;
+  accent-color: #ff8c00 !important;
+  cursor: pointer !important;
+}
+
+/* Download buttons */
+.download-btns {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 8px !important;
+}
+
+.viz-action-btn {
+  background: rgba(255,140,0,0.1) !important;
+  color: #ff8c00 !important;
+  border: 1px solid rgba(255,140,0,0.25) !important;
+  padding: 9px 12px !important;
+  border-radius: 10px !important;
+  cursor: pointer !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.5px !important;
+  transition: all 0.2s !important;
+  text-align: center !important;
+}
+
+.viz-action-btn:hover {
+  background: rgba(255,140,0,0.2) !important;
+  color: white !important;
+  border-color: #ff8c00 !important;
+  transform: translateY(-1px) !important;
+}
+
+/* ── Viz title redesign ── */
+.viz-title {
+  font-size: 36px !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.5px !important;
+  color: white !important;
+  -webkit-text-fill-color: white !important;
+  background: none !important;
+  margin: 0 !important;
+}
+
+.viz-title-accent {
+  background: linear-gradient(90deg, #ff8c00, #ffb347, #ff8c00);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradientMove 4s linear infinite;
+}
+
+/* ── Viz title size fix ── */
+.viz-title {
+  font-size: 24px !important;
+  font-weight: 800 !important;
+  letter-spacing: 2px !important;
+  color: white !important;
+  -webkit-text-fill-color: white !important;
+  background: none !important;
+  text-transform: uppercase !important;
+}
+
+.viz-title-accent {
+  background: linear-gradient(90deg, #ff8c00, #ffb347, #ff8c00) !important;
+  background-size: 200% auto !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  animation: gradientMove 4s linear infinite !important;
+}
+
+
+
+/* ── Color dots same row ── */
+.color-options {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  gap: 8px !important;
+  align-items: center !important;
+}
+
+.color-dot {
+  width: 22px !important;
+  height: 22px !important;
+  flex-shrink: 0 !important;
+}
+
+.custom-color-dot {
+  width: 22px !important;
+  height: 22px !important;
+  flex-shrink: 0 !important;
+}
+
+/* ── Both title words orange gradient ── */
+.viz-title {
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  letter-spacing: 3px !important;
+  text-transform: uppercase !important;
+  background: none !important;
+  -webkit-text-fill-color: unset !important;
+  color: white !important;
+}
+
+/* ── Data points redesign ── */
+.data-points-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.data-points-wrap .ctrl-range {
+  flex: 1;
+}
+
+.range-badge {
+  background: linear-gradient(135deg, #ff8c00, #ffb347);
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(255,140,0,0.4);
+}
+
+.range-minmax {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: #444;
+  margin-top: 2px;
+  padding: 0 2px;
+}
+
+/* ── Data title - no gradient, just white with animation ── */
+.viz-title {
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  letter-spacing: 3px !important;
+  text-transform: uppercase !important;
+  background: none !important;
+  -webkit-text-fill-color: white !important;
+  color: white !important;
+  animation: titleFade 3s ease-in-out infinite alternate !important;
+}
+
+@keyframes titleFade {
+  from { opacity: 0.7; letter-spacing: 3px; }
+  to   { opacity: 1;   letter-spacing: 4px; }
+}
+
+.viz-title-accent {
+  background: linear-gradient(90deg, #ff8c00, #ffb347, #ff8c00) !important;
+  background-size: 200% auto !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  animation: gradientMove 4s linear infinite !important;
+}
+
+/* ── Data points redesign ── */
+.dp-track {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dp-range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 4px;
+  background: linear-gradient(to right, #ff8c00 var(--fill, 30%), rgba(255,255,255,0.1) var(--fill, 30%));
+  outline: none;
+  cursor: pointer;
+}
+
+.dp-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ff8c00;
+  cursor: pointer;
+  box-shadow: 0 0 6px rgba(255,140,0,0.6);
+  border: 2px solid white;
+  transition: transform 0.15s;
+}
+
+.dp-range::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+.dp-ticks {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: #444;
+  padding: 0 2px;
+}
+
+/* optgroup styling */
+.ctrl-select optgroup {
+  color: #666;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* ── Custom Chart Type Dropdown ── */
+.chart-dropdown {
+  position: relative;
+  user-select: none;
+}
+
+.chart-dropdown-selected {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-size: 13px;
+  color: white;
+  transition: all 0.2s;
+}
+
+.chart-dropdown-selected:hover,
+.chart-dropdown.open .chart-dropdown-selected {
+  border-color: rgba(255,140,0,0.5);
+  background: rgba(255,140,0,0.08);
+}
+
+.dropdown-arrow {
+  color: #666;
+  font-size: 12px;
+  transition: transform 0.2s;
+}
+
+.chart-dropdown.open .dropdown-arrow {
+  transform: rotate(180deg);
+  color: #ff8c00;
+}
+
+.chart-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: #131d2e;
+  border: 1px solid rgba(255,140,0,0.2);
+  border-radius: 12px;
+  padding: 6px;
+  z-index: 999;
+  display: none;
+  box-shadow: 0 16px 40px rgba(0,0,0,0.6);
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.chart-dropdown-menu::-webkit-scrollbar { width: 3px; }
+.chart-dropdown-menu::-webkit-scrollbar-thumb { background: rgba(255,140,0,0.3); border-radius: 4px; }
+
+.chart-dropdown-menu.open {
+  display: block;
+  animation: ddFadeIn 0.15s ease;
+}
+
+@keyframes ddFadeIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.chart-dd-group {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #444;
+  padding: 8px 10px 4px;
+  text-transform: uppercase;
+}
+
+.chart-dd-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #aaa;
+  transition: all 0.15s;
+}
+
+.chart-dd-item span {
+  font-size: 16px;
+  width: 20px;
+  text-align: center;
+}
+
+.chart-dd-item:hover {
+  background: rgba(255,140,0,0.1);
+  color: white;
+}
+
+.chart-dd-item.active {
+  background: rgba(255,140,0,0.12);
+  color: #ff8c00;
+  font-weight: 600;
+}
+
+/* ── Axis dropdown positioning ── */
+.axis-dropdown {
+  position: relative;
+  user-select: none;
+}
+
+.axis-menu {
+  max-height: 200px !important;
+}
+
+
+
+/* Chart header bar */
+.chart-header {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  background: rgba(255,255,255,0.03);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  flex-shrink: 0;
+}
+
+.chart-title-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.chart-title-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ff8c00;
+  box-shadow: 0 0 8px rgba(255,140,0,0.6);
+  animation: pulse 2s infinite;
+}
+
+.chart-title-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  letter-spacing: 0.3px;
+}
+
+.chart-meta {
+  font-size: 11px;
+  color: #444;
+  letter-spacing: 0.5px;
+}
+
+/* Chart canvas wrapper */
+
+
+/* Placeholder centered */
+
+
+
+
+.chart-placeholder p {
+  font-size: 14px;
+  color: #444;
+  margin: 0;
+}
+
+
+
+/* ── Chart column wrapper ── */
+
+
+/* ── Chart header outside box ── */
+.chart-header-outside {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px;
+}
+
+.chart-header {
+  display: none !important;
+}
+
+/* Reuse same inner styles */
+.chart-header-outside .chart-title-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.chart-header-outside .chart-title-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ff8c00;
+  box-shadow: 0 0 8px rgba(255,140,0,0.6);
+  animation: pulse 2s infinite;
+}
+
+.chart-header-outside .chart-title-text {
+  font-size: 15px;
+  font-weight: 700;
+  color: white;
+  letter-spacing: 0.3px;
+}
+
+.chart-header-outside .chart-meta {
+  font-size: 11px;
+  color: #555;
+  letter-spacing: 0.5px;
+}
+
+
+
+
+
+
+
+/* ── Color mode toggle ── */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.toggle-label {
+  font-size: 11px;
+  color: #666;
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 38px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.1);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: 0.2s;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.toggle-slider::before {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  left: 2px;
+  top: 2px;
+  background: #666;
+  border-radius: 50%;
+  transition: 0.2s;
+}
+
+.toggle-switch input:checked + .toggle-slider {
+  background: rgba(255,140,0,0.2);
+  border-color: rgba(255,140,0,0.4);
+}
+
+.toggle-switch input:checked + .toggle-slider::before {
+  transform: translateX(18px);
+  background: #ff8c00;
+  box-shadow: 0 0 6px rgba(255,140,0,0.6);
+}
+
+
+/* ── CHART AREA — FIXED SIZE ── */
+
+
+
+
+
+
+
+
+
+
+.chart-placeholder p {
+  font-size: 14px;
+  color: #444;
+  margin: 0;
+}
+
+
+
+
+
+.chart-header-outside .chart-title-text {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #ccc !important;
+}
+
+.chart-header-outside .chart-meta {
+  font-size: 11px !important;
+  color: #444 !important;
+}
+
+/* ── MATCH SCREENSHOT LAYOUT ── */
+
+
+
+
+
+
+
+
+
+
+/* ── Viz page top padding fix ── */
+
+
+/* ── Viz page width fix ── */
+
+
+
+
+/* ── Tighter margins ── */
+
+/* ── Chatbot full page ── */
+body.chatbot-body {
+  overflow: hidden !important;
+  height: 100vh !important;
+}
+
+.chatbot-page {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 60px);
+  width: 96%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding-top: 70px;
+  padding-bottom: 0px;
+  box-sizing: border-box;
+}
+
+.chat-window {
+  flex: 1 !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow-y: auto;
+  padding: 20px;
+  background: #000000;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.chatbot-input-area {
+  flex-shrink: 0;
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px 12px 0 0;
+  margin-bottom: 0;
+}
+
+/* ── Body scroll fix ── */
+body:not(.chatbot-body) {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  height: auto !important;
+}
+
+/* ── Clear button ── */
+.clear-btn {
+  background: rgba(255,255,255,0.08);
+  color: #ff6b6b;
+  border: 1px solid rgba(255,107,107,0.4);
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.clear-btn:hover {
+  background: rgba(255,107,107,0.15);
+  border-color: #ff6b6b;
+  color: white;
+}
+
+/* ── STATIC FIXED CHART BOX ── */
+
+
+
+
+
+.viz-controls::-webkit-scrollbar-thumb {
+  background: rgba(255,140,0,0.3);
+  border-radius: 4px;
+}
+
+/* ── Fill space below boxes ── */
+
+
+
+
+
+
+
+
+
+/* ── Chatbot page ── */
+body.chatbot-body {
+  overflow: hidden !important;
+  height: 100vh !important;
+}
+
+.chatbot-page {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 60px);
+  width: 96%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding-top: 70px;
+  padding-bottom: 0;
+  box-sizing: border-box;
+}
+
+.chat-window {
+  flex: 1 !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow-y: auto;
+  padding: 20px;
+  background: #000000;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.chatbot-input-area {
+  flex-shrink: 0;
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px 12px 0 0;
+  margin-bottom: 0;
+}
+
+body:not(.chatbot-body) {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  height: auto !important;
+}
+
+/* ── Clear button ── */
+.clear-btn {
+  background: rgba(255,255,255,0.08);
+  color: #ff6b6b;
+  border: 1px solid rgba(255,107,107,0.4);
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.clear-btn:hover {
+  background: rgba(255,107,107,0.15);
+  border-color: #ff6b6b;
+  color: white;
+}
+
+
+
+
+
+
+
+
+
+.viz-controls::-webkit-scrollbar { width: 3px; }
+.viz-controls::-webkit-scrollbar-thumb { background: rgba(255,140,0,0.3); border-radius: 4px; }
+
+
+
+
+
+
+
+
+.chart-placeholder p { font-size: 14px; color: #444; margin: 0; }
+
+
+
+
+/* chatbot */
+body.chatbot-body { overflow: hidden !important; height: 100vh !important; }
+body:not(.chatbot-body) { overflow-y: auto !important; overflow-x: hidden !important; height: auto !important; }
+
+.chatbot-page {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 60px);
+  width: 96%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding-top: 70px;
+  padding-bottom: 0;
+  box-sizing: border-box;
+}
+
+.chat-window {
+  flex: 1 !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow-y: auto;
+  padding: 20px;
+  background: #000000;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.chatbot-input-area {
+  flex-shrink: 0;
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px 12px 0 0;
+}
+
+.clear-btn {
+  background: rgba(255,255,255,0.08);
+  color: #ff6b6b;
+  border: 1px solid rgba(255,107,107,0.4);
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.clear-btn:hover {
+  background: rgba(255,107,107,0.15);
+  border-color: #ff6b6b;
+  color: white;
+}
+
+
+/* ── Compact controls to fit no scroll ── */
+
+
+.control-group {
+  gap: 5px !important;
+}
+
+.viz-divider {
+  margin: 2px 0 !important;
+}
+
+.ctrl-label {
+  font-size: 9px !important;
+  margin-bottom: 4px !important;
+}
+
+.chart-dropdown-selected,
+.ctrl-select {
+  padding: 7px 10px !important;
+  font-size: 12px !important;
+}
+
+.color-dot {
+  width: 20px !important;
+  height: 20px !important;
+}
+
+.custom-color-dot {
+  width: 20px !important;
+  height: 20px !important;
+}
+
+.dp-range {
+  height: 3px !important;
+}
+
+.dp-ticks {
+  font-size: 9px !important;
+}
+
+.viz-action-btn {
+  padding: 7px 10px !important;
+  font-size: 11px !important;
+}
+
+/* ── Vertical separator between boxes ── */
+
+
+.viz-separator {
+  width: 1px;
+  background: rgba(255,255,255,0.08);
+  margin: 0 8px;
+  border-radius: 1px;
+  flex-shrink: 0;
+}
+
+/* Remove gap between chart-builder items since separator handles spacing */
+
+
+
+
+/* ── Better dividers inside left box ── */
+.viz-divider {
+  height: 1px !important;
+  background: rgba(255,255,255,0.08) !important;
+  margin: 4px 0 !important;
+  border-radius: 1px !important;
+}
+
+
+
+.theme-toggle:hover {
+  background: rgba(255,255,255,0.15);
+  transform: scale(1.1);
+}
+
+/* ── Light mode ── */
+body.light-mode {
+  background: #f0f4f8 !important;
+  animation: none !important;
+  color: #111 !important;
+}
+
+body.light-mode .topbar {
+  background: rgba(255,255,255,0.95) !important;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+body.light-mode .logo {
+  background: linear-gradient(90deg, #ff8c00, #ffb347, #ff8c00) !important;
+  background-size: 200% auto !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+body.light-mode .nav-links span {
+  background: linear-gradient(90deg, #ff8c00, #e07000) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+body.light-mode .viz-title {
+  color: #111 !important;
+  -webkit-text-fill-color: #111 !important;
+}
+
+body.light-mode 
+
+body.light-mode .ctrl-label { color: #999 !important; }
+body.light-mode .ctrl-hint  { color: #bbb !important; }
+
+body.light-mode .chart-dropdown-selected,
+body.light-mode .ctrl-select {
+  background: #f5f5f5 !important;
+  border-color: rgba(0,0,0,0.15) !important;
+  color: #111 !important;
+}
+
+body.light-mode .chart-dd-item { color: #555 !important; }
+body.light-mode .chart-dd-item:hover { background: rgba(255,140,0,0.08) !important; color: #111 !important; }
+body.light-mode .chart-dropdown-menu { background: #ffffff !important; border-color: rgba(255,140,0,0.2) !important; }
+
+body.light-mode .toggle-label { color: #999 !important; }
+
+body.light-mode 
+
+body.light-mode .viz-divider { background: rgba(0,0,0,0.08) !important; }
+
+body.light-mode .viz-stats h2 { color: #111 !important; }
+
+body.light-mode .stat-card {
+  background: #ffffff !important;
+  border-color: rgba(0,0,0,0.08) !important;
+}
+
+body.light-mode .stat-col-name { color: #111 !important; }
+body.light-mode .stat-row { color: #888 !important; }
+body.light-mode .stat-row span:last-child { color: #333 !important; }
+
+body.light-mode .dp-range {
+  background: linear-gradient(to right, #ff8c00 var(--fill, 30%), #ddd var(--fill, 30%)) !important;
+}
+
+body.light-mode .viz-action-btn {
+  background: rgba(255,140,0,0.1) !important;
+  border-color: rgba(255,140,0,0.3) !important;
+}
+
+/* ── Theme toggle in header ── */
+
+
+.theme-toggle {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  padding: 7px 14px;
+  cursor: pointer;
+  font-size: 18px;
+  transition: all 0.2s;
+  color: white;
+}
+
+.theme-toggle:hover {
+  background: rgba(255,140,0,0.15);
+  border-color: rgba(255,140,0,0.3);
+  transform: scale(1.1);
+}
+
+body.light-mode .theme-toggle {
+  background: rgba(0,0,0,0.06) !important;
+  border-color: rgba(0,0,0,0.12) !important;
+  color: #333 !important;
+}
+
+/* ── Chart top bar with toggle ── */
+.chart-top-bar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+
+
+
+
+
+.theme-toggle {
+  background: rgba(255,255,255,0.05) !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+  border-radius: 8px !important;
+  padding: 4px 10px !important;
+  cursor: pointer !important;
+  font-size: 14px !important;
+  transition: all 0.2s !important;
+  color: white !important;
+  line-height: 1 !important;
+}
+
+.theme-toggle:hover {
+  background: rgba(255,140,0,0.12) !important;
+  border-color: rgba(255,140,0,0.3) !important;
+}
+
+
+
+
+
+
+
+
+/* ── Chatbot page ── */
+body.chatbot-body {
+  overflow: hidden !important;
+  height: 100vh !important;
+}
+
+.chatbot-page {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 60px);
+  width: 96%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding-top: 70px;
+  padding-bottom: 0;
+  box-sizing: border-box;
+}
+
+.chat-window {
+  flex: 1 !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow-y: auto;
+  padding: 20px;
+  background: #000000;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.chatbot-input-area {
+  flex-shrink: 0;
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px 12px 0 0;
+}
+
+body:not(.chatbot-body) {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  height: auto !important;
+}
+
+.clear-btn {
+  background: rgba(255,255,255,0.08);
+  color: #ff6b6b;
+  border: 1px solid rgba(255,107,107,0.4);
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.clear-btn:hover {
+  background: rgba(255,107,107,0.15);
+  border-color: #ff6b6b;
+  color: white;
+}
+
+
+/* chatbot */
+body.chatbot-body { overflow:hidden !important; height:100vh !important; }
+body:not(.chatbot-body) { overflow-y:auto !important; overflow-x:hidden !important; height:auto !important; }
+.chatbot-page { display:flex; flex-direction:column; height:calc(100vh - 60px); width:96%; max-width:1400px; margin:0 auto; padding-top:70px; padding-bottom:0; box-sizing:border-box; }
+.chat-window { flex:1 !important; height:auto !important; min-height:0 !important; max-height:none !important; overflow-y:auto; padding:20px; background:#000000; border:1px solid rgba(255,255,255,0.06); border-radius:16px; display:flex; flex-direction:column; gap:16px; margin-bottom:14px; }
+.chatbot-input-area { flex-shrink:0; padding:10px 14px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px 12px 0 0; }
+.clear-btn { background:rgba(255,255,255,0.08); color:#ff6b6b; border:1px solid rgba(255,107,107,0.4); padding:10px 20px; border-radius:6px; cursor:pointer; font-size:14px; font-weight:500; transition:all 0.2s ease; }
+.clear-btn:hover { background:rgba(255,107,107,0.15); border-color:#ff6b6b; color:white; }
+
+/* ============================================
+   VISUALIZATION LAYOUT - FINAL
+   ============================================ */
+.viz-page {
+  width: 98%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 90px 10px 60px;
+  box-sizing: border-box;
+}
+.viz-header { margin-bottom: 16px; }
+.chart-builder {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 16px;
+  align-items: start;
+}
+.viz-controls {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 16px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-sizing: border-box;
+  height: 560px;
+  overflow-y: auto;
+}
+.viz-controls::-webkit-scrollbar { width: 3px; }
+.viz-controls::-webkit-scrollbar-thumb { background: rgba(255,140,0,0.3); border-radius: 4px; }
+.chart-column { display: flex; flex-direction: column; }
+.chart-area {
+  background: #0a0f1a;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 16px;
+  padding: 16px;
+  box-sizing: border-box;
+  overflow: hidden;
+  height: 560px;
+}
+.chart-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 100%;
+}
+.placeholder-icon { font-size: 44px; opacity: 0.15; }
+.chart-placeholder p { font-size: 14px; color: #444; margin: 0; }
+.placeholder-sub { font-size: 12px; color: #333; }
+#myChart {
+  width: 100% !important;
+  height: 528px !important;
+  display: block !important;
+}
+
+/* chatbot */
+body.chatbot-body { overflow: hidden !important; height: 100vh !important; }
+body:not(.chatbot-body) { overflow-y: auto !important; overflow-x: hidden !important; height: auto !important; }
+.chatbot-page {
+  display: flex; flex-direction: column;
+  height: calc(100vh - 60px);
+  width: 96%; max-width: 1400px;
+  margin: 0 auto; padding-top: 70px;
+  padding-bottom: 0; box-sizing: border-box;
+}
+.chat-window {
+  flex: 1 !important; height: auto !important;
+  min-height: 0 !important; max-height: none !important;
+  overflow-y: auto; padding: 20px;
+  background: #000000;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 16px; display: flex;
+  flex-direction: column; gap: 16px; margin-bottom: 14px;
+}
+.chatbot-input-area {
+  flex-shrink: 0; padding: 10px 14px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px 12px 0 0;
+}
+.clear-btn {
+  background: rgba(255,255,255,0.08); color: #ff6b6b;
+  border: 1px solid rgba(255,107,107,0.4);
+  padding: 10px 20px; border-radius: 6px;
+  cursor: pointer; font-size: 14px; font-weight: 500;
+  transition: all 0.2s ease;
+}
+.clear-btn:hover { background: rgba(255,107,107,0.15); border-color: #ff6b6b; color: white; }
