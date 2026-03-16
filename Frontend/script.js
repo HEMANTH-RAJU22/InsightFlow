@@ -1068,70 +1068,83 @@ function logout(){
 /* ============================================================
    INSIGHTFLOW — report.js  (BI Dashboard Generator)
    ============================================================ */
-
+ 
 let rptHeaders = []
 let rptDataset = []
 let rptMeta    = {}
 let biCharts   = []
-
+ 
 const BI_COLORS = ["#ff8c00","#3b82f6","#10b981","#ec4899","#8b5cf6","#ef4444","#f59e0b","#06b6d4","#84cc16","#f97316"]
-
+ 
 /* ── Init ── */
 function initReport(){
-  // Force hide both first
+  // Hide everything first
   const noMsg = document.getElementById("noDataMsg")
+  const wrapper = document.getElementById("dashboardWrapper")
   const biDiv = document.getElementById("biDashboard")
+  
   if(noMsg) noMsg.style.display = "none"
+  if(wrapper) wrapper.style.display = "none"
   if(biDiv) biDiv.style.display = "none"
-
+ 
   const raw = localStorage.getItem("insightflow_dataset")
   if(!raw){
     if(noMsg){ noMsg.style.display = "flex" }
     return
   }
-
+ 
   const d = JSON.parse(raw)
   rptHeaders = d.headers || []
   rptDataset = d.dataset || []
   rptMeta    = d
-
-  if(biDiv) biDiv.style.display = "flex"
+ 
+  // Show the appropriate dashboard based on what's available
+  if(wrapper) {
+    wrapper.style.display = "flex"
+    document.getElementById("dashboardTitle").innerText = d.fileName
+    document.getElementById("dashboardSubtitle").innerText = Number(d.rows).toLocaleString() + " rows • " + d.columns + " columns"
+  } else if(biDiv) {
+    biDiv.style.display = "flex"
+    // Old sidebar dashboard fallback
+    try {
+      document.getElementById("biFileName").innerText = d.fileName + "  ·  " + Number(d.rows).toLocaleString() + " rows  ·  " + d.columns + " cols"
+      document.getElementById("sidebarDsName").innerText = d.fileName
+      document.getElementById("sidebarDsRows").innerText = Number(d.rows).toLocaleString() + " rows · " + d.columns + " cols"
+    } catch(e) { /* element may not exist */ }
+  }
+  
   if(noMsg) noMsg.style.display = "none"
-  document.getElementById("biFileName").innerText        = d.fileName + "  ·  " + Number(d.rows).toLocaleString() + " rows  ·  " + d.columns + " cols"
-  document.getElementById("sidebarDsName").innerText     = d.fileName
-  document.getElementById("sidebarDsRows").innerText     = Number(d.rows).toLocaleString() + " rows · " + d.columns + " cols"
-
-  buildFilters()
+ 
   buildBI()
 }
-
+ 
 // Run immediately - HTML is already parsed since script is at bottom of body
 initReport()
-
-
+ 
+ 
 /* ── Detect numeric ── */
 function isNum(i){
   const vals = rptDataset.map(r=>r[i]).filter(v=>v!=="")
   return vals.map(v=>parseFloat(v)).filter(v=>!isNaN(v)).length > vals.length * 0.5
 }
-
+ 
 function numCols(){ return rptHeaders.map((_,i)=>i).filter(isNum) }
 function catCols(){ return rptHeaders.map((_,i)=>i).filter(i=>!isNum(i)) }
-
+ 
 function colStats(i){
   const vals = rptDataset.map(r=>parseFloat(r[i])).filter(v=>!isNaN(v))
   if(!vals.length) return null
   const sum = vals.reduce((a,b)=>a+b,0)
   return { min: Math.min(...vals), max: Math.max(...vals), avg: sum/vals.length, sum, count: vals.length }
 }
-
+ 
 function topN(colIdx, n=8){
   const counts = {}
   rptDataset.forEach(r=>{ const v=String(r[colIdx]??""); counts[v]=(counts[v]||0)+1 })
   return Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,n)
 }
-
-
+ 
+ 
 /* ── Filters ── */
 function buildFilters(){
   const cats = catCols().slice(0,3)
@@ -1144,29 +1157,43 @@ function buildFilters(){
     row.appendChild(btn)
   })
 }
-
-
+ 
+ 
 /* ── Main build ── */
 function buildBI(){
-  biCharts.forEach(c=>c.destroy())
+  // FIXED: Added null checks for safer chart destruction
+  biCharts.forEach(c => {
+    try {
+      if(c && typeof c.destroy === 'function') {
+        c.destroy()
+      }
+    } catch(e) {
+      console.warn("Error destroying chart:", e)
+    }
+  })
   biCharts = []
-
+ 
+  // FIXED: Add empty state checking
+  if(!rptDataset || rptDataset.length === 0) {
+    console.warn("No dataset available for BI build")
+    return
+  }
+ 
+  // Build in new modern layout
   buildKPIs()
-  buildRow1()
-  buildRow2()
-  buildRow3()
+  buildModernCharts()
 }
-
-
+ 
+ 
 /* ── KPI Cards ── */
 function buildKPIs(){
   const sec = document.getElementById("biKpiSection")
   sec.innerHTML = ""
   const nums = numCols().slice(0,5)
   const cats = catCols().slice(0,2)
-
+ 
   const accentColors = ["#ff8c00","#3b82f6","#10b981","#ec4899","#8b5cf6","#f59e0b","#06b6d4"]
-
+ 
   nums.forEach((i, idx) => {
     const s = colStats(i)
     if(!s) return
@@ -1175,7 +1202,7 @@ function buildKPIs(){
     const pct    = Math.abs(((s.avg-prev)/prev)*100).toFixed(1)
     const color  = accentColors[idx % accentColors.length]
     const val    = s.avg % 1 === 0 ? s.avg.toLocaleString() : s.avg.toFixed(1)
-
+ 
     sec.innerHTML += `
       <div class="bi-kpi">
         <div class="bi-kpi-accent" style="background:${color}"></div>
@@ -1185,7 +1212,7 @@ function buildKPIs(){
         <div class="bi-kpi-trend ${isUp?'up':'down'}">${isUp?'▲':'▼'} ${pct}%</div>
       </div>`
   })
-
+ 
   cats.forEach((i, idx) => {
     const vals   = rptDataset.map(r=>r[i]).filter(v=>v!=="")
     const unique = new Set(vals).size
@@ -1200,131 +1227,173 @@ function buildKPIs(){
       </div>`
   })
 }
-
-
+ 
+ 
 /* ── Row 1: Wide bar + Pie ── */
 function buildRow1(){
   const sec  = document.getElementById("biRow1")
   sec.innerHTML = ""
   const nums = numCols()
   const cats = catCols()
-  if(!nums.length || !cats.length) return
-
+  
+  // FIXED: Early return if insufficient data
+  if(!nums.length || !cats.length) {
+    sec.innerHTML = '<div class="bi-empty-state" style="grid-column: 1/-1; padding: 60px 20px;"><div class="bi-empty-state-icon">📊</div><div class="bi-empty-state-text">Insufficient data for visualization. Need both numeric and categorical columns.</div></div>'
+    return
+  }
+ 
   const xi = cats[0], yi = nums[0]
   const rows = rptDataset.slice(0, 20)
-
+ 
   // Wide bar
   const card1 = mkCard("BAR", `${rptHeaders[xi]} vs ${rptHeaders[yi]}`, 220)
   sec.appendChild(card1)
   const c1 = card1.querySelector("canvas")
-  const inst1 = new Chart(c1, {
-    type: "bar",
-    data: {
-      labels: rows.map(r=>String(r[xi]??"")),
-      datasets: [{ data: rows.map(r=>parseFloat(r[yi])||0),
-        backgroundColor: BI_COLORS[0]+"cc", borderColor: BI_COLORS[0],
-        borderWidth: 1, borderRadius: 4 }]
-    },
-    options: biOpts(false, BI_COLORS[0])
-  })
-  biCharts.push(inst1)
-
+  
+  try {
+    const inst1 = new Chart(c1, {
+      type: "bar",
+      data: {
+        labels: rows.map(r=>String(r[xi]??"")),
+        datasets: [{ data: rows.map(r=>parseFloat(r[yi])||0),
+          backgroundColor: BI_COLORS[0]+"cc", borderColor: BI_COLORS[0],
+          borderWidth: 1, borderRadius: 4 }]
+      },
+      options: biOpts(false, BI_COLORS[0])
+    })
+    biCharts.push(inst1)
+  } catch(e) {
+    console.error("Error creating bar chart:", e)
+  }
+ 
   // Pie
   if(cats.length > 0){
     const top = topN(cats[0])
     const card2 = mkCard("PIE", `${rptHeaders[cats[0]]} Share`, 220)
     sec.appendChild(card2)
     const c2 = card2.querySelector("canvas")
-    const inst2 = new Chart(c2, {
-      type: "doughnut",
-      data: { labels: top.map(e=>e[0]), datasets: [{ data: top.map(e=>e[1]), backgroundColor: BI_COLORS, borderWidth: 2, borderColor: "#13171f" }] },
-      options: { ...biOpts(true), cutout: "60%" }
-    })
-    biCharts.push(inst2)
+    
+    try {
+      const inst2 = new Chart(c2, {
+        type: "doughnut",
+        data: { labels: top.map(e=>e[0]), datasets: [{ data: top.map(e=>e[1]), backgroundColor: BI_COLORS, borderWidth: 2, borderColor: "#13171f" }] },
+        options: { ...biOpts(true), cutout: "60%" }
+      })
+      biCharts.push(inst2)
+    } catch(e) {
+      console.error("Error creating pie chart:", e)
+    }
   }
 }
-
-
+ 
+ 
 /* ── Row 2: 3 charts ── */
 function buildRow2(){
   const sec  = document.getElementById("biRow2")
   sec.innerHTML = ""
   const nums = numCols()
   const cats = catCols()
-
+ 
   // Line
   if(nums.length > 0){
     const yi   = nums[0]
     const rows = rptDataset.slice(0, 30)
     const card = mkCard("LINE", `${rptHeaders[yi]} Trend`, 180)
     sec.appendChild(card)
-    const inst = new Chart(card.querySelector("canvas"), {
-      type: "line",
-      data: { labels: rows.map((_,i)=>`#${i+1}`),
-        datasets: [{ data: rows.map(r=>parseFloat(r[yi])||0),
-          borderColor: BI_COLORS[1], backgroundColor: BI_COLORS[1]+"22",
-          fill: true, tension: 0.4, pointRadius: 2, borderWidth: 2 }] },
-      options: biOpts(false, BI_COLORS[1])
-    })
-    biCharts.push(inst)
+    
+    try {
+      const inst = new Chart(card.querySelector("canvas"), {
+        type: "line",
+        data: { labels: rows.map((_,i)=>`#${i+1}`),
+          datasets: [{ data: rows.map(r=>parseFloat(r[yi])||0),
+            borderColor: BI_COLORS[1], backgroundColor: BI_COLORS[1]+"22",
+            fill: true, tension: 0.4, pointRadius: 2, borderWidth: 2 }] },
+        options: biOpts(false, BI_COLORS[1])
+      })
+      biCharts.push(inst)
+    } catch(e) {
+      console.error("Error creating line chart:", e)
+    }
   }
-
+ 
   // Horizontal bar
   if(cats.length > 0 && nums.length > 0){
     const xi = cats[0], yi = nums[nums.length > 1 ? 1 : 0]
     const top = topN(xi, 6)
     const card = mkCard("H-BAR", `Top ${rptHeaders[xi]}`, 180)
     sec.appendChild(card)
-    const inst = new Chart(card.querySelector("canvas"), {
-      type: "bar",
-      data: { labels: top.map(e=>e[0]),
-        datasets: [{ data: top.map(e=>e[1]),
-          backgroundColor: BI_COLORS[2]+"cc", borderColor: BI_COLORS[2],
-          borderWidth: 1, borderRadius: 4 }] },
-      options: { ...biOpts(false, BI_COLORS[2]), indexAxis: "y" }
-    })
-    biCharts.push(inst)
+    
+    try {
+      const inst = new Chart(card.querySelector("canvas"), {
+        type: "bar",
+        data: { labels: top.map(e=>e[0]),
+          datasets: [{ data: top.map(e=>e[1]),
+            backgroundColor: BI_COLORS[2]+"cc", borderColor: BI_COLORS[2],
+            borderWidth: 1, borderRadius: 4 }] },
+        options: { ...biOpts(false, BI_COLORS[2]), indexAxis: "y" }
+      })
+      biCharts.push(inst)
+    } catch(e) {
+      console.error("Error creating horizontal bar chart:", e)
+    }
   }
-
+ 
   // Polar / second pie
   if(cats.length > 1){
     const top  = topN(cats[1], 6)
     const card = mkCard("POLAR", `${rptHeaders[cats[1]]} Distribution`, 180)
     sec.appendChild(card)
-    const inst = new Chart(card.querySelector("canvas"), {
-      type: "polarArea",
-      data: { labels: top.map(e=>e[0]),
-        datasets: [{ data: top.map(e=>e[1]), backgroundColor: BI_COLORS.map(c=>c+"bb"), borderWidth: 1 }] },
-      options: biOpts(true)
-    })
-    biCharts.push(inst)
+    
+    try {
+      const inst = new Chart(card.querySelector("canvas"), {
+        type: "polarArea",
+        data: { labels: top.map(e=>e[0]),
+          datasets: [{ data: top.map(e=>e[1]), backgroundColor: BI_COLORS.map(c=>c+"bb"), borderWidth: 1 }] },
+        options: biOpts(true)
+      })
+      biCharts.push(inst)
+    } catch(e) {
+      console.error("Error creating polar chart:", e)
+    }
   } else if(nums.length > 1) {
     // Scatter fallback
     const xi = nums[0], yi = nums[1]
     const rows = rptDataset.slice(0, 30)
     const card = mkCard("SCATTER", `${rptHeaders[xi]} vs ${rptHeaders[yi]}`, 180)
     sec.appendChild(card)
-    const inst = new Chart(card.querySelector("canvas"), {
-      type: "scatter",
-      data: { datasets: [{ data: rows.map(r=>({ x:parseFloat(r[xi])||0, y:parseFloat(r[yi])||0 })),
-        backgroundColor: BI_COLORS[3]+"88", borderColor: BI_COLORS[3], pointRadius: 5 }] },
-      options: biOpts(false, BI_COLORS[3])
-    })
-    biCharts.push(inst)
+    
+    try {
+      const inst = new Chart(card.querySelector("canvas"), {
+        type: "scatter",
+        data: { datasets: [{ data: rows.map(r=>({ x:parseFloat(r[xi])||0, y:parseFloat(r[yi])||0 })),
+          backgroundColor: BI_COLORS[3]+"88", borderColor: BI_COLORS[3], pointRadius: 5 }] },
+        options: biOpts(false, BI_COLORS[3])
+      })
+      biCharts.push(inst)
+    } catch(e) {
+      console.error("Error creating scatter chart:", e)
+    }
   }
 }
-
-
+ 
+ 
 /* ── Row 3: Table + Chart ── */
 function buildRow3(){
   const sec = document.getElementById("biRow3")
   sec.innerHTML = ""
-
+ 
   // Mini data table
   const card1 = document.createElement("div")
   card1.className = "bi-card"
   const cols  = rptHeaders.slice(0, 5)
   const rows  = rptDataset.slice(0, 10)
+  
+  if(cols.length === 0 || rows.length === 0) {
+    card1.innerHTML = '<div class="bi-empty-state"><div class="bi-empty-state-icon">📋</div><div class="bi-empty-state-text">No data to preview</div></div>'
+    sec.appendChild(card1)
+    return
+  }
+  
   card1.innerHTML = `
     <div class="bi-card-header">
       <span class="bi-card-title">Data Preview</span>
@@ -1335,7 +1404,7 @@ function buildRow3(){
       <tbody>${rows.map(r=>`<tr>${cols.map((_,i)=>`<td>${r[i]??""}</td>`).join("")}</tr>`).join("")}</tbody>
     </table>`
   sec.appendChild(card1)
-
+ 
   // Stacked / area chart
   const nums = numCols()
   const cats = catCols()
@@ -1344,19 +1413,24 @@ function buildRow3(){
     const rows2 = rptDataset.slice(0, 20)
     const card2 = mkCard("AREA", `${rptHeaders[yi]} Area Chart`, 260)
     sec.appendChild(card2)
-    const inst = new Chart(card2.querySelector("canvas"), {
-      type: "line",
-      data: { labels: rows2.map(r=>String(r[xi]??"")),
-        datasets: [{ data: rows2.map(r=>parseFloat(r[yi])||0),
-          borderColor: BI_COLORS[4], backgroundColor: BI_COLORS[4]+"33",
-          fill: true, tension: 0.4, pointRadius: 3, borderWidth: 2 }] },
-      options: biOpts(false, BI_COLORS[4])
-    })
-    biCharts.push(inst)
+    
+    try {
+      const inst = new Chart(card2.querySelector("canvas"), {
+        type: "line",
+        data: { labels: rows2.map(r=>String(r[xi]??"")),
+          datasets: [{ data: rows2.map(r=>parseFloat(r[yi])||0),
+            borderColor: BI_COLORS[4], backgroundColor: BI_COLORS[4]+"33",
+            fill: true, tension: 0.4, pointRadius: 3, borderWidth: 2 }] },
+        options: biOpts(false, BI_COLORS[4])
+      })
+      biCharts.push(inst)
+    } catch(e) {
+      console.error("Error creating area chart:", e)
+    }
   }
 }
-
-
+ 
+ 
 /* ── Card factory ── */
 function mkCard(badge, title, canvasHeight){
   const div = document.createElement("div")
@@ -1369,8 +1443,8 @@ function mkCard(badge, title, canvasHeight){
     <canvas style="height:${canvasHeight}px"></canvas>`
   return div
 }
-
-
+ 
+ 
 /* ── Common chart options ── */
 function biOpts(isCircular, color){
   return {
@@ -1388,14 +1462,231 @@ function biOpts(isCircular, color){
     }
   }
 }
-
-
+ 
+ 
 /* ── Export ── */
 function exportPDF(){
   window.print()
 }
-
+ 
 function logout(){
   localStorage.removeItem("userEmail")
   window.location.href = "index.html"
+}
+ 
+/* ──────────────────────────────────────────────────────────
+   MODERN DASHBOARD LAYOUT (Power BI / Tableau Style)
+   ────────────────────────────────────────────────────────── */
+ 
+function buildModernCharts(){
+  const grid = document.getElementById("biChartsGrid")
+  if(!grid) {
+    // Fallback to old layout if new dashboard not loaded
+    buildRow1()
+    buildRow2()
+    buildRow3()
+    return
+  }
+  
+  grid.innerHTML = ""
+  const nums = numCols()
+  const cats = catCols()
+ 
+  // Chart 1: Bar Chart (Wide)
+  if(nums.length > 0 && cats.length > 0) {
+    const xi = cats[0], yi = nums[0]
+    const rows = rptDataset.slice(0, 15)
+    const card = createModernCard(`${rptHeaders[xi]} vs ${rptHeaders[yi]}`, "BAR", true)
+    grid.appendChild(card)
+    
+    try {
+      const canvas = card.querySelector("canvas")
+      const inst = new Chart(canvas, {
+        type: "bar",
+        data: {
+          labels: rows.map(r => String(r[xi] ?? "").substring(0, 12)),
+          datasets: [{
+            data: rows.map(r => parseFloat(r[yi]) || 0),
+            backgroundColor: "rgba(255, 140, 0, 0.8)",
+            borderColor: "#ff8c00",
+            borderWidth: 1,
+            borderRadius: 6
+          }]
+        },
+        options: biOpts(false, "#ff8c00")
+      })
+      biCharts.push(inst)
+    } catch(e) {
+      console.error("Error creating bar chart:", e)
+    }
+  }
+ 
+  // Chart 2: Pie Chart
+  if(cats.length > 0) {
+    const top = topN(cats[0], 8)
+    const card = createModernCard(`${rptHeaders[cats[0]]} Distribution`, "PIE")
+    grid.appendChild(card)
+    
+    try {
+      const canvas = card.querySelector("canvas")
+      const inst = new Chart(canvas, {
+        type: "doughnut",
+        data: {
+          labels: top.map(e => String(e[0]).substring(0, 10)),
+          datasets: [{
+            data: top.map(e => e[1]),
+            backgroundColor: ["#ff8c00", "#3b82f6", "#10b981", "#ec4899", "#8b5cf6", "#ef4444", "#f59e0b", "#06b6d4"],
+            borderColor: "#16213e",
+            borderWidth: 2
+          }]
+        },
+        options: { ...biOpts(true), cutout: "65%" }
+      })
+      biCharts.push(inst)
+    } catch(e) {
+      console.error("Error creating pie chart:", e)
+    }
+  }
+ 
+  // Chart 3: Line Trend
+  if(nums.length > 0) {
+    const yi = nums[0]
+    const rows = rptDataset.slice(0, 30)
+    const card = createModernCard(`${rptHeaders[yi]} Trend`, "LINE")
+    grid.appendChild(card)
+    
+    try {
+      const canvas = card.querySelector("canvas")
+      const inst = new Chart(canvas, {
+        type: "line",
+        data: {
+          labels: rows.map((_, i) => `#${i + 1}`),
+          datasets: [{
+            data: rows.map(r => parseFloat(r[yi]) || 0),
+            borderColor: "#3b82f6",
+            backgroundColor: "rgba(59, 130, 246, 0.1)",
+            fill: true,
+            tension: 0.4,
+            pointRadius: 3,
+            pointBackgroundColor: "#3b82f6",
+            borderWidth: 2
+          }]
+        },
+        options: biOpts(false, "#3b82f6")
+      })
+      biCharts.push(inst)
+    } catch(e) {
+      console.error("Error creating line chart:", e)
+    }
+  }
+ 
+  // Chart 4: Horizontal Bar (Top N)
+  if(cats.length > 0 && nums.length > 0) {
+    const xi = cats[0]
+    const yi = nums[nums.length > 1 ? 1 : 0]
+    const top = topN(xi, 8)
+    const card = createModernCard(`Top ${rptHeaders[xi]}`, "H-BAR")
+    grid.appendChild(card)
+    
+    try {
+      const canvas = card.querySelector("canvas")
+      const inst = new Chart(canvas, {
+        type: "bar",
+        data: {
+          labels: top.map(e => String(e[0]).substring(0, 15)),
+          datasets: [{
+            data: top.map(e => e[1]),
+            backgroundColor: "rgba(16, 185, 129, 0.8)",
+            borderColor: "#10b981",
+            borderWidth: 1,
+            borderRadius: 6
+          }]
+        },
+        options: { ...biOpts(false, "#10b981"), indexAxis: "y" }
+      })
+      biCharts.push(inst)
+    } catch(e) {
+      console.error("Error creating horizontal bar chart:", e)
+    }
+  }
+ 
+  // Chart 5: Area Chart (Wide)
+  if(nums.length > 0 && cats.length > 0) {
+    const xi = cats[cats.length > 1 ? 1 : 0]
+    const yi = nums[0]
+    const rows = rptDataset.slice(0, 20)
+    const card = createModernCard(`${rptHeaders[yi]} Over ${rptHeaders[xi]}`, "AREA", true)
+    grid.appendChild(card)
+    
+    try {
+      const canvas = card.querySelector("canvas")
+      const inst = new Chart(canvas, {
+        type: "line",
+        data: {
+          labels: rows.map(r => String(r[xi] ?? "").substring(0, 12)),
+          datasets: [{
+            data: rows.map(r => parseFloat(r[yi]) || 0),
+            borderColor: "#ec4899",
+            backgroundColor: "rgba(236, 72, 153, 0.15)",
+            fill: true,
+            tension: 0.4,
+            pointRadius: 3,
+            pointBackgroundColor: "#ec4899",
+            borderWidth: 2
+          }]
+        },
+        options: biOpts(false, "#ec4899")
+      })
+      biCharts.push(inst)
+    } catch(e) {
+      console.error("Error creating area chart:", e)
+    }
+  }
+ 
+  // Chart 6: Scatter (if 2+ numeric columns)
+  if(nums.length > 1) {
+    const xi = nums[0]
+    const yi = nums[1]
+    const rows = rptDataset.slice(0, 30)
+    const card = createModernCard(`${rptHeaders[xi]} vs ${rptHeaders[yi]}`, "SCATTER")
+    grid.appendChild(card)
+    
+    try {
+      const canvas = card.querySelector("canvas")
+      const inst = new Chart(canvas, {
+        type: "scatter",
+        data: {
+          datasets: [{
+            data: rows.map(r => ({
+              x: parseFloat(r[xi]) || 0,
+              y: parseFloat(r[yi]) || 0
+            })),
+            backgroundColor: "rgba(139, 92, 246, 0.6)",
+            borderColor: "#8b5cf6",
+            pointRadius: 5,
+            borderWidth: 1
+          }]
+        },
+        options: biOpts(false, "#8b5cf6")
+      })
+      biCharts.push(inst)
+    } catch(e) {
+      console.error("Error creating scatter chart:", e)
+    }
+  }
+}
+ 
+function createModernCard(title, badge, isWide = false) {
+  const card = document.createElement("div")
+  card.className = "chart-card" + (isWide ? " chart-wide" : "")
+  card.innerHTML = `
+    <div class="chart-header">
+      <span class="chart-title">${title}</span>
+      <span class="chart-badge">${badge}</span>
+    </div>
+    <div class="chart-body">
+      <canvas></canvas>
+    </div>
+  `
+  return card
 }

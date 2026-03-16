@@ -9,292 +9,481 @@
 
 html, body {
   height: 100%;
-  font-family: 'Segoe UI', system-ui, sans-serif;
-  background: #0e1117;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background: #0f0f1e;
   color: #e0e0e0;
   overflow: hidden;
 }
 
-#biDashboard {
+/* Main Container */
+.dashboard-wrapper {
   display: flex;
   width: 100%;
   height: 100vh;
-}
-
-/* Sidebar */
-.bi-sidebar {
-  width: 200px;
-  min-width: 200px;
-  background: #13171f;
-  border-right: 1px solid rgba(255,255,255,0.06);
-  display: flex;
   flex-direction: column;
-  height: 100vh;
 }
 
-.bi-logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 18px 16px;
-  font-size: 14px;
-  font-weight: 800;
-  letter-spacing: 1px;
-  color: white;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-}
-
-.bi-logo-icon { color: #ff8c00; font-size: 18px; }
-
-.bi-nav { flex: 1; padding: 10px 8px; display: flex; flex-direction: column; gap: 2px; }
-
-.bi-nav-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 9px 10px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 13px;
-  color: #555;
-  transition: all 0.15s;
-}
-
-.bi-nav-item:hover { background: rgba(255,255,255,0.05); color: #aaa; }
-.bi-nav-item.active { background: rgba(255,140,0,0.12); color: #ff8c00; font-weight: 600; }
-
-.bi-sidebar-footer {
-  padding: 14px;
-  border-top: 1px solid rgba(255,255,255,0.06);
-}
-
-.bi-ds-label { font-size: 9px; letter-spacing: 2px; color: #444; font-weight: 700; margin-bottom: 4px; }
-.bi-ds-name  { font-size: 12px; color: #777; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.bi-ds-rows  { font-size: 10px; color: #444; margin-top: 2px; }
-
-/* Main */
-.bi-main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-  height: 100vh;
-}
-
-.bi-main::-webkit-scrollbar { width: 4px; }
-.bi-main::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
-
-/* Topbar */
-.bi-topbar {
+/* Top Header Bar - Power BI Style */
+.dashboard-header {
+  background: linear-gradient(135deg, #1a1f3a 0%, #16213e 100%);
+  border-bottom: 2px solid #ff8c00;
+  padding: 16px 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 20px;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-  background: #13171f;
   flex-shrink: 0;
-  gap: 12px;
-  flex-wrap: wrap;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
-.bi-page-title { font-size: 16px; font-weight: 800; color: white; }
-.bi-page-sub { font-size: 11px; color: #444; margin-top: 2px; display: block; }
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
 
-.bi-topbar-right { display: flex; align-items: center; gap: 8px; }
+.header-logo {
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  background: linear-gradient(135deg, #ff8c00, #ffb347);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 
-.bi-export-btn {
-  background: rgba(255,140,0,0.1);
-  border: 1px solid rgba(255,140,0,0.25);
-  color: #ff8c00;
-  padding: 6px 14px;
-  border-radius: 8px;
-  cursor: pointer;
+.header-logo::before {
+  content: "⬡";
+  font-size: 28px;
+  background: none;
+  -webkit-text-fill-color: #ff8c00;
+}
+
+.header-title {
+  display: flex;
+  flex-direction: column;
+}
+
+.header-title-main {
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+}
+
+.header-title-sub {
+  font-size: 11px;
+  color: #888;
+  margin-top: 2px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
   font-size: 12px;
   font-weight: 600;
-  transition: all 0.15s;
-}
-
-.bi-export-btn:hover { background: rgba(255,140,0,0.2); color: white; }
-
-.bi-refresh-btn {
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.1);
-  color: #666;
-  width: 30px; height: 30px;
-  border-radius: 8px;
   cursor: pointer;
-  font-size: 15px;
-  transition: all 0.15s;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.bi-refresh-btn:hover { color: white; background: rgba(255,255,255,0.1); }
+.btn-export {
+  background: rgba(255, 140, 0, 0.15);
+  color: #ff8c00;
+  border: 1px solid rgba(255, 140, 0, 0.4);
+}
 
-/* KPI */
-.bi-kpi-section {
+.btn-export:hover {
+  background: rgba(255, 140, 0, 0.25);
+  color: #ffb347;
+}
+
+.btn-refresh {
+  background: rgba(255, 255, 255, 0.08);
+  color: #aaa;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.btn-refresh:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
+}
+
+.btn-back {
+  background: rgba(100, 150, 255, 0.15);
+  color: #64a0ff;
+  border: 1px solid rgba(100, 150, 255, 0.4);
+}
+
+.btn-back:hover {
+  background: rgba(100, 150, 255, 0.25);
+}
+
+/* Main Content Area */
+.dashboard-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  background: linear-gradient(to bottom, #0f0f1e, #1a1a2e);
+}
+
+.dashboard-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.dashboard-content::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.dashboard-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 140, 0, 0.4);
+  border-radius: 4px;
+}
+
+.dashboard-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 140, 0, 0.6);
+}
+
+/* KPI Section - 5 Columns Responsive */
+.kpi-section {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-  gap: 10px;
-  padding: 14px 18px;
-  flex-shrink: 0;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
 }
 
-.bi-kpi {
-  background: #13171f;
-  border: 1px solid rgba(255,255,255,0.06);
+.kpi-card {
+  background: linear-gradient(135deg, #1a1f3a 0%, #16213e 100%);
+  border: 1px solid rgba(255, 140, 0, 0.2);
   border-radius: 12px;
-  padding: 14px 14px 14px 18px;
+  padding: 20px;
   position: relative;
   overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-.bi-kpi:hover { border-color: rgba(255,140,0,0.2); }
+.kpi-card:hover {
+  border-color: rgba(255, 140, 0, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 140, 0, 0.15);
+}
 
-.bi-kpi-accent {
+.kpi-accent-bar {
   position: absolute;
-  top: 0; left: 0;
-  width: 3px; height: 100%;
-  border-radius: 12px 0 0 12px;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, #ff8c00, #ffb347);
 }
 
-.bi-kpi-label { font-size: 9px; font-weight: 700; letter-spacing: 1.5px; color: #444; text-transform: uppercase; margin-bottom: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.bi-kpi-value { font-size: 22px; font-weight: 800; color: white; line-height: 1; margin-bottom: 4px; }
-.bi-kpi-sub   { font-size: 9px; color: #444; margin-bottom: 6px; }
-
-.bi-kpi-trend {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  font-size: 10px;
+.kpi-label {
+  font-size: 11px;
   font-weight: 700;
-  padding: 2px 6px;
-  border-radius: 6px;
+  letter-spacing: 1.5px;
+  color: #888;
+  text-transform: uppercase;
+  margin-bottom: 8px;
 }
 
-.bi-kpi-trend.up   { background: rgba(16,185,129,0.1); color: #10b981; }
-.bi-kpi-trend.down { background: rgba(239,68,68,0.1);  color: #ef4444; }
-.bi-kpi-trend.flat { background: rgba(255,255,255,0.05); color: #555; }
-
-/* Chart Rows */
-.bi-charts-row1,
-.bi-charts-row2,
-.bi-charts-row3 {
-  padding: 0 18px 12px;
-  display: grid;
-  gap: 10px;
-  flex-shrink: 0;
+.kpi-value {
+  font-size: 28px;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1;
+  margin-bottom: 8px;
+  font-variant-numeric: tabular-nums;
 }
 
-.bi-charts-row1 { grid-template-columns: 2fr 1fr; }
-.bi-charts-row2 { grid-template-columns: 1fr 1fr 1fr; }
-.bi-charts-row3 { grid-template-columns: 1fr 1fr; }
-
-/* Card */
-.bi-card {
-  background: #13171f;
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 12px;
-  padding: 14px;
-  display: flex;
-  flex-direction: column;
+.kpi-subtitle {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 10px;
 }
 
-.bi-card:hover { border-color: rgba(255,255,255,0.1); }
-
-.bi-card-header {
+.kpi-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 10px;
+}
+
+.kpi-min-max {
+  font-size: 10px;
+  color: #555;
+}
+
+.kpi-trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+}
+
+.kpi-trend.down {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.kpi-trend.neutral {
+  background: rgba(255, 255, 255, 0.08);
+  color: #888;
+}
+
+/* Charts Grid - Power BI Style */
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.chart-card {
+  background: linear-gradient(135deg, #1a1f3a 0%, #16213e 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  min-height: 300px;
+}
+
+.chart-card:hover {
+  border-color: rgba(255, 140, 0, 0.3);
+  box-shadow: 0 6px 16px rgba(255, 140, 0, 0.1);
+}
+
+.chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
   flex-shrink: 0;
 }
 
-.bi-card-title {
-  font-size: 11px;
+.chart-title {
+  font-size: 14px;
   font-weight: 700;
-  color: #777;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 72%;
+  color: #e0e0e0;
 }
 
-.bi-card-badge {
+.chart-badge {
   font-size: 9px;
   font-weight: 700;
   letter-spacing: 1px;
-  color: #ff8c00;
-  background: rgba(255,140,0,0.1);
-  border: 1px solid rgba(255,140,0,0.15);
-  padding: 2px 6px;
+  padding: 4px 10px;
   border-radius: 20px;
+  background: rgba(255, 140, 0, 0.15);
+  color: #ff8c00;
   text-transform: uppercase;
-  flex-shrink: 0;
 }
 
-.bi-card canvas { width: 100% !important; }
+.chart-body {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  min-height: 250px;
+}
 
-/* Table */
-.bi-table { width: 100%; border-collapse: collapse; font-size: 11px; }
-.bi-table th { text-align: left; padding: 5px 7px; color: #444; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid rgba(255,255,255,0.06); }
-.bi-table td { padding: 6px 7px; color: #777; border-bottom: 1px solid rgba(255,255,255,0.03); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100px; }
-.bi-table tr:hover td { color: #ccc; background: rgba(255,255,255,0.02); }
+.chart-body canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
 
-/* No data */
+/* Wide Chart - 2 columns */
+.chart-wide {
+  grid-column: span 2;
+}
+
+/* Empty State */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 60px 20px;
+  text-align: center;
+  color: #555;
+}
+
+.empty-state-icon {
+  font-size: 48px;
+  opacity: 0.4;
+}
+
+.empty-state-text {
+  font-size: 14px;
+  color: #888;
+}
+
+.empty-state-sub {
+  font-size: 12px;
+  color: #666;
+}
+
+/* No Data Message */
 #noDataMsg {
   display: none;
   height: 100vh;
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
   text-align: center;
+  background: linear-gradient(135deg, #0f0f1e, #1a1a2e);
+}
+
+.no-data-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.no-data-icon {
+  font-size: 64px;
+  opacity: 0.3;
+}
+
+.no-data-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: white;
+}
+
+.no-data-subtitle {
+  font-size: 14px;
+  color: #888;
+  margin-bottom: 24px;
+}
+
+.no-data-btn {
+  padding: 12px 28px;
+  background: linear-gradient(135deg, #ff8c00, #ffb347);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.no-data-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(255, 140, 0, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 1400px) {
+  .charts-grid {
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  }
+  
+  .chart-wide {
+    grid-column: span 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-header {
+    padding: 12px 16px;
+  }
+  
+  .header-logo {
+    font-size: 18px;
+  }
+  
+  .dashboard-content {
+    padding: 16px;
+  }
+  
+  .kpi-section {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .chart-wide {
+    grid-column: span 1;
+  }
 }
 </style>
 </head>
 <body>
 
+<!-- No Data State -->
 <div id="noDataMsg">
-  <div style="font-size:48px">📂</div>
-  <h2 style="color:white">No Dataset Loaded</h2>
-  <p style="color:#aaa">Upload a dataset on the dashboard first.</p>
-  <a href="dashboard.html" style="background:#ff8c00;color:white;padding:10px 24px;border-radius:8px;text-decoration:none;font-weight:600;">Go to Dashboard</a>
+  <div class="no-data-content">
+    <div class="no-data-icon">📊</div>
+    <h2 class="no-data-title">No Dataset Loaded</h2>
+    <p class="no-data-subtitle">Upload a dataset to view your dashboard</p>
+    <a href="dashboard.html" class="no-data-btn">← Upload Dataset</a>
+  </div>
 </div>
 
-<div id="biDashboard">
-  <aside class="bi-sidebar">
-    <div class="bi-logo"><span class="bi-logo-icon">⬡</span> InsightFlow</div>
-    <nav class="bi-nav">
-      <div class="bi-nav-item active"><span>▦</span> Overview</div>
-      <div class="bi-nav-item" onclick="location.href='dashboard.html'"><span>⬆</span> Upload</div>
-      <div class="bi-nav-item" onclick="location.href='visualize.html'"><span>◈</span> Visualize</div>
-      <div class="bi-nav-item" onclick="location.href='chatbot.html'"><span>◎</span> AI Analyst</div>
-    </nav>
-    <div class="bi-sidebar-footer">
-      <div class="bi-ds-label">DATASET</div>
-      <div class="bi-ds-name" id="sidebarDsName">—</div>
-      <div class="bi-ds-rows" id="sidebarDsRows">—</div>
+<!-- Main Dashboard -->
+<div class="dashboard-wrapper" id="dashboardWrapper" style="display: none;">
+  
+  <!-- Header -->
+  <header class="dashboard-header">
+    <div class="header-left">
+      <div class="header-logo">INSIGHTFLOW</div>
+      <div class="header-title">
+        <div class="header-title-main" id="dashboardTitle">Overview Dashboard</div>
+        <div class="header-title-sub" id="dashboardSubtitle">Loading...</div>
+      </div>
     </div>
-  </aside>
+    
+    <div class="header-right">
+      <button class="header-btn btn-back" onclick="window.location.href='dashboard.html'" title="Back to Upload">
+        ← Upload
+      </button>
+      <button class="header-btn btn-export" onclick="window.print()" title="Export as PDF">
+        ↓ Export PDF
+      </button>
+      <button class="header-btn btn-refresh" onclick="buildBI()" title="Refresh Dashboard">
+        ↺ Refresh
+      </button>
+    </div>
+  </header>
 
-  <main class="bi-main">
-    <header class="bi-topbar">
-      <div>
-        <h1 class="bi-page-title">Overview Dashboard</h1>
-        <span class="bi-page-sub" id="biFileName">Loading...</span>
-      </div>
-      <div class="bi-topbar-right">
-        <button class="bi-export-btn" onclick="window.print()">↓ Export PDF</button>
-        <button class="bi-refresh-btn" onclick="buildBI()">↺</button>
-      </div>
-    </header>
+  <!-- Content -->
+  <div class="dashboard-content">
+    <!-- KPI Cards -->
+    <div class="kpi-section" id="biKpiSection"></div>
+    
+    <!-- Charts Grid -->
+    <div class="charts-grid" id="biChartsGrid"></div>
+  </div>
 
-    <section class="bi-kpi-section" id="biKpiSection"></section>
-    <section class="bi-charts-row1" id="biRow1"></section>
-    <section class="bi-charts-row2" id="biRow2"></section>
-    <section class="bi-charts-row3" id="biRow3"></section>
-  </main>
 </div>
 
-<script src="report.js"></script>
+<!-- Scripts -->
+<script src="script.js"></script>
 </body>
 </html>
