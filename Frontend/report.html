@@ -77,169 +77,120 @@ body.report-body::after { display: none !important; }
 
 /* ─── SIDEBAR ─── */
 .r-sidebar {
-  width: 230px;
-  flex-shrink: 0;
-  background: #1f2a40;
-  border-right: 1px solid rgba(255,255,255,0.07);
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-  overflow-x: hidden;
+  width: 235px; flex-shrink: 0;
+  background: linear-gradient(180deg,#0d1626 0%,#0a1020 100%);
+  border-right: 1px solid rgba(255,255,255,.05);
+  display: flex; flex-direction: column;
+  overflow-y: auto; overflow-x: hidden; position: relative;
 }
-.r-sidebar::-webkit-scrollbar { width: 3px; }
-.r-sidebar::-webkit-scrollbar-thumb { background: rgba(255,140,0,.3); border-radius: 4px; }
-
-/* sidebar top branding strip */
+.r-sidebar::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:3px;
+  background:linear-gradient(90deg,#ff8c00,#ffb347,#ff6600,transparent); z-index:1;
+}
+.r-sidebar::-webkit-scrollbar{width:2px}
+.r-sidebar::-webkit-scrollbar-thumb{background:rgba(255,140,0,.25);border-radius:4px}
 .r-sb-brand {
-  padding: 22px 20px 16px;
-  border-bottom: 1px solid rgba(255,255,255,0.07);
+  padding:22px 16px 18px; border-bottom:1px solid rgba(255,255,255,.04);
+  display:flex; align-items:center; gap:13px; background:rgba(255,140,0,.03);
 }
-.r-sb-brand-title {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 2.5px;
-  text-transform: uppercase;
-  color: #ff8c00;
-  margin-bottom: 4px;
+.r-sb-brand-icon {
+  width:46px; height:46px; border-radius:14px;
+  background:linear-gradient(135deg,#ff8c00,#ff6600);
+  display:flex; align-items:center; justify-content:center;
+  font-size:22px; flex-shrink:0;
+  box-shadow:0 6px 20px rgba(255,140,0,.45),0 0 0 1px rgba(255,140,0,.2);
+  position:relative;
 }
-.r-sb-brand-sub {
-  font-size: 10px;
-  color: #555;
-  letter-spacing: .5px;
+.r-sb-brand-icon::after {
+  content:''; position:absolute; inset:-1px; border-radius:15px;
+  background:linear-gradient(135deg,rgba(255,180,0,.4),transparent); pointer-events:none;
 }
-
-/* sidebar section label */
+.r-sb-brand-title { font-size:15px; font-weight:700; color:white; letter-spacing:.2px; margin-bottom:3px; }
+.r-sb-brand-sub { font-size:9px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#ff8c00; opacity:.75; }
 .r-sb-sec {
-  padding: 16px 20px 6px;
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: #445;
+  padding:18px 18px 7px; font-size:9px; font-weight:700; letter-spacing:2.5px;
+  text-transform:uppercase; color:rgba(255,255,255,.15);
+  display:flex; align-items:center; gap:8px;
 }
-
-/* view filter chips in sidebar */
-.r-sb-chips {
-  padding: 0 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
+.r-sb-sec::after { content:''; flex:1; height:1px; background:rgba(255,255,255,.05); }
+.r-sb-chips { padding:0 10px; display:flex; flex-direction:column; gap:3px; }
 .r-sb-chip {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 9px 12px;
-  border-radius: 10px;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: .4px;
-  color: #778;
-  cursor: pointer;
-  transition: all .15s;
-  border: 1px solid transparent;
-  background: transparent;
-  font-family: Arial, Helvetica, sans-serif;
+  display:flex; align-items:center; gap:11px;
+  padding:11px 12px; border-radius:12px;
+  font-size:13px; font-weight:600; color:rgba(255,255,255,.28);
+  cursor:pointer; transition:all .18s ease;
+  border:1px solid transparent; background:transparent;
+  font-family:Arial,Helvetica,sans-serif; position:relative; overflow:hidden;
 }
-.r-sb-chip .chip-ico { font-size: 14px; }
-.r-sb-chip:hover { background: rgba(255,255,255,.04); color: #ccc; }
+.r-sb-chip::before {
+  content:''; position:absolute; left:0; top:0; bottom:0;
+  width:3px; border-radius:0 3px 3px 0; background:#ff8c00; opacity:0; transition:opacity .18s;
+}
+.chip-ico {
+  width:32px; height:32px; border-radius:10px;
+  background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.06);
+  display:flex; align-items:center; justify-content:center;
+  font-size:15px; flex-shrink:0; transition:all .18s;
+}
+.r-sb-chip-count {
+  margin-left:auto; font-size:11px; font-weight:700;
+  color:rgba(255,255,255,.18); background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.06);
+  padding:2px 8px; border-radius:20px; min-width:26px; text-align:center; transition:all .18s;
+}
+.r-sb-chip:hover { background:rgba(255,255,255,.05); color:rgba(255,255,255,.7); border-color:rgba(255,255,255,.07); }
+.r-sb-chip:hover .chip-ico { background:rgba(255,255,255,.09); border-color:rgba(255,255,255,.12); }
 .r-sb-chip.on {
-  background: rgba(255,140,0,.1);
-  border-color: rgba(255,140,0,.3);
-  color: #ff8c00;
+  background:linear-gradient(135deg,rgba(255,140,0,.16),rgba(255,100,0,.07));
+  border-color:rgba(255,140,0,.25); color:#ff8c00;
+  box-shadow:inset 0 1px 0 rgba(255,180,0,.1);
 }
-
-/* divider in sidebar */
-.r-sb-div {
-  height: 1px;
-  background: rgba(255,255,255,0.06);
-  margin: 14px 20px;
-}
-
-/* stats strip in sidebar */
-.r-sb-stats {
-  padding: 0 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
+.r-sb-chip.on::before { opacity:1; }
+.r-sb-chip.on .chip-ico { background:rgba(255,140,0,.18); border-color:rgba(255,140,0,.25); }
+.r-sb-chip.on .r-sb-chip-count { color:#ff8c00; background:rgba(255,140,0,.15); border-color:rgba(255,140,0,.25); }
+.r-sb-div { height:1px; background:rgba(255,255,255,.04); margin:8px 14px; }
+.r-sb-stats { padding:0 10px; display:grid; grid-template-columns:1fr 1fr; gap:7px; }
 .r-sb-stat {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 12px;
-  border-radius: 8px;
-  background: rgba(255,255,255,.03);
-  border: 1px solid rgba(255,255,255,.05);
+  display:flex; flex-direction:column; align-items:flex-start;
+  padding:13px 12px 11px; border-radius:12px;
+  background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.05);
+  transition:all .2s; position:relative; overflow:hidden;
 }
-.r-sb-stat-lbl { font-size: 10px; color: #556; font-weight: 600; letter-spacing: .5px; }
-.r-sb-stat-val { font-size: 12px; font-weight: 700; color: #ff8c00; }
-
-/* action buttons in sidebar */
-.r-sb-actions {
-  padding: 0 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+.r-sb-stat::after {
+  content:''; position:absolute; bottom:0; left:0; right:0; height:2px;
+  background:linear-gradient(90deg,#ff8c00,transparent); opacity:.35; transition:opacity .2s;
 }
+.r-sb-stat:hover { background:rgba(255,140,0,.06); border-color:rgba(255,140,0,.2); transform:translateY(-1px); box-shadow:0 4px 14px rgba(0,0,0,.3); }
+.r-sb-stat:hover::after { opacity:.7; }
+.r-sb-stat-val { font-size:26px; font-weight:800; color:#ff8c00; line-height:1; letter-spacing:-1.5px; margin-bottom:6px; }
+.r-sb-stat-lbl { font-size:9px; color:rgba(255,255,255,.2); font-weight:700; letter-spacing:1.2px; text-transform:uppercase; }
+.r-sb-actions { padding:0 10px; display:flex; flex-direction:column; gap:7px; }
 .r-sb-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 10px 16px;
-  border-radius: 10px;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: .5px;
-  cursor: pointer;
-  transition: all .2s;
-  border: none;
-  font-family: Arial, Helvetica, sans-serif;
-  width: 100%;
-  text-align: center;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  padding:12px 16px; border-radius:12px;
+  font-size:12px; font-weight:700; letter-spacing:.5px;
+  cursor:pointer; transition:all .22s ease; border:none;
+  font-family:Arial,Helvetica,sans-serif; width:100%;
 }
 .r-sb-btn-pdf {
-  background: #ff8c00;
-  color: white;
+  background:linear-gradient(135deg,#ff8c00,#ff6600); color:white;
+  box-shadow:0 4px 18px rgba(255,140,0,.4),0 0 0 1px rgba(255,160,0,.2);
 }
-.r-sb-btn-pdf:hover {
-  background: #ffa733;
-  box-shadow: 0 4px 16px rgba(255,140,0,.4);
-  transform: translateY(-1px);
-}
+.r-sb-btn-pdf:hover { background:linear-gradient(135deg,#ffab40,#ff8c00); box-shadow:0 8px 28px rgba(255,140,0,.6); transform:translateY(-2px); }
 .r-sb-btn-print {
-  background: rgba(255,255,255,.05);
-  color: #778;
-  border: 1px solid rgba(255,255,255,.1) !important;
+  background:rgba(96,165,250,.07); color:rgba(96,165,250,.8);
+  border:1px solid rgba(96,165,250,.2) !important;
 }
-.r-sb-btn-print:hover {
-  background: rgba(255,255,255,.09);
-  color: white;
-  transform: translateY(-1px);
-}
-
-/* live badge bottom of sidebar */
+.r-sb-btn-print:hover { background:rgba(96,165,250,.15); color:white; border-color:rgba(96,165,250,.45) !important; transform:translateY(-1px); }
 .r-sb-live {
-  margin-top: auto;
-  padding: 16px 20px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  color: #10b981;
-  border-top: 1px solid rgba(255,255,255,.06);
+  margin-top:auto; padding:14px 18px;
+  display:flex; align-items:center; justify-content:space-between;
+  border-top:1px solid rgba(255,255,255,.05); background:rgba(16,185,129,.03);
 }
-.r-ldot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: #10b981;
-  animation: rBlink 2s infinite;
-  flex-shrink: 0;
-}
-@keyframes rBlink { 0%,100%{opacity:1;box-shadow:0 0 6px #10b981}50%{opacity:.3;box-shadow:none} }
+.r-sb-live-left { display:flex; align-items:center; gap:8px; font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#10b981; }
+.r-ldot { width:8px; height:8px; border-radius:50%; background:#10b981; box-shadow:0 0 8px #10b981; animation:rBlink 2s infinite; flex-shrink:0; }
+.r-sb-live-time { font-size:11px; color:rgba(255,255,255,.2); font-weight:500; font-family:Arial,Helvetica,sans-serif; letter-spacing:.5px; }
+@keyframes rBlink{0%,100%{opacity:1;box-shadow:0 0 10px #10b981}50%{opacity:.25;box-shadow:none}}
 
 /* ─── MAIN CANVAS ─── */
 .r-canvas {
@@ -368,8 +319,8 @@ body.report-body::after { display: none !important; }
   <!-- TOPBAR -->
   <div class="r-topbar">
     <div class="r-logo" onclick="window.location.href='dashboard.html'">INSIGHTFLOW</div>
-    <!-- Account + Logout pushed to right -->
     <div class="r-nav">
+      <span onclick="window.location.href='dashboard.html'">← Dashboard</span>
       <span onclick="window.location.href='account.html'">Account</span>
       <span onclick="window.location.href='index.html'">Logout</span>
     </div>
@@ -380,72 +331,54 @@ body.report-body::after { display: none !important; }
 
     <!-- ── SIDEBAR ── -->
     <div class="r-sidebar">
-
-      <!-- Brand -->
       <div class="r-sb-brand">
-        <div class="r-sb-brand-title">Data Report</div>
-        <div class="r-sb-brand-sub" id="sbDataset">Loading dataset...</div>
+        <div class="r-sb-brand-icon">📊</div>
+        <div>
+          <div class="r-sb-brand-title">Data Report</div>
+          <div class="r-sb-brand-sub">Auto Dashboard</div>
+        </div>
       </div>
-
-      <!-- View filter -->
       <div class="r-sb-sec">Views</div>
       <div class="r-sb-chips">
         <div class="r-sb-chip on" onclick="setView(this,'all')">
-          <span class="chip-ico">📊</span> All Metrics
+          <div class="chip-ico">📊</div><span>All Metrics</span>
+          <span class="r-sb-chip-count" id="countAll">—</span>
         </div>
         <div class="r-sb-chip" onclick="setView(this,'numeric')">
-          <span class="chip-ico">🔢</span> Numeric
+          <div class="chip-ico">🔢</div><span>Numeric</span>
+          <span class="r-sb-chip-count" id="countNum">—</span>
         </div>
         <div class="r-sb-chip" onclick="setView(this,'category')">
-          <span class="chip-ico">🏷️</span> Categories
+          <div class="chip-ico">🏷️</div><span>Categories</span>
+          <span class="r-sb-chip-count" id="countCat">—</span>
         </div>
         <div class="r-sb-chip" onclick="setView(this,'trends')">
-          <span class="chip-ico">📈</span> Trends
+          <div class="chip-ico">📈</div><span>Trends</span>
+          <span class="r-sb-chip-count">3</span>
         </div>
       </div>
-
       <div class="r-sb-div"></div>
-
-      <!-- Dataset stats -->
       <div class="r-sb-sec">Dataset</div>
       <div class="r-sb-stats">
-        <div class="r-sb-stat">
-          <span class="r-sb-stat-lbl">Rows</span>
-          <span class="r-sb-stat-val" id="sbRows">—</span>
-        </div>
-        <div class="r-sb-stat">
-          <span class="r-sb-stat-lbl">Columns</span>
-          <span class="r-sb-stat-val" id="sbCols">—</span>
-        </div>
-        <div class="r-sb-stat">
-          <span class="r-sb-stat-lbl">Numeric</span>
-          <span class="r-sb-stat-val" id="sbNum">—</span>
-        </div>
-        <div class="r-sb-stat">
-          <span class="r-sb-stat-lbl">Categorical</span>
-          <span class="r-sb-stat-val" id="sbCat">—</span>
-        </div>
+        <div class="r-sb-stat"><span class="r-sb-stat-val" id="sbRows">—</span><span class="r-sb-stat-lbl">Rows</span></div>
+        <div class="r-sb-stat"><span class="r-sb-stat-val" id="sbCols">—</span><span class="r-sb-stat-lbl">Cols</span></div>
+        <div class="r-sb-stat"><span class="r-sb-stat-val" id="sbNum">—</span><span class="r-sb-stat-lbl">Numeric</span></div>
+        <div class="r-sb-stat"><span class="r-sb-stat-val" id="sbCat">—</span><span class="r-sb-stat-lbl">Categ.</span></div>
       </div>
-
       <div class="r-sb-div"></div>
-
-      <!-- Actions -->
       <div class="r-sb-sec">Export</div>
       <div class="r-sb-actions">
         <button class="r-sb-btn r-sb-btn-pdf" id="pdfBtn" onclick="exportPDF()">↓ Export PDF</button>
         <button class="r-sb-btn r-sb-btn-print" onclick="window.print()">🖨 Print Report</button>
       </div>
-
-      <!-- Live badge pinned to bottom -->
       <div class="r-sb-live">
-        <div class="r-ldot"></div> Live Data
+        <div class="r-sb-live-left"><div class="r-ldot"></div>Live</div>
+        <div class="r-sb-live-time" id="sbTime">—</div>
       </div>
-
     </div>
 
     <!-- ── MAIN CANVAS ── -->
     <div class="r-canvas" id="rCanvas">
-      <div class="r-sumbar" id="rSumbar"></div>
       <div class="r-kpi-row" id="rKpi"></div>
       <div class="r-g-main" id="rGMain"></div>
       <div class="r-g-mid"  id="rGMid"></div>
@@ -491,13 +424,19 @@ function buildSidebarStats(){
   document.getElementById('sbCols').textContent=H.length
   document.getElementById('sbNum').textContent=nc.length
   document.getElementById('sbCat').textContent=cc.length
+  var cAll=document.getElementById('countAll');if(cAll)cAll.textContent=nc.length+cc.length
+  var cNum=document.getElementById('countNum');if(cNum)cNum.textContent=nc.length
+  var cCat=document.getElementById('countCat');if(cCat)cCat.textContent=cc.length
+  function tick(){var t=document.getElementById('sbTime');if(t)t.textContent=new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}
+  tick();setInterval(tick,1000)
 }
-
-/* ── summary strip ── */
-function buildSummary(){
-  var nc=nIdx(),cc=cIdx(),now=new Date()
-  var ts=now.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})+' '+now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})
-  document.getElementById('rSumbar').innerHTML='<span class="r-sb-ic">◉</span><span class="r-sb-tx"><b>'+D.length.toLocaleString()+' rows</b> × <b>'+H.length+' columns</b> — <b>'+nc.length+' numeric</b> &amp; <b>'+cc.length+' categorical</b></span><span class="r-sb-ts">'+ts+'</span>'
+function realTrend(i){
+  var v=D.map(function(r){return parseFloat(r[i])}).filter(function(n){return !isNaN(n)})
+  if(v.length<2)return{up:true,pct:'0.0'}
+  var mid=Math.floor(v.length/2)
+  var first=v.slice(0,mid).reduce(function(a,b){return a+b},0)/mid
+  var last=v.slice(mid).reduce(function(a,b){return a+b},0)/(v.length-mid)
+  return{up:last>=first,pct:first===0?'0.0':Math.abs(((last-first)/first)*100).toFixed(1)}
 }
 
 /* ── KPIs ── */
@@ -506,9 +445,9 @@ function buildKPIs(){
   var nc=nIdx(),cc=cIdx()
   nc.slice(0,5).forEach(function(i,idx){
     var s=stats(i);if(!s)return
-    var prev=s.avg*(0.78+Math.random()*0.44),up=s.avg>=prev,pct=Math.abs(((s.avg-prev)/prev)*100).toFixed(1),col=PAL[idx%PAL.length]
+    var tr=realTrend(i),col=PAL[idx%PAL.length]
     var k=document.createElement('div');k.className='r-kpi';k.style.setProperty('--ac',col)
-    k.innerHTML='<div class="r-kpi-top"><span class="r-kpi-ico">'+ICONS[idx]+'</span><span class="r-kpi-tag">'+H[i].substring(0,10).toUpperCase()+'</span></div><div class="r-kpi-lbl">'+H[i]+'</div><div class="r-kpi-val" style="color:'+col+'">'+fmt(s.avg)+'</div><div class="r-kpi-meta">Σ '+fmt(s.sum)+' · n='+s.count+'</div><div class="r-kpi-tr '+(up?'t-up':'t-dn')+'">'+(up?'▲':'▼')+' '+pct+'%</div>'
+    k.innerHTML='<div class="r-kpi-top"><span class="r-kpi-ico">'+ICONS[idx]+'</span><span class="r-kpi-tag">'+H[i].substring(0,10).toUpperCase()+'</span></div><div class="r-kpi-lbl">'+H[i]+'</div><div class="r-kpi-val" style="color:'+col+'">'+fmt(s.avg)+'</div><div class="r-kpi-meta">Σ '+fmt(s.sum)+' · n='+s.count+'</div><div class="r-kpi-tr '+(tr.up?'t-up':'t-dn')+'">'+(tr.up?'▲':'▼')+' '+tr.pct+'%</div>'
     el.appendChild(k)
   })
   cc.slice(0,2).forEach(function(i,idx){
@@ -558,11 +497,7 @@ function buildGMid(){
 
 function buildAll(){
   charts.forEach(function(c){c.destroy()});charts=[]
-  buildSidebarStats()
-  buildSummary()
-  buildKPIs()
-  buildGMain()
-  buildGMid()
+  buildSidebarStats();buildKPIs();buildGMain();buildGMid()
 }
 
 /* ── view filter ── */
@@ -598,16 +533,12 @@ async function exportPDF(){
   btn.textContent='↓ Export PDF';btn.disabled=false
 }
 
-/* ── init ── */
 var raw=null;try{raw=localStorage.getItem('insightflow_dataset')}catch(e){}
-if(!raw){
-  document.getElementById('rNoData').style.display='flex'
-  document.getElementById('rApp').style.display='none'
-}else{
+if(!raw){document.getElementById('rNoData').style.display='flex';document.getElementById('rApp').style.display='none'}
+else{
   var d=JSON.parse(raw);H=d.headers||[];D=d.dataset||d.preview||[]
   document.getElementById('rNoData').style.display='none'
-  var app=document.getElementById('rApp');app.style.display='flex'
-  if(d.fileName)document.getElementById('sbDataset').textContent=d.fileName
+  var app=document.getElementById('rApp');app.style.display='flex';app.style.flexDirection='column';app.style.height='100vh';app.style.overflow='hidden'
   buildAll()
 }
 </script>

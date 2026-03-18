@@ -636,14 +636,13 @@ function populateSelects(){
     xItem.onclick = () => pickAxisCol("x", i, h)
     xMenu.appendChild(xItem)
 
-    if(isNum){
-      const yItem = document.createElement("div")
-      yItem.className = "chart-dd-item"
-      yItem.setAttribute("data-idx", i)
-      yItem.innerHTML = `<span>🔢</span> ${h}`
-      yItem.onclick = () => pickAxisCol("y", i, h)
-      yMenu.appendChild(yItem)
-    }
+    // Y axis — show ALL columns
+    const yItem = document.createElement("div")
+    yItem.className = "chart-dd-item"
+    yItem.setAttribute("data-idx", i)
+    yItem.innerHTML = `<span>${isNum ? "🔢" : "🔤"}</span> ${h}`
+    yItem.onclick = () => pickAxisCol("y", i, h)
+    yMenu.appendChild(yItem)
 
     if(firstCat === -1 && !isNum) firstCat = i
     if(firstNum === -1 && isNum)  firstNum = i
@@ -786,10 +785,17 @@ function buildChart(){
 
   const ctx = document.getElementById("myChart").getContext("2d")
 
-  const multiColors = [
-    "#ff8c00","#3b82f6","#10b981","#ec4899","#8b5cf6",
-    "#ef4444","#f59e0b","#06b6d4","#84cc16","#f97316"
-  ]
+  // ── 500 unique colors via golden-ratio HSL ──
+  const genColors = (function(){
+    const c = [], g = 137.508
+    for(let i = 0; i < 500; i++){
+      const h = (i * g) % 360
+      const s = 62 + (i % 6) * 5
+      const l = 50 + (i % 5) * 4
+      c.push(`hsl(${h.toFixed(1)},${s}%,${l}%)`)
+    }
+    return c
+  })()
 
   const noYTypes   = ["pie","doughnut","polarArea"]
   const isMultiCol = noYTypes.includes(chartType)
@@ -797,33 +803,49 @@ function buildChart(){
   let dsConfig = {}
 
   if(isMultiCol){
+    // pie/donut/polar — each slice a different color from 500-color palette
     const counts = countOccurrences(labels)
+    const keys   = Object.keys(counts)
     dsConfig = {
       label: vizHeaders[xIdx],
       data:  Object.values(counts),
-      backgroundColor: multiColors,
+      backgroundColor: keys.map((_, i) => genColors[i % 500]),
       borderWidth: 2,
       borderColor: "#0d1117"
     }
   } else if(chartType === "scatter"){
+    // scatter — each point gets a unique color from palette
+    const isMultiMode = document.getElementById("multiColorToggle")?.checked
+    const pts = rows.map(r => ({ x: parseFloat(r[xIdx])||0, y: parseFloat(r[yIdx])||0 }))
     dsConfig = {
       label: `${vizHeaders[xIdx]} vs ${vizHeaders[yIdx]}`,
-      data:  rows.map(r => ({ x: parseFloat(r[xIdx])||0, y: parseFloat(r[yIdx])||0 })),
-      backgroundColor: chartColor + "bb",
-      borderColor: chartColor,
-      pointRadius: 6,
-      pointHoverRadius: 8
+      data:  pts,
+      backgroundColor: isMultiMode
+        ? pts.map((_, i) => genColors[i % 500] + "cc")
+        : chartColor + "cc",
+      borderColor: isMultiMode
+        ? pts.map((_, i) => genColors[i % 500])
+        : chartColor,
+      pointRadius: 7,
+      pointHoverRadius: 10,
+      borderWidth: 1.5
     }
   } else if(chartType === "bubble"){
+    const isMultiMode = document.getElementById("multiColorToggle")?.checked
+    const pts = rows.map((r,i) => ({
+      x: parseFloat(r[xIdx])||i,
+      y: parseFloat(r[yIdx])||0,
+      r: Math.max(3, Math.min(20, (parseFloat(r[yIdx])||10)/10))
+    }))
     dsConfig = {
       label: `${vizHeaders[xIdx]} vs ${vizHeaders[yIdx]}`,
-      data:  rows.map((r,i) => ({
-        x: parseFloat(r[xIdx])||i,
-        y: parseFloat(r[yIdx])||0,
-        r: Math.max(3, Math.min(20, (parseFloat(r[yIdx])||10)/10))
-      })),
-      backgroundColor: chartColor + "88",
-      borderColor: chartColor,
+      data:  pts,
+      backgroundColor: isMultiMode
+        ? pts.map((_, i) => genColors[i % 500] + "99")
+        : chartColor + "88",
+      borderColor: isMultiMode
+        ? pts.map((_, i) => genColors[i % 500])
+        : chartColor,
       borderWidth: 1
     }
   } else if(chartType === "radar"){
@@ -840,20 +862,14 @@ function buildChart(){
     const isArea       = chartType === "area"
     const isHBar       = chartType === "horizontalBar"
     const isStackedBar = chartType === "stackedBar"
-    const isMultiMode  = document.getElementById("multiColorToggle")?.checked
-
-    const multiColors = [
-      "#ff8c00","#3b82f6","#10b981","#ec4899","#8b5cf6",
-      "#ef4444","#f59e0b","#06b6d4","#84cc16","#f97316",
-      "#14b8a6","#a855f7","#64748b","#fb7185","#38bdf8"
-    ]
+    const isMultiMode  = document.getElementById("multiColorToggle")?.checked ?? true
 
     const bgColor = isMultiMode
-      ? values.map((_, i) => multiColors[i % multiColors.length] + "dd")
+      ? values.map((_, i) => genColors[i % 500] + "dd")
       : (isArea || chartType === "line") ? chartColor + "22" : chartColor + "dd"
 
     const borderCol = isMultiMode
-      ? values.map((_, i) => multiColors[i % multiColors.length])
+      ? values.map((_, i) => genColors[i % 500])
       : chartColor
 
     dsConfig = {
@@ -865,8 +881,8 @@ function buildChart(){
       borderRadius: (chartType === "bar" || isStackedBar) ? 6 : 0,
       fill: isArea,
       tension: 0.4,
-      pointBackgroundColor: isMultiMode ? multiColors : chartColor2,
-      pointBorderColor: isMultiMode ? multiColors : chartColor,
+      pointBackgroundColor: isMultiMode ? values.map((_,i) => genColors[i%500]) : chartColor2,
+      pointBorderColor:     isMultiMode ? values.map((_,i) => genColors[i%500]) : chartColor,
       pointRadius: (chartType === "line" || isArea) ? 4 : 0,
       pointHoverRadius: 6
     }
