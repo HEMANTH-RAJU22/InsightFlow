@@ -28,6 +28,13 @@ if not GROQ_API_KEY:
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=False)
 
+# ── Max upload size: 15MB ──
+app.config['MAX_CONTENT_LENGTH'] = 15 * 1024 * 1024
+
+@app.errorhandler(413)
+def file_too_large(e):
+    return jsonify({"error": "File too large. Maximum allowed size is 15MB."}), 413
+
 
 # -------------------------
 # MySQL Connection (lazy)
@@ -235,11 +242,17 @@ def chat():
 
     messages = history[-4:] + [{"role": "user", "content": user_message}]
 
-    # Trim dataset context to reduce token usage
+    # Build rich dataset context — 50 sample rows
     ctx_lines = dataset_ctx.split("\n")
-    short_ctx = "\n".join(ctx_lines[:20])
+    # Keep header info (first 6 lines) + up to 50 data rows
+    header_lines = ctx_lines[:6]
+    data_lines   = ctx_lines[6:][:50]
+    short_ctx    = "\n".join(header_lines + data_lines)
 
-    system_prompt = f"""You are a data analyst. Dataset: {short_ctx}. Be concise, use bullet points, max 150 words."""
+    system_prompt = f"""You are an expert data analyst assistant. Analyze the dataset below and answer questions clearly with bullet points, numbers, and insights. Be concise but thorough — max 200 words.
+
+Dataset:
+{short_ctx}"""
 
     try:
         client = Groq(api_key=GROQ_API_KEY)
