@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script src="auth.js"></script>
 <meta charset="UTF-8">
 <title>Visualize - InsightFlow</title>
 <link rel="stylesheet" href="style.css">
@@ -106,7 +107,7 @@
         <div class="toggle-row">
           <span class="toggle-label">Single Color</span>
           <label class="toggle-switch">
-            <input type="checkbox" id="multiColorToggle" checked onchange="buildChart()">
+            <input type="checkbox" id="multiColorToggle" onchange="buildChart()">
             <span class="toggle-slider"></span>
           </label>
           <span class="toggle-label">Multi Color</span>
@@ -191,7 +192,7 @@
 
   <!-- Generate Dashboard CTA -->
   <div class="viz-dashboard-cta">
-    <button class="viz-dashboard-btn" id="genDashBtn" onclick="goToDashboard()">
+    <button class="viz-dashboard-btn" onclick="window.location.href='report.html'">
       <span class="viz-dash-icon">📋</span>
       <div>
         <div class="viz-dash-title">Generate Dashboard</div>
@@ -203,47 +204,6 @@
       </svg>
     </button>
   </div>
-
-  <!-- Full-page loading overlay -->
-  <div id="dashOverlay" style="
-    display:none;position:fixed;inset:0;z-index:9999;
-    background:rgba(10,14,24,0.92);
-    backdrop-filter:blur(6px);
-    -webkit-backdrop-filter:blur(6px);
-    flex-direction:column;align-items:center;justify-content:center;
-    gap:20px;
-  ">
-    <div id="dashSpinner" style="
-      width:56px;height:56px;
-      border:3px solid rgba(255,140,0,0.15);
-      border-top:3px solid #ff8c00;
-      border-radius:50%;
-      animation:dashSpin .75s linear infinite;
-    "></div>
-    <div style="text-align:center">
-      <div style="font-size:18px;font-weight:700;color:white;letter-spacing:.5px;margin-bottom:6px">Generating Dashboard</div>
-      <div style="font-size:13px;color:#888">Building KPIs, charts and visualizations…</div>
-    </div>
-    <div id="dashDots" style="display:flex;gap:8px;margin-top:4px">
-      <span style="width:8px;height:8px;border-radius:50%;background:#ff8c00;display:block;animation:dashDot .9s ease-in-out infinite"></span>
-      <span style="width:8px;height:8px;border-radius:50%;background:#ff8c00;display:block;animation:dashDot .9s ease-in-out .2s infinite"></span>
-      <span style="width:8px;height:8px;border-radius:50%;background:#ff8c00;display:block;animation:dashDot .9s ease-in-out .4s infinite"></span>
-    </div>
-  </div>
-
-  <style>
-  @keyframes dashSpin { to { transform: rotate(360deg); } }
-  @keyframes dashDot  { 0%,80%,100%{opacity:.2;transform:scale(.8)} 40%{opacity:1;transform:scale(1.2)} }
-  </style>
-
-  <script>
-  function goToDashboard(){
-    const overlay = document.getElementById('dashOverlay')
-    overlay.style.display = 'flex'
-    document.getElementById('genDashBtn').disabled = true
-    setTimeout(function(){ window.location.href = 'report.html' }, 1800)
-  }
-  </script>
 
 </div>
 

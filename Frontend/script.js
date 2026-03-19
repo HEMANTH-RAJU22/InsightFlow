@@ -286,15 +286,25 @@ function goDashboard(){ window.location.href = "login.html" }
 function goAccount(){   window.location.href = "account.html" }
 function goToChatbot(){ window.location.href = "chatbot.html" }
 function logout(){
-  localStorage.removeItem("userEmail")
-  window.location.href = "index.html"
+  if(window.Auth) window.Auth.logout()
+  else {
+    localStorage.removeItem("userEmail")
+    localStorage.removeItem("insightflow_dataset")
+    window.location.href = "index.html"
+  }
 }
 
 
 /* ── Auth ───────────────────────────────────────────────────── */
 function login(){
-  let email    = document.getElementById("emailInput").value
+  let email    = document.getElementById("emailInput").value.trim().toLowerCase()
   let password = document.getElementById("passwordInput").value
+  let btn      = document.getElementById("mainButton")
+
+  if(!email || !password){ alert("Email and password are required."); return }
+
+  if(btn){ btn.disabled = true; btn.innerText = "Logging in..." }
+
   fetch("http://127.0.0.1:5000/login", {
     method:"POST", headers:{"Content-Type":"application/json"},
     body: JSON.stringify({email, password})
@@ -302,26 +312,56 @@ function login(){
   .then(res => res.json())
   .then(data => {
     if(data.status === "success"){
-      localStorage.setItem("userEmail", data.email)
-      window.location.href = "dashboard.html"
+      // Use Auth module — creates secure session with token + expiry
+      if(window.Auth) window.Auth.setSession(data.email, data.name)
+      else localStorage.setItem("userEmail", data.email)  // fallback
+      // Redirect to intended page or dashboard
+      let dest = "dashboard.html"
+      try { dest = sessionStorage.getItem("insightflow_redirect") || "dashboard.html" } catch(e){}
+      try { sessionStorage.removeItem("insightflow_redirect") } catch(e){}
+      window.location.href = dest
     } else {
+      if(btn){ btn.disabled = false; btn.innerText = "Login" }
       alert(data.message || "Login failed")
     }
   })
-  .catch(() => alert("Cannot reach server. Make sure Flask is running."))
+  .catch(() => {
+    if(btn){ btn.disabled = false; btn.innerText = "Login" }
+    alert("Cannot reach server. Make sure Flask is running.")
+  })
 }
 
 function register(){
-  let name     = document.getElementById("nameInput").value
-  let email    = document.getElementById("emailInput").value
+  let name     = document.getElementById("nameInput").value.trim()
+  let email    = document.getElementById("emailInput").value.trim().toLowerCase()
   let password = document.getElementById("passwordInput").value
+  let btn      = document.getElementById("mainButton")
+
+  if(!name || !email || !password){ alert("All fields are required."); return }
+  if(name.length < 2){ alert("Name must be at least 2 characters."); return }
+  if(!/^[^@]+@[^@]+\.[^@]+$/.test(email)){ alert("Enter a valid email address."); return }
+  if(password.length < 6){ alert("Password must be at least 6 characters."); return }
+
+  if(btn){ btn.disabled = true; btn.innerText = "Registering..." }
+
   fetch("http://127.0.0.1:5000/register", {
     method:"POST", headers:{"Content-Type":"application/json"},
     body: JSON.stringify({name, email, password})
   })
   .then(res => res.json())
-  .then(data => alert(data.message))
-  .catch(() => alert("Register failed. Make sure Flask is running."))
+  .then(data => {
+    if(btn){ btn.disabled = false; btn.innerText = "Register" }
+    if(data.status === "success"){
+      alert("Account created! Please log in.")
+      toggleForm()  // Switch back to login form
+    } else {
+      alert(data.message || "Registration failed")
+    }
+  })
+  .catch(() => {
+    if(btn){ btn.disabled = false; btn.innerText = "Register" }
+    alert("Register failed. Make sure Flask is running.")
+  })
 }
 
 let isRegister = false
@@ -352,11 +392,12 @@ function toggleForm(){
 }
 
 function loadAccount(){
-  let email = localStorage.getItem("userEmail")
-  if(!email) return
-  fetch(`http://127.0.0.1:5000/account/${email}`)
-    .then(res => res.json())
+  let email = window.Auth ? window.Auth.getEmail() : localStorage.getItem("userEmail")
+  if(!email){ window.location.href = "index.html"; return }
+  fetch(`http://127.0.0.1:5000/account/${encodeURIComponent(email)}`)
+    .then(res => { if(!res.ok) throw new Error("Not found"); return res.json() })
     .then(data => {
+      if(data.error){ console.warn("Account:", data.error); return }
       let u = document.getElementById("username")
       let e = document.getElementById("email")
       if(u) u.innerText = data.name  || ""
@@ -636,13 +677,14 @@ function populateSelects(){
     xItem.onclick = () => pickAxisCol("x", i, h)
     xMenu.appendChild(xItem)
 
-    // Y axis — show ALL columns
-    const yItem = document.createElement("div")
-    yItem.className = "chart-dd-item"
-    yItem.setAttribute("data-idx", i)
-    yItem.innerHTML = `<span>${isNum ? "🔢" : "🔤"}</span> ${h}`
-    yItem.onclick = () => pickAxisCol("y", i, h)
-    yMenu.appendChild(yItem)
+    if(isNum){
+      const yItem = document.createElement("div")
+      yItem.className = "chart-dd-item"
+      yItem.setAttribute("data-idx", i)
+      yItem.innerHTML = `<span>🔢</span> ${h}`
+      yItem.onclick = () => pickAxisCol("y", i, h)
+      yMenu.appendChild(yItem)
+    }
 
     if(firstCat === -1 && !isNum) firstCat = i
     if(firstNum === -1 && isNum)  firstNum = i
@@ -785,17 +827,10 @@ function buildChart(){
 
   const ctx = document.getElementById("myChart").getContext("2d")
 
-  // ── 500 unique colors via golden-ratio HSL ──
-  const genColors = (function(){
-    const c = [], g = 137.508
-    for(let i = 0; i < 500; i++){
-      const h = (i * g) % 360
-      const s = 62 + (i % 6) * 5
-      const l = 50 + (i % 5) * 4
-      c.push(`hsl(${h.toFixed(1)},${s}%,${l}%)`)
-    }
-    return c
-  })()
+  const multiColors = [
+    "#ff8c00","#3b82f6","#10b981","#ec4899","#8b5cf6",
+    "#ef4444","#f59e0b","#06b6d4","#84cc16","#f97316"
+  ]
 
   const noYTypes   = ["pie","doughnut","polarArea"]
   const isMultiCol = noYTypes.includes(chartType)
@@ -803,49 +838,33 @@ function buildChart(){
   let dsConfig = {}
 
   if(isMultiCol){
-    // pie/donut/polar — each slice a different color from 500-color palette
     const counts = countOccurrences(labels)
-    const keys   = Object.keys(counts)
     dsConfig = {
       label: vizHeaders[xIdx],
       data:  Object.values(counts),
-      backgroundColor: keys.map((_, i) => genColors[i % 500]),
+      backgroundColor: multiColors,
       borderWidth: 2,
       borderColor: "#0d1117"
     }
   } else if(chartType === "scatter"){
-    // scatter — each point gets a unique color from palette
-    const isMultiMode = document.getElementById("multiColorToggle")?.checked
-    const pts = rows.map(r => ({ x: parseFloat(r[xIdx])||0, y: parseFloat(r[yIdx])||0 }))
     dsConfig = {
       label: `${vizHeaders[xIdx]} vs ${vizHeaders[yIdx]}`,
-      data:  pts,
-      backgroundColor: isMultiMode
-        ? pts.map((_, i) => genColors[i % 500] + "cc")
-        : chartColor + "cc",
-      borderColor: isMultiMode
-        ? pts.map((_, i) => genColors[i % 500])
-        : chartColor,
-      pointRadius: 7,
-      pointHoverRadius: 10,
-      borderWidth: 1.5
+      data:  rows.map(r => ({ x: parseFloat(r[xIdx])||0, y: parseFloat(r[yIdx])||0 })),
+      backgroundColor: chartColor + "bb",
+      borderColor: chartColor,
+      pointRadius: 6,
+      pointHoverRadius: 8
     }
   } else if(chartType === "bubble"){
-    const isMultiMode = document.getElementById("multiColorToggle")?.checked
-    const pts = rows.map((r,i) => ({
-      x: parseFloat(r[xIdx])||i,
-      y: parseFloat(r[yIdx])||0,
-      r: Math.max(3, Math.min(20, (parseFloat(r[yIdx])||10)/10))
-    }))
     dsConfig = {
       label: `${vizHeaders[xIdx]} vs ${vizHeaders[yIdx]}`,
-      data:  pts,
-      backgroundColor: isMultiMode
-        ? pts.map((_, i) => genColors[i % 500] + "99")
-        : chartColor + "88",
-      borderColor: isMultiMode
-        ? pts.map((_, i) => genColors[i % 500])
-        : chartColor,
+      data:  rows.map((r,i) => ({
+        x: parseFloat(r[xIdx])||i,
+        y: parseFloat(r[yIdx])||0,
+        r: Math.max(3, Math.min(20, (parseFloat(r[yIdx])||10)/10))
+      })),
+      backgroundColor: chartColor + "88",
+      borderColor: chartColor,
       borderWidth: 1
     }
   } else if(chartType === "radar"){
@@ -862,14 +881,20 @@ function buildChart(){
     const isArea       = chartType === "area"
     const isHBar       = chartType === "horizontalBar"
     const isStackedBar = chartType === "stackedBar"
-    const isMultiMode  = document.getElementById("multiColorToggle")?.checked ?? true
+    const isMultiMode  = document.getElementById("multiColorToggle")?.checked
+
+    const multiColors = [
+      "#ff8c00","#3b82f6","#10b981","#ec4899","#8b5cf6",
+      "#ef4444","#f59e0b","#06b6d4","#84cc16","#f97316",
+      "#14b8a6","#a855f7","#64748b","#fb7185","#38bdf8"
+    ]
 
     const bgColor = isMultiMode
-      ? values.map((_, i) => genColors[i % 500] + "dd")
+      ? values.map((_, i) => multiColors[i % multiColors.length] + "dd")
       : (isArea || chartType === "line") ? chartColor + "22" : chartColor + "dd"
 
     const borderCol = isMultiMode
-      ? values.map((_, i) => genColors[i % 500])
+      ? values.map((_, i) => multiColors[i % multiColors.length])
       : chartColor
 
     dsConfig = {
@@ -881,8 +906,8 @@ function buildChart(){
       borderRadius: (chartType === "bar" || isStackedBar) ? 6 : 0,
       fill: isArea,
       tension: 0.4,
-      pointBackgroundColor: isMultiMode ? values.map((_,i) => genColors[i%500]) : chartColor2,
-      pointBorderColor:     isMultiMode ? values.map((_,i) => genColors[i%500]) : chartColor,
+      pointBackgroundColor: isMultiMode ? multiColors : chartColor2,
+      pointBorderColor: isMultiMode ? multiColors : chartColor,
       pointRadius: (chartType === "line" || isArea) ? 4 : 0,
       pointHoverRadius: 6
     }
@@ -1078,8 +1103,12 @@ window.addEventListener("DOMContentLoaded", () => {
 /* ── Navigation ── */
 function goAccount(){ window.location.href = "account.html" }
 function logout(){
-  localStorage.removeItem("userEmail")
-  window.location.href = "index.html"
+  if(window.Auth) window.Auth.logout()
+  else {
+    localStorage.removeItem("userEmail")
+    localStorage.removeItem("insightflow_dataset")
+    window.location.href = "index.html"
+  }
 }
 /* ============================================================
    INSIGHTFLOW — report.js  (BI Dashboard Generator)
@@ -1486,8 +1515,12 @@ function exportPDF(){
 }
  
 function logout(){
-  localStorage.removeItem("userEmail")
-  window.location.href = "index.html"
+  if(window.Auth) window.Auth.logout()
+  else {
+    localStorage.removeItem("userEmail")
+    localStorage.removeItem("insightflow_dataset")
+    window.location.href = "index.html"
+  }
 }
  
 /* ──────────────────────────────────────────────────────────
