@@ -3,68 +3,97 @@ from flask_cors import CORS
 import pandas as pd
 import warnings
 import os
-import requests
-from groq import Groq
 import re
+import math
+import logging
+from groq import Groq
 from dotenv import load_dotenv
 import bcrypt
 
 load_dotenv()
-
 warnings.filterwarnings("ignore")
-import urllib3
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-# ── Validate required environment variables on startup ──
+# ── Logging ──
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s"
+)
+log = logging.getLogger(__name__)
+
+# ── Validate env vars ──
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 if not GROQ_API_KEY:
     raise EnvironmentError(
         "GROQ_API_KEY is not set.\n"
         "Add it to your .env file:\n"
-        "  GROQ_API_KEY=gsk_your_key_here\n"
-        "Or set it in PyCharm: Run > Edit Configurations > Environment Variables"
+        "  GROQ_API_KEY=gsk_your_key_here"
     )
 
+# ── Groq client (singleton — not recreated per request) ──
+groq_client = Groq(api_key=GROQ_API_KEY)
+
+# ── Flask app ──
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=False)
 
-# ── Max upload size: 15MB ──
-app.config['MAX_CONTENT_LENGTH'] = 15 * 1024 * 1024
+# ── File size limit: 15 MB ──
+app.config["MAX_CONTENT_LENGTH"] = 15 * 1024 * 1024
 
 @app.errorhandler(413)
-def file_too_large(e):
-    return jsonify({"error": "File too large. Maximum allowed size is 15MB."}), 413
+def too_large(e):
+    return jsonify({"error": "File too large. Maximum size is 15 MB."}), 413
 
 
-# -------------------------
-# MySQL Connection (lazy)
-# -------------------------
-
-db     = None
-cursor = None
+# ─────────────────────────────────────────
+# DATABASE — per-request connection (thread-safe)
+# ─────────────────────────────────────────
 
 def get_db():
-    global db, cursor
+    """Return a fresh (connection, cursor) pair. Caller must close both."""
     try:
-        if db is None or not db.is_connected():
-            import mysql.connector
-            db = mysql.connector.connect(
-                host=os.environ.get("DB_HOST", "localhost"),
-                user=os.environ.get("DB_USER", "root"),
-                password=os.environ.get("DB_PASSWORD", ""),
-                database=os.environ.get("DB_NAME", "insightflow")
-            )
-            cursor = db.cursor(dictionary=True)
+        import mysql.connector
+        db = mysql.connector.connect(
+            host=os.environ.get("DB_HOST", "localhost"),
+            user=os.environ.get("DB_USER", "root"),
+            password=os.environ.get("DB_PASSWORD", ""),
+            database=os.environ.get("DB_NAME", "insightflow"),
+            connection_timeout=5
+        )
+        cursor = db.cursor(dictionary=True)
+        return db, cursor
     except Exception as e:
-        print("DB connection error:", e)
-        db = None
-        cursor = None
-    return db, cursor
+        log.error("DB connection error: %s", e)
+        return None, None
 
 
-# -------------------------
-# REGISTER API
-# -------------------------
+# ─────────────────────────────────────────
+# HEALTH CHECK
+# ─────────────────────────────────────────
+
+@app.route("/health")
+def health():
+    db, cursor = get_db()
+    db_ok = False
+    if db:
+        try:
+            cursor.execute("SELECT 1")
+            cursor.fetchone()
+            db_ok = True
+        except Exception:
+            pass
+        finally:
+            cursor.close()
+            db.close()
+    return jsonify({
+        "status": "ok",
+        "database": "connected" if db_ok else "unavailable",
+        "groq": "ready"
+    })
+
+
+# ─────────────────────────────────────────
+# REGISTER
+# ─────────────────────────────────────────
 
 @app.route("/register", methods=["POST"])
 def register():
@@ -72,35 +101,52 @@ def register():
     if not db:
         return jsonify({"status": "error", "message": "Database unavailable"}), 500
 
-    data     = request.json
-    name     = data.get("name", "").strip()
-    email    = data.get("email", "").strip().lower()
-    password = data.get("password", "")
+    try:
+        data     = request.json or {}
+        name     = data.get("name", "").strip()
+        email    = data.get("email", "").strip().lower()
+        password = data.get("password", "")
 
-    if not name or not email or not password:
-        return jsonify({"status": "error", "message": "All fields are required"})
+        # Validation
+        if not name or not email or not password:
+            return jsonify({"status": "error", "message": "All fields are required"})
+        if len(name) < 2:
+            return jsonify({"status": "error", "message": "Name must be at least 2 characters"})
+        if not re.match(r"^[^@]+@[^@]+\.[^@]+$", email):
+            return jsonify({"status": "error", "message": "Invalid email address"})
+        if len(password) < 6:
+            return jsonify({"status": "error", "message": "Password must be at least 6 characters"})
 
-    cursor.execute("SELECT * FROM users WHERE email=%s", (email,))
-    existing_user = cursor.fetchone()
+        cursor.execute("SELECT id FROM users WHERE email=%s", (email,))
+        if cursor.fetchone():
+            return jsonify({"status": "error", "message": "Email already registered"})
 
-    if existing_user:
-        return jsonify({"status": "error", "message": "Email already registered"})
+        hashed = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+        cursor.execute(
+            "INSERT INTO users(name, email, password) VALUES(%s, %s, %s)",
+            (name, email, hashed)
+        )
+        db.commit()
+        # Log registration activity
+        cursor.execute(
+            "INSERT INTO activity_log(user_id, action, detail, ip_address) VALUES(LAST_INSERT_ID(),%s,%s,%s)",
+            ("register", email, request.remote_addr or "unknown")
+        )
+        db.commit()
+        log.info("New user registered: %s", email)
+        return jsonify({"status": "success", "message": "User registered successfully"})
 
-    # Hash password before storing
-    hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
-
-    cursor.execute(
-        "INSERT INTO users(name, email, password) VALUES(%s, %s, %s)",
-        (name, email, hashed_password)
-    )
-    db.commit()
-
-    return jsonify({"status": "success", "message": "User registered successfully"})
+    except Exception as e:
+        log.error("Register error: %s", e)
+        return jsonify({"status": "error", "message": "Registration failed"}), 500
+    finally:
+        cursor.close()
+        db.close()
 
 
-# -------------------------
-# LOGIN API
-# -------------------------
+# ─────────────────────────────────────────
+# LOGIN
+# ─────────────────────────────────────────
 
 @app.route("/login", methods=["POST"])
 def login():
@@ -108,22 +154,51 @@ def login():
     if not db:
         return jsonify({"status": "error", "message": "Database unavailable"}), 500
 
-    data     = request.json
-    email    = data.get("email", "").strip().lower()
-    password = data.get("password", "")
+    try:
+        data     = request.json or {}
+        email    = data.get("email", "").strip().lower()
+        password = data.get("password", "")
 
-    cursor.execute("SELECT * FROM users WHERE email=%s", (email,))
-    user = cursor.fetchone()
+        if not email or not password:
+            return jsonify({"status": "error", "message": "Email and password required"})
 
-    if user and bcrypt.checkpw(password.encode("utf-8"), user["password"].encode("utf-8")):
-        return jsonify({"status": "success", "name": user["name"], "email": user["email"]})
-    else:
-        return jsonify({"status": "error", "message": "Invalid email or password"})
+        cursor.execute("SELECT * FROM users WHERE email=%s", (email,))
+        user = cursor.fetchone()
+
+        ip = request.remote_addr or "unknown"
+
+        if user and user.get("is_active", 1) == 0:
+            return jsonify({"status": "error", "message": "Account is disabled. Contact support."})
+
+        if user and bcrypt.checkpw(password.encode("utf-8"), user["password"].encode("utf-8")):
+            cursor.execute("UPDATE users SET last_login=NOW() WHERE id=%s", (user["id"],))
+            cursor.execute(
+                "INSERT INTO activity_log(user_id, action, detail, ip_address) VALUES(%s,%s,%s,%s)",
+                (user["id"], "login", email, ip)
+            )
+            db.commit()
+            log.info("Login OK: %s from %s", email, ip)
+            return jsonify({"status": "success", "name": user["name"], "email": user["email"]})
+        else:
+            uid = user["id"] if user else None
+            cursor.execute(
+                "INSERT INTO activity_log(user_id, action, detail, ip_address) VALUES(%s,%s,%s,%s)",
+                (uid, "login_failed", email, ip)
+            )
+            db.commit()
+            return jsonify({"status": "error", "message": "Invalid email or password"})
+
+    except Exception as e:
+        log.error("Login error: %s", e)
+        return jsonify({"status": "error", "message": "Login failed"}), 500
+    finally:
+        cursor.close()
+        db.close()
 
 
-# -------------------------
-# ACCOUNT API
-# -------------------------
+# ─────────────────────────────────────────
+# ACCOUNT — GET
+# ─────────────────────────────────────────
 
 @app.route("/account/<email>")
 def get_account(email):
@@ -131,18 +206,63 @@ def get_account(email):
     if not db:
         return jsonify({"error": "Database unavailable"}), 500
 
-    cursor.execute("SELECT name, email FROM users WHERE email=%s", (email,))
-    user = cursor.fetchone()
+    try:
+        cursor.execute("SELECT name, email FROM users WHERE email=%s", (email,))
+        user = cursor.fetchone()
+        if user:
+            return jsonify(user)
+        return jsonify({"error": "User not found"}), 404
+    except Exception as e:
+        log.error("Account fetch error: %s", e)
+        return jsonify({"error": "Failed to fetch account"}), 500
+    finally:
+        cursor.close()
+        db.close()
 
-    if user:
-        return jsonify(user)
-    else:
-        return jsonify({"error": "User not found"})
+
+# ─────────────────────────────────────────
+# ACCOUNT — UPDATE (name / password)
+# ─────────────────────────────────────────
+
+@app.route("/account/update", methods=["POST"])
+def update_account():
+    db, cursor = get_db()
+    if not db:
+        return jsonify({"status": "error", "message": "Database unavailable"}), 500
+
+    try:
+        data     = request.json or {}
+        email    = data.get("email", "").strip().lower()
+        new_name = data.get("name", "").strip()
+        new_pass = data.get("password", "")
+
+        if not email:
+            return jsonify({"status": "error", "message": "Email required"})
+
+        if new_name:
+            cursor.execute("UPDATE users SET name=%s WHERE email=%s", (new_name, email))
+        if new_pass:
+            if len(new_pass) < 6:
+                return jsonify({"status": "error", "message": "Password must be at least 6 characters"})
+            hashed = bcrypt.hashpw(new_pass.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+            cursor.execute("UPDATE users SET password=%s WHERE email=%s", (hashed, email))
+
+        db.commit()
+        log.info("Account updated: %s", email)
+        return jsonify({"status": "success", "message": "Account updated"})
+    except Exception as e:
+        log.error("Update account error: %s", e)
+        return jsonify({"status": "error", "message": "Update failed"}), 500
+    finally:
+        cursor.close()
+        db.close()
 
 
-# -------------------------
-# DATASET UPLOAD API
-# -------------------------
+# ─────────────────────────────────────────
+# DATASET UPLOAD
+# ─────────────────────────────────────────
+
+ALLOWED_EXT = {".csv", ".txt", ".xlsx", ".xls", ".sql", ".json"}
 
 @app.route("/upload", methods=["POST", "OPTIONS"])
 def upload():
@@ -153,179 +273,444 @@ def upload():
         return jsonify({"error": "No file uploaded"}), 400
 
     file = request.files["file"]
-
-    if file.filename == "":
+    if not file.filename:
         return jsonify({"error": "No file selected"}), 400
 
-    filename = file.filename.lower()
+    ext = os.path.splitext(file.filename.lower())[1]
+    if ext not in ALLOWED_EXT:
+        return jsonify({"error": f"Unsupported file type: {ext.upper()}. Allowed: CSV, TXT, XLSX, XLS, SQL, JSON"}), 400
 
     try:
-        if filename.endswith(".csv"):
-            df = pd.read_csv(file, low_memory=False)
-
-        elif filename.endswith(".txt"):
-            df = pd.read_csv(file, sep=",", low_memory=False)
-
-        elif filename.endswith(".xlsx"):
-            try:
-                df = pd.read_excel(file, engine="openpyxl")
-            except Exception as xlsx_err:
-                err_msg = str(xlsx_err).lower()
-                if "encrypt" in err_msg or "password" in err_msg or "zip" in err_msg:
-                    return jsonify({"error": "This Excel file is password-protected or encrypted. Please remove the password in Excel (File → Info → Protect Workbook → Remove Password) and try again."}), 400
-                file.seek(0)
-                try:
-                    df = pd.read_csv(file)
-                except Exception:
-                    return jsonify({"error": "Could not read Excel file: " + str(xlsx_err)}), 400
-
-        elif filename.endswith(".sql"):
-            text = file.read().decode("utf-8")
-            rows = re.findall(r'\((.*?)\)', text)
-            if not rows:
-                return jsonify({"error": "No data rows found in SQL file"}), 400
-            dataset_rows = [r.split(",") for r in rows]
-            col_headers  = [f"Column {i+1}" for i in range(len(dataset_rows[0]))]
-            df = pd.DataFrame(dataset_rows, columns=col_headers)
-
-        else:
-            return jsonify({"error": f"Unsupported file type: {filename.split('.')[-1].upper()}"}), 400
+        df = _read_file(file, ext)
+        if df is None:
+            return jsonify({"error": "Could not parse file"}), 400
 
         # Clean
         df = df.dropna(how="all")
+        df.columns = [str(c).strip() for c in df.columns]
 
         if df.empty:
             return jsonify({"error": "Dataset is empty after cleaning"}), 400
 
-        # KPIs
         total_rows    = len(df)
         total_columns = len(df.columns)
         missing       = int(df.isnull().sum().sum())
+        missing_pct   = round(missing / max(total_rows * total_columns, 1) * 100, 1)
         duplicates    = int(df.duplicated().sum())
-        numeric       = len(df.select_dtypes(include="number").columns)
-        categorical   = len(df.select_dtypes(exclude="number").columns)
+        numeric_cols  = list(df.select_dtypes(include="number").columns)
+        cat_cols      = list(df.select_dtypes(exclude="number").columns)
 
-        # Preview — send up to 100 rows
-        preview = df.head(100).fillna("").values.tolist()
+        # Up to 500 rows preview
+        preview = df.head(500).fillna("").values.tolist()
 
         result = {
-            "rows":        total_rows,
-            "columns":     total_columns,
-            "missing":     missing,
-            "duplicates":  duplicates,
-            "numeric":     numeric,
-            "categorical": categorical,
-            "preview":     preview,
-            "headers":     list(df.columns)
+            "rows":         total_rows,
+            "columns":      total_columns,
+            "missing":      missing,
+            "missing_pct":  missing_pct,
+            "duplicates":   duplicates,
+            "numeric":      len(numeric_cols),
+            "categorical":  len(cat_cols),
+            "numeric_cols": numeric_cols,
+            "cat_cols":     cat_cols,
+            "preview":      preview,
+            "headers":      list(df.columns),
+            "fileName":     file.filename
         }
-        print(f"UPLOAD SUCCESS: {total_rows} rows, {total_columns} cols, {len(preview)} preview rows")
+        # Save dataset metadata to DB (best-effort — don't fail upload if DB is down)
+        try:
+            db2, cur2 = get_db()
+            if db2:
+                email_hdr = request.headers.get("X-User-Email", "")
+                if email_hdr:
+                    cur2.execute("SELECT id FROM users WHERE email=%s", (email_hdr,))
+                    u = cur2.fetchone()
+                    if u:
+                        cur2.execute(
+                            """INSERT INTO datasets
+                               (user_id, file_name, file_size, file_type,
+                                total_rows, total_cols, numeric_cols, cat_cols,
+                                missing_vals, duplicates, headers)
+                               VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
+                            (
+                                u["id"], file.filename,
+                                request.content_length or 0,
+                                ext.lstrip("."),
+                                total_rows, total_columns,
+                                len(numeric_cols), len(cat_cols),
+                                missing, duplicates,
+                                str(list(df.columns))
+                            )
+                        )
+                        cur2.execute(
+                            "INSERT INTO activity_log(user_id, action, detail, ip_address) VALUES(%s,%s,%s,%s)",
+                            (u["id"], "upload", file.filename, request.remote_addr or "unknown")
+                        )
+                        db2.commit()
+                cur2.close()
+                db2.close()
+        except Exception as db_err:
+            log.warning("Could not save dataset metadata to DB: %s", db_err)
+
+        log.info("Upload OK: %s | %d rows x %d cols", file.filename, total_rows, total_columns)
         return jsonify(result)
 
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
     except Exception as e:
-        print("UPLOAD ERROR:", str(e))
+        log.error("Upload error: %s", e)
         return jsonify({"error": "Upload failed", "details": str(e)}), 500
 
 
-# -------------------------
-# AI CHAT API
-# -------------------------
+def _read_file(file, ext):
+    if ext in (".csv", ".txt"):
+        try:
+            return pd.read_csv(file, low_memory=False)
+        except Exception:
+            file.seek(0)
+            return pd.read_csv(file, sep=None, engine="python", low_memory=False)
+
+    elif ext in (".xlsx", ".xls"):
+        try:
+            return pd.read_excel(file, engine="openpyxl")
+        except Exception as e:
+            err = str(e).lower()
+            if any(k in err for k in ("encrypt", "password", "zip")):
+                raise ValueError(
+                    "This Excel file is password-protected. "
+                    "Remove the password in Excel (File → Info → Protect Workbook) and re-upload."
+                )
+            file.seek(0)
+            try:
+                return pd.read_excel(file, engine="xlrd")
+            except Exception:
+                return None
+
+    elif ext == ".json":
+        return pd.read_json(file)
+
+    elif ext == ".sql":
+        text = file.read().decode("utf-8", errors="ignore")
+        rows = re.findall(r'\(([^()]+)\)', text)
+        if not rows:
+            raise ValueError("No data rows found in SQL file")
+        parsed   = [[p.strip().strip("'\"") for p in r.split(",")] for r in rows]
+        max_cols = max(len(r) for r in parsed)
+        headers  = [f"Column_{i+1}" for i in range(max_cols)]
+        padded   = [r + [""] * (max_cols - len(r)) for r in parsed]
+        return pd.DataFrame(padded, columns=headers)
+
+    return None
+
+
+# ─────────────────────────────────────────
+# ANALYZE — per-column statistics
+# ─────────────────────────────────────────
+
+
+# ─────────────────────────────────────────
+# LOGOUT — log the action
+# ─────────────────────────────────────────
+
+@app.route("/logout", methods=["POST"])
+def logout():
+    data  = request.json or {}
+    email = data.get("email", "").strip().lower()
+    if email:
+        db, cursor = get_db()
+        if db:
+            try:
+                cursor.execute("SELECT id FROM users WHERE email=%s", (email,))
+                u = cursor.fetchone()
+                if u:
+                    cursor.execute(
+                        "INSERT INTO activity_log(user_id, action, ip_address) VALUES(%s,%s,%s)",
+                        (u["id"], "logout", request.remote_addr or "unknown")
+                    )
+                    db.commit()
+            except Exception as e:
+                log.warning("Logout log error: %s", e)
+            finally:
+                cursor.close()
+                db.close()
+    return jsonify({"status": "ok"})
+
+@app.route("/analyze", methods=["POST"])
+def analyze():
+    """Rich per-column stats for the frontend dashboard charts."""
+    data    = request.json or {}
+    headers = data.get("headers", [])
+    rows    = data.get("dataset", data.get("preview", []))
+
+    if not headers or not rows:
+        return jsonify({"error": "No dataset provided"}), 400
+
+    try:
+        df = pd.DataFrame(rows, columns=headers)
+        col_stats = {}
+
+        for col in df.columns:
+            series       = df[col]
+            numeric_vals = pd.to_numeric(series, errors="coerce").dropna()
+            is_num       = len(numeric_vals) > len(series) * 0.5
+
+            if is_num:
+                v  = numeric_vals
+                q1 = float(v.quantile(0.25))
+                q3 = float(v.quantile(0.75))
+                iq = q3 - q1
+                col_stats[col] = {
+                    "type":     "numeric",
+                    "count":    int(v.count()),
+                    "missing":  int(series.isnull().sum()),
+                    "min":      _safe_float(v.min()),
+                    "max":      _safe_float(v.max()),
+                    "mean":     _safe_float(v.mean()),
+                    "median":   _safe_float(v.median()),
+                    "std":      _safe_float(v.std()) if len(v) > 1 else 0.0,
+                    "variance": _safe_float(v.var()) if len(v) > 1 else 0.0,
+                    "q1":       round(q1, 4),
+                    "q3":       round(q3, 4),
+                    "iqr":      round(iq, 4),
+                    "outliers": int(((v < q1 - 1.5*iq) | (v > q3 + 1.5*iq)).sum()),
+                    "sum":      _safe_float(v.sum()),
+                    "skew":     round(float(v.skew()), 4) if len(v) > 2 else 0.0,
+                }
+            else:
+                vc = series.dropna().astype(str).value_counts()
+                col_stats[col] = {
+                    "type":      "categorical",
+                    "count":     int(series.count()),
+                    "missing":   int(series.isnull().sum()),
+                    "unique":    int(series.nunique()),
+                    "top_value": str(vc.index[0]) if len(vc) else "",
+                    "top_count": int(vc.iloc[0]) if len(vc) else 0,
+                    "top_10":    {str(k): int(v) for k, v in vc.head(10).items()},
+                }
+
+        summary = {
+            "total_rows":    len(df),
+            "total_cols":    len(df.columns),
+            "total_missing": int(df.isnull().sum().sum()),
+            "total_dupes":   int(df.duplicated().sum()),
+            "numeric_cols":  [c for c in df.columns if col_stats[c]["type"] == "numeric"],
+            "cat_cols":      [c for c in df.columns if col_stats[c]["type"] == "categorical"],
+        }
+
+        return jsonify({"summary": summary, "columns": col_stats})
+
+    except Exception as e:
+        log.error("Analyze error: %s", e)
+        return jsonify({"error": "Analysis failed", "details": str(e)}), 500
+
+
+def _safe_float(val):
+    try:
+        f = float(val)
+        return 0.0 if (math.isnan(f) or math.isinf(f)) else round(f, 4)
+    except Exception:
+        return 0.0
+
+
+# ─────────────────────────────────────────
+# AI CHAT
+# ─────────────────────────────────────────
 
 @app.route("/chat", methods=["POST"])
 def chat():
-    data         = request.json
-    user_message = data.get("message", "")
+    data         = request.json or {}
+    user_message = data.get("message", "").strip()
     history      = data.get("history", [])
     dataset_ctx  = data.get("dataset_context", "No dataset uploaded yet.")
 
     if not user_message:
         return jsonify({"error": "No message provided"}), 400
 
-    messages = history[-4:] + [{"role": "user", "content": user_message}]
+    # Keep last 10 turns for better conversation context
+    recent = history[-10:]
+    ctx    = "\n".join(dataset_ctx.split("\n")[:50])
 
-    # Build rich dataset context — 50 sample rows
-    ctx_lines = dataset_ctx.split("\n")
-    # Keep header info (first 6 lines) + up to 50 data rows
-    header_lines = ctx_lines[:6]
-    data_lines   = ctx_lines[6:][:50]
-    short_ctx    = "\n".join(header_lines + data_lines)
-
-    system_prompt = f"""You are an expert data analyst assistant. Analyze the dataset below and answer questions clearly with bullet points, numbers, and insights. Be concise but thorough — max 200 words.
-
-Dataset:
-{short_ctx}"""
+    system_prompt = (
+        "You are InsightFlow's expert data analyst AI. "
+        "Analyze data clearly and concisely. Use bullet points. Max 200 words. "
+        "Always base answers on the dataset provided.\n\n"
+        f"Dataset context:\n{ctx}"
+    )
 
     try:
-        client = Groq(api_key=GROQ_API_KEY)
-
-        groq_messages = [{"role": "system", "content": system_prompt}] + messages
-
-        response = client.chat.completions.create(
+        response = groq_client.chat.completions.create(
             model="llama-3.3-70b-versatile",
-            messages=groq_messages,
+            messages=[{"role": "system", "content": system_prompt}] + recent + [
+                {"role": "user", "content": user_message}
+            ],
             max_tokens=1000,
             temperature=0.7
         )
-
         reply = response.choices[0].message.content
+        log.info("Chat reply: %d chars", len(reply))
         return jsonify({"reply": reply})
 
     except Exception as e:
-        import traceback
-        print("CHAT ERROR:", traceback.format_exc())
+        log.error("Chat error: %s", e)
         return jsonify({"error": str(e)}), 500
 
 
-# -------------------------
-# GEMINI MODELS LIST
-# -------------------------
+# ─────────────────────────────────────────
+# AI AUTO-SUMMARY — one-click dataset summary
+# ─────────────────────────────────────────
 
-@app.route("/list-models")
-def list_models():
-    api_key = os.environ.get("GEMINI_API_KEY", "")
-    if not api_key:
-        return jsonify({"error": "GEMINI_API_KEY not set in .env"}), 401
-    url = f"https://generativelanguage.googleapis.com/v1beta/models?key={api_key}"
-    resp = requests.get(url, timeout=10, verify=False)
-    if resp.status_code != 200:
-        return jsonify({"error": resp.text})
-    models = [m["name"] for m in resp.json().get("models", []) if "generateContent" in m.get("supportedGenerationMethods", [])]
-    return jsonify({"models": models})
+@app.route("/summary", methods=["POST"])
+def summary():
+    """Generate a natural-language summary of the dataset using AI."""
+    data    = request.json or {}
+    headers = data.get("headers", [])
+    rows    = data.get("dataset", data.get("preview", []))
+    fname   = data.get("fileName", "dataset")
 
+    if not headers or not rows:
+        return jsonify({"error": "No dataset provided"}), 400
 
-# -------------------------
-# GEMINI TEST ROUTE
-# -------------------------
+    try:
+        df       = pd.DataFrame(rows[:100], columns=headers)
+        preview  = df.head(5).to_string(index=False)
+        num_cols = list(df.select_dtypes(include="number").columns)
+        cat_cols = list(df.select_dtypes(exclude="number").columns)
 
-@app.route("/test-gemini")
-def test_gemini():
-    api_key = os.environ.get("GEMINI_API_KEY", "")
-    if not api_key:
-        return jsonify({"error": "GEMINI_API_KEY not set in .env"}), 401
+        prompt = (
+            f"Dataset: '{fname}' — {len(rows)} rows × {len(headers)} columns.\n"
+            f"Numeric columns: {', '.join(num_cols) or 'None'}.\n"
+            f"Categorical columns: {', '.join(cat_cols) or 'None'}.\n"
+            f"First 5 rows:\n{preview}\n\n"
+            "Give a 3-bullet insight summary. Mention key patterns, "
+            "potential use cases, and any data quality notes. Max 120 words."
+        )
 
-    models = [
-        "gemini-2.0-flash",
-        "gemini-1.5-flash",
-        "gemini-1.5-flash-8b",
-        "gemini-pro"
-    ]
+        response = groq_client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[
+                {"role": "system", "content": "You are a senior data analyst. Be concise and insightful."},
+                {"role": "user",   "content": prompt}
+            ],
+            max_tokens=400,
+            temperature=0.5
+        )
+        return jsonify({"summary": response.choices[0].message.content})
 
-    results = {}
-    for model in models:
-        try:
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
-            resp = requests.post(url, json={
-                "contents": [{"role": "user", "parts": [{"text": "say hi"}]}]
-            }, timeout=10, verify=False)
-            results[model] = resp.status_code
-        except Exception as e:
-            results[model] = str(e)
-
-    return jsonify(results)
+    except Exception as e:
+        log.error("Summary error: %s", e)
+        return jsonify({"error": str(e)}), 500
 
 
-# -------------------------
-# RUN SERVER
-# -------------------------
+# ─────────────────────────────────────────
+# AI COLUMN INSIGHT — single column analysis
+# ─────────────────────────────────────────
+
+@app.route("/column-insight", methods=["POST"])
+def column_insight():
+    """AI insight for a single column."""
+    data     = request.json or {}
+    col      = data.get("column", "")
+    values   = data.get("values", [])
+    col_type = data.get("type", "unknown")
+
+    if not col or not values:
+        return jsonify({"error": "column and values required"}), 400
+
+    try:
+        prompt = (
+            f"Column: '{col}' (type: {col_type})\n"
+            f"Sample values: {values[:50]}\n\n"
+            "In 2-3 bullet points: describe the distribution pattern, "
+            "any anomalies or outliers, and one actionable insight. Max 80 words."
+        )
+        response = groq_client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[
+                {"role": "system", "content": "You are a data analyst. Be brief and specific."},
+                {"role": "user",   "content": prompt}
+            ],
+            max_tokens=200,
+            temperature=0.5
+        )
+        return jsonify({"insight": response.choices[0].message.content})
+
+    except Exception as e:
+        log.error("Column insight error: %s", e)
+        return jsonify({"error": str(e)}), 500
+
+
+
+# ─────────────────────────────────────────
+# DATASET HISTORY — user's past uploads
+# ─────────────────────────────────────────
+
+@app.route("/datasets/<email>")
+def dataset_history(email):
+    db, cursor = get_db()
+    if not db:
+        return jsonify({"error": "Database unavailable"}), 500
+    try:
+        cursor.execute("SELECT id FROM users WHERE email=%s", (email,))
+        u = cursor.fetchone()
+        if not u:
+            return jsonify({"datasets": []})
+        cursor.execute(
+            """SELECT id, file_name, file_type, total_rows, total_cols,
+                      numeric_cols, cat_cols, missing_vals, duplicates, uploaded_at
+               FROM datasets WHERE user_id=%s
+               ORDER BY uploaded_at DESC LIMIT 20""",
+            (u["id"],)
+        )
+        rows = cursor.fetchall()
+        # Convert datetime to string for JSON
+        for r in rows:
+            if r.get("uploaded_at"):
+                r["uploaded_at"] = str(r["uploaded_at"])
+        return jsonify({"datasets": rows})
+    except Exception as e:
+        log.error("Dataset history error: %s", e)
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close()
+        db.close()
+
+
+# ─────────────────────────────────────────
+# ACTIVITY LOG — recent user actions
+# ─────────────────────────────────────────
+
+@app.route("/activity/<email>")
+def activity(email):
+    db, cursor = get_db()
+    if not db:
+        return jsonify({"error": "Database unavailable"}), 500
+    try:
+        cursor.execute("SELECT id FROM users WHERE email=%s", (email,))
+        u = cursor.fetchone()
+        if not u:
+            return jsonify({"activity": []})
+        cursor.execute(
+            """SELECT action, detail, ip_address, created_at
+               FROM activity_log WHERE user_id=%s
+               ORDER BY created_at DESC LIMIT 50""",
+            (u["id"],)
+        )
+        rows = cursor.fetchall()
+        for r in rows:
+            if r.get("created_at"):
+                r["created_at"] = str(r["created_at"])
+        return jsonify({"activity": rows})
+    except Exception as e:
+        log.error("Activity error: %s", e)
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close()
+        db.close()
+
+# ─────────────────────────────────────────
+# RUN
+# ─────────────────────────────────────────
 
 if __name__ == "__main__":
+    log.info("Starting InsightFlow backend on port 5000")
     app.run(debug=True, port=5000)
