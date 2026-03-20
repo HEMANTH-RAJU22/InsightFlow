@@ -4,43 +4,30 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>InsightFlow — Login</title>
-<script src="auth.js" data-public></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 
 html,body{
   height:100%;width:100%;overflow:hidden;
   font-family:Arial,Helvetica,sans-serif;
-  background:#0b0f1a;color:white;
+  background:linear-gradient(135deg,#0f172a,#1f2a40,#0f172a);
+  background-size:400% 400%;
+  animation:bgMove 12s infinite;
+  color:white;
 }
-
-/* ── Animated background ── */
-.bg-glow{
-  position:fixed;inset:0;z-index:0;
-  background:
-    radial-gradient(ellipse 60% 60% at 50% 40%,rgba(255,140,0,.06) 0%,transparent 65%),
-    radial-gradient(ellipse 40% 40% at 20% 80%,rgba(255,80,0,.04) 0%,transparent 60%);
-}
-.bg-grid{
-  position:fixed;inset:0;z-index:0;
-  background-image:linear-gradient(rgba(255,255,255,.02) 1px,transparent 1px),
-                   linear-gradient(90deg,rgba(255,255,255,.02) 1px,transparent 1px);
-  background-size:48px 48px;
-  animation:gridDrift 20s linear infinite;
-}
-@keyframes gridDrift{from{background-position:0 0}to{background-position:48px 48px}}
+@keyframes bgMove{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
 @keyframes logoGlow{0%{background-position:0% center}100%{background-position:200% center}}
 
-/* ── Layout ── */
 .page{
-  position:relative;z-index:1;
-  height:100vh;display:flex;align-items:center;justify-content:center;
-  padding:20px;overflow:hidden;
+  position:fixed;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  padding:16px;
 }
 
-/* ── Auth card ── */
 .auth-card{
-  width:420px;flex-shrink:0;
+  width:400px;max-width:100%;
+  max-height:calc(100vh - 32px);
+  display:flex;flex-direction:column;
   background:rgba(255,255,255,.04);
   border:1px solid rgba(255,255,255,.09);
   border-radius:20px;
@@ -48,31 +35,33 @@ html,body{
   overflow:hidden;
 }
 
-/* card header */
-.card-header{padding:32px 32px 0}
-.card-title{font-size:22px;font-weight:700;color:white;letter-spacing:.2px;margin-bottom:6px}
-.card-sub{font-size:13px;color:rgba(255,255,255,.35)}
+.card-header{padding:20px 28px 0;flex-shrink:0}
+.card-title{font-size:20px;font-weight:700;color:white;letter-spacing:.2px;margin-bottom:4px}
+.card-sub{font-size:12px;color:rgba(255,255,255,.35)}
 
-/* tabs */
-.tabs{display:flex;gap:4px;background:rgba(255,255,255,.05);border-radius:10px;padding:4px;margin:16px 32px 0}
+.tabs{
+  display:flex;gap:4px;background:rgba(255,255,255,.05);
+  border-radius:10px;padding:4px;margin:12px 28px 0;flex-shrink:0;
+}
 .tab{
-  flex:1;padding:9px;border-radius:7px;border:none;cursor:pointer;
+  flex:1;padding:8px;border-radius:7px;border:none;cursor:pointer;
   font-size:13px;font-weight:600;letter-spacing:.3px;
   color:rgba(255,255,255,.35);background:transparent;
   font-family:Arial,Helvetica,sans-serif;transition:all .2s;
 }
 .tab.active{background:rgba(255,140,0,.18);color:#ff8c00;border:1px solid rgba(255,140,0,.25)}
 
-/* form */
-.form-group{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
-.form-body{padding:16px 32px 28px}
-.form-label{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.3)}
+.form-scroll{flex:1;overflow:hidden;display:flex;flex-direction:column}
+.form-body{padding:14px 28px 20px;display:flex;flex-direction:column;flex:1}
+
+.form-group{display:flex;flex-direction:column;gap:3px;margin-bottom:8px;flex-shrink:0}
+.form-label{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.3)}
 .form-input-wrap{position:relative}
 .form-input{
-  width:100%;padding:10px 14px;
+  width:100%;padding:8px 12px;
   background:rgba(255,255,255,.06);
   border:1px solid rgba(255,255,255,.1);
-  border-radius:10px;color:white;font-size:13px;
+  border-radius:9px;color:white;font-size:13px;
   font-family:Arial,Helvetica,sans-serif;
   transition:border-color .2s,background .2s;outline:none;
 }
@@ -81,46 +70,40 @@ html,body{
 .form-input.ok{border-color:rgba(16,185,129,.4)}
 .form-input::placeholder{color:rgba(255,255,255,.18)}
 .pw-eye{
-  position:absolute;right:14px;top:50%;transform:translateY(-50%);
-  cursor:pointer;opacity:.35;transition:opacity .2s;
-  font-size:16px;user-select:none;
+  position:absolute;right:12px;top:50%;transform:translateY(-50%);
+  cursor:pointer;opacity:.35;transition:opacity .2s;font-size:15px;user-select:none;
 }
 .pw-eye:hover{opacity:.7}
 
-/* validation message */
 .val-msg{
-  font-size:11px;font-weight:600;padding:0;height:0;overflow:hidden;
-  transition:height .2s,padding .2s;border-radius:6px;
+  font-size:10px;font-weight:600;
+  max-height:0;overflow:hidden;
+  transition:max-height .18s ease,padding .18s ease;
+  border-radius:6px;
 }
-.val-msg.show{height:auto;padding:7px 10px;margin-top:4px}
+.val-msg.show{max-height:28px;padding:4px 9px;margin-top:2px}
 .val-msg.err{background:rgba(239,68,68,.1);color:#ef4444;border:1px solid rgba(239,68,68,.2)}
 .val-msg.ok{background:rgba(16,185,129,.08);color:#10b981;border:1px solid rgba(16,185,129,.2)}
 
-/* remember me + forgot */
-.form-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-.remember{display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
-.remember input[type=checkbox]{
-  width:15px;height:15px;accent-color:#ff8c00;cursor:pointer;flex-shrink:0;
-}
-.remember span{font-size:13px;color:rgba(255,255,255,.4)}
-.forgot{font-size:12px;color:#ff8c00;cursor:pointer;opacity:.8;transition:opacity .2s}
+.form-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-shrink:0}
+.remember{display:flex;align-items:center;gap:7px;cursor:pointer;user-select:none}
+.remember input[type=checkbox]{width:14px;height:14px;accent-color:#ff8c00;cursor:pointer;flex-shrink:0}
+.remember span{font-size:12px;color:rgba(255,255,255,.4)}
+.forgot{font-size:11px;color:#ff8c00;cursor:pointer;opacity:.8;transition:opacity .2s}
 .forgot:hover{opacity:1}
 
-/* submit button */
 .submit-btn{
-  width:100%;padding:11px;border-radius:10px;border:none;cursor:pointer;
+  width:100%;padding:10px;border-radius:9px;border:none;cursor:pointer;
   font-size:13px;font-weight:700;letter-spacing:.5px;
   font-family:Arial,Helvetica,sans-serif;
   background:linear-gradient(135deg,#ff8c00,#ff5500);color:white;
   box-shadow:0 4px 20px rgba(255,140,0,.4);
-  transition:all .22s;position:relative;overflow:hidden;
+  transition:all .22s;position:relative;overflow:hidden;flex-shrink:0;
 }
 .submit-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 28px rgba(255,140,0,.55)}
 .submit-btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
-
-/* spinner inside button */
 .btn-spinner{
-  display:none;width:16px;height:16px;border-radius:50%;
+  display:none;width:15px;height:15px;border-radius:50%;
   border:2px solid rgba(255,255,255,.3);border-top-color:white;
   animation:spin .6s linear infinite;margin:0 auto;
 }
@@ -128,399 +111,508 @@ html,body{
 .submit-btn.loading .btn-text{display:none}
 .submit-btn.loading .btn-spinner{display:block}
 
-/* global error banner */
 .error-banner{
-  padding:9px 14px;border-radius:10px;font-size:12px;font-weight:600;
+  padding:7px 12px;border-radius:9px;font-size:11px;font-weight:600;
   background:rgba(239,68,68,.1);color:#ef4444;border:1px solid rgba(239,68,68,.2);
-  display:none;margin-bottom:12px;text-align:center;
-  animation:shake .4s ease;
+  display:none;margin-bottom:8px;text-align:center;animation:shake .4s ease;flex-shrink:0;
 }
 .error-banner.show{display:block}
-@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
-
-/* success banner */
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
 .success-banner{
-  padding:9px 14px;border-radius:10px;font-size:12px;font-weight:600;
+  padding:7px 12px;border-radius:9px;font-size:11px;font-weight:600;
   background:rgba(16,185,129,.1);color:#10b981;border:1px solid rgba(16,185,129,.2);
-  display:none;margin-bottom:12px;text-align:center;
+  display:none;margin-bottom:8px;text-align:center;flex-shrink:0;
 }
 .success-banner.show{display:block}
 
-/* divider line */
-.or-line{
-  display:flex;align-items:center;gap:12px;margin:20px 0;
-  font-size:11px;color:rgba(255,255,255,.2);font-weight:600;letter-spacing:1px;
-}
-.or-line::before,.or-line::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.07)}
-
-/* bottom toggle */
-.toggle-row{text-align:center;margin-top:12px;font-size:12px;color:rgba(255,255,255,.35)}
+.toggle-row{text-align:center;margin-top:10px;font-size:11px;color:rgba(255,255,255,.35);flex-shrink:0}
 .toggle-row span{color:#ff8c00;cursor:pointer;font-weight:600;transition:opacity .2s}
 .toggle-row span:hover{opacity:.8}
 
-/* strength bar */
-.strength-wrap{margin-top:4px}
+.strength-wrap{margin-top:3px;flex-shrink:0}
 .strength-bar{height:3px;border-radius:3px;background:rgba(255,255,255,.07);overflow:hidden}
 .strength-fill{height:100%;border-radius:3px;transition:width .3s,background .3s;width:0}
-.strength-lbl{font-size:10px;color:rgba(255,255,255,.3);margin-top:4px;font-weight:600}
+.strength-lbl{font-size:9px;color:rgba(255,255,255,.3);margin-top:3px;font-weight:600}
 
-/* responsive */
-@media(max-width:480px){
-  .auth-card{width:100%;border-radius:0;border-left:none;border-right:none}
-  .page{padding:0}
+/* ── Password reveal box ── */
+.pw-reveal-box{
+  margin-top:14px;
+  padding:14px 16px;
+  background:rgba(16,185,129,.07);
+  border:1px solid rgba(16,185,129,.25);
+  border-radius:10px;
+  flex-shrink:0;
+}
+.pw-reveal-label{
+  font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+  color:rgba(16,185,129,.6);margin-bottom:6px;
+}
+.pw-reveal-row{display:flex;align-items:center;gap:8px;}
+.pw-reveal-value{
+  flex:1;font-size:14px;font-weight:700;
+  color:#10b981;letter-spacing:.5px;
+  word-break:break-all;
+}
+.pw-copy-btn{
+  padding:5px 10px;border-radius:6px;border:1px solid rgba(16,185,129,.3);
+  background:rgba(16,185,129,.1);color:#10b981;
+  font-size:11px;font-weight:700;cursor:pointer;
+  font-family:Arial,Helvetica,sans-serif;
+  transition:all .18s;white-space:nowrap;flex-shrink:0;
+}
+.pw-copy-btn:hover{background:rgba(16,185,129,.2)}
+.pw-reveal-hint{
+  font-size:10px;color:rgba(255,255,255,.25);margin-top:8px;
+}
+
+@media(max-height:620px){
+  .card-header{padding:12px 24px 0}
+  .card-title{font-size:17px;margin-bottom:2px}
+  .tabs{margin:8px 24px 0}
+  .form-body{padding:10px 24px 12px}
+  .form-group{margin-bottom:5px}
+  .form-input{padding:6px 11px;font-size:12px}
+  .submit-btn{padding:8px}
+  .toggle-row{margin-top:6px}
+}
+@media(max-width:440px){
+  .auth-card{border-radius:16px}
+  .card-header{padding:16px 18px 0}
+  .tabs{margin:10px 18px 0}
+  .form-body{padding:12px 18px 16px}
 }
 </style>
 </head>
 <body>
 
-<div class="bg-glow"></div>
-<div class="bg-grid"></div>
-
 <div class="page">
-
-  <!-- ── Auth card ── -->
   <div class="auth-card">
 
     <div class="card-header">
-      <div style="font-size:18px;font-weight:900;letter-spacing:3px;background:linear-gradient(90deg,#ff8c00,#ffb347,#ff8c00);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:logoGlow 6s linear infinite;margin-bottom:10px">INSIGHTFLOW</div>
+      <div style="font-size:16px;font-weight:900;letter-spacing:3px;background:linear-gradient(90deg,#ff8c00,#ffb347,#ff8c00);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:logoGlow 6s linear infinite;margin-bottom:8px">INSIGHTFLOW</div>
       <div class="card-title" id="cardTitle">Welcome back</div>
       <div class="card-sub"  id="cardSub">Sign in to your InsightFlow account</div>
     </div>
 
-    <!-- Tabs -->
     <div class="tabs">
       <button class="tab active" id="tabLogin"    onclick="switchTab('login')">Sign In</button>
       <button class="tab"        id="tabRegister" onclick="switchTab('register')">Create Account</button>
     </div>
 
     <!-- ══ LOGIN FORM ══ -->
-    <div id="loginForm"><div class="form-body">
-      <div class="error-banner"   id="errBanner"></div>
-      <div class="success-banner" id="okBanner"></div>
+    <div id="loginForm" class="form-scroll">
+      <div class="form-body">
+        <div class="error-banner"   id="errBanner"></div>
+        <div class="success-banner" id="okBanner"></div>
 
-      <div class="form-group">
-        <label class="form-label">Email Address</label>
-        <input class="form-input" type="email" id="lEmail"
-               placeholder="you@example.com"
-               oninput="clearErr('lEmail')"
-               onblur="validateEmail('lEmail')">
-        <div class="val-msg" id="lEmailMsg"></div>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Password</label>
-        <div class="form-input-wrap">
-          <input class="form-input" type="password" id="lPass"
-                 placeholder="Enter your password"
-                 oninput="clearErr('lPass')"
-                 onkeydown="if(event.key==='Enter') doLogin()">
-          <span class="pw-eye" onclick="toggleEye('lPass',this)">👁</span>
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input class="form-input" type="email" id="lEmail" placeholder="you@example.com"
+                 oninput="clearField('lEmail')">
+          <div class="val-msg" id="lEmailMsg"></div>
         </div>
-        <div class="val-msg" id="lPassMsg"></div>
+
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <div class="form-input-wrap">
+            <input class="form-input" type="password" id="lPass" placeholder="Enter your password"
+                   oninput="clearField('lPass')" onkeydown="if(event.key==='Enter')doLogin()">
+            <span class="pw-eye" onclick="toggleEye('lPass',this)">👁</span>
+          </div>
+          <div class="val-msg" id="lPassMsg"></div>
+        </div>
+
+        <div class="form-row">
+          <label class="remember">
+            <input type="checkbox" id="rememberMe" onchange="onRememberToggle()">
+            <span>Remember me</span>
+          </label>
+          <span class="forgot" onclick="showForgot()">Forgot password?</span>
+        </div>
+
+        <button class="submit-btn" id="loginBtn" onclick="doLogin()">
+          <span class="btn-text">Sign In</span>
+          <div class="btn-spinner"></div>
+        </button>
+        <div class="toggle-row">Don't have an account? <span onclick="switchTab('register')">Create one free</span></div>
       </div>
-
-      <div class="form-row">
-        <label class="remember">
-          <input type="checkbox" id="rememberMe">
-          <span>Remember me</span>
-        </label>
-        <span class="forgot" onclick="showForgot()">Forgot password?</span>
-      </div>
-
-      <button class="submit-btn" id="loginBtn" onclick="doLogin()">
-        <span class="btn-text">Sign In</span>
-        <div class="btn-spinner"></div>
-      </button>
-
-      <div class="toggle-row">Don't have an account? <span onclick="switchTab('register')">Create one free</span></div>
-    </div></div>
+    </div>
 
     <!-- ══ REGISTER FORM ══ -->
-    <div id="registerForm" style="display:none"><div class="form-body">
-      <div class="error-banner"   id="errBanner2"></div>
-      <div class="success-banner" id="okBanner2"></div>
+    <div id="registerForm" class="form-scroll" style="display:none">
+      <div class="form-body">
+        <div class="error-banner"   id="errBanner2"></div>
+        <div class="success-banner" id="okBanner2"></div>
 
-      <div class="form-group">
-        <label class="form-label">Full Name</label>
-        <input class="form-input" type="text" id="rName"
-               placeholder="Your name"
-               oninput="clearErr('rName')"
-               onblur="validateName()">
-        <div class="val-msg" id="rNameMsg"></div>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Email Address</label>
-        <input class="form-input" type="email" id="rEmail"
-               placeholder="you@example.com"
-               oninput="clearErr('rEmail')"
-               onblur="validateEmail('rEmail')">
-        <div class="val-msg" id="rEmailMsg"></div>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Password</label>
-        <div class="form-input-wrap">
-          <input class="form-input" type="password" id="rPass"
-                 placeholder="At least 6 characters"
-                 oninput="checkStrength(this.value);clearErr('rPass')"
-                 onkeydown="if(event.key==='Enter') doRegister()">
-          <span class="pw-eye" onclick="toggleEye('rPass',this)">👁</span>
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <input class="form-input" type="text" id="rName" placeholder="Your name"
+                 oninput="clearField('rName')">
+          <div class="val-msg" id="rNameMsg"></div>
         </div>
-        <div class="strength-wrap">
-          <div class="strength-bar"><div class="strength-fill" id="strFill"></div></div>
-          <div class="strength-lbl" id="strLbl">Enter a password</div>
+
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input class="form-input" type="email" id="rEmail" placeholder="you@example.com"
+                 oninput="clearField('rEmail')">
+          <div class="val-msg" id="rEmailMsg"></div>
         </div>
-        <div class="val-msg" id="rPassMsg"></div>
-      </div>
 
-      <div class="form-group" style="margin-bottom:10px">
-        <label class="form-label">Confirm Password</label>
-        <div class="form-input-wrap">
-          <input class="form-input" type="password" id="rConf"
-                 placeholder="Repeat your password"
-                 oninput="clearErr('rConf')"
-                 onkeydown="if(event.key==='Enter') doRegister()">
-          <span class="pw-eye" onclick="toggleEye('rConf',this)">👁</span>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <div class="form-input-wrap">
+            <input class="form-input" type="password" id="rPass" placeholder="At least 6 characters"
+                   oninput="checkStrength(this.value);clearField('rPass')"
+                   onkeydown="if(event.key==='Enter')doRegister()">
+            <span class="pw-eye" onclick="toggleEye('rPass',this)">👁</span>
+          </div>
+          <div class="strength-wrap">
+            <div class="strength-bar"><div class="strength-fill" id="strFill"></div></div>
+            <div class="strength-lbl" id="strLbl">Enter a password</div>
+          </div>
+          <div class="val-msg" id="rPassMsg"></div>
         </div>
-        <div class="val-msg" id="rConfMsg"></div>
+
+        <div class="form-group" style="margin-bottom:8px">
+          <label class="form-label">Confirm Password</label>
+          <div class="form-input-wrap">
+            <input class="form-input" type="password" id="rConf" placeholder="Repeat your password"
+                   oninput="clearField('rConf')" onkeydown="if(event.key==='Enter')doRegister()">
+            <span class="pw-eye" onclick="toggleEye('rConf',this)">👁</span>
+          </div>
+          <div class="val-msg" id="rConfMsg"></div>
+        </div>
+
+        <button class="submit-btn" id="registerBtn" onclick="doRegister()">
+          <span class="btn-text">Create Account</span>
+          <div class="btn-spinner"></div>
+        </button>
+        <div class="toggle-row">Already have an account? <span onclick="switchTab('login')">Sign in</span></div>
       </div>
+    </div>
 
-      <button class="submit-btn" id="registerBtn" onclick="doRegister()">
-        <span class="btn-text">Create Account</span>
-        <div class="btn-spinner"></div>
-      </button>
-
-      <div class="toggle-row">Already have an account? <span onclick="switchTab('login')">Sign in</span></div>
-    </div></div>
-
-  </div><!-- end auth-card -->
-</div><!-- end page -->
+  </div>
+</div>
 
 <script>
 var API = 'http://127.0.0.1:5000'
 
-/* ── Tab switch ── */
+window.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('lEmail').value = ''
+  document.getElementById('rememberMe').checked = false
+  var tab = sessionStorage.getItem('insightflow_tab')
+  if (tab === 'register') { sessionStorage.removeItem('insightflow_tab'); switchTab('register') }
+})
+
+function onRememberToggle() {
+  var cb    = document.getElementById('rememberMe')
+  var email = document.getElementById('lEmail')
+  if (cb.checked) {
+    var saved = localStorage.getItem('insightflow_remember')
+    if (saved) email.value = saved
+  } else {
+    email.value = ''
+    localStorage.removeItem('insightflow_remember')
+  }
+}
+
+function clearField(id) {
+  var inp = document.getElementById(id); if (inp) inp.className = 'form-input'
+  var msg = document.getElementById(id + 'Msg'); if (msg) { msg.textContent = ''; msg.className = 'val-msg' }
+  hideBanners()
+}
+
+function resetForm(formId) {
+  var form = document.getElementById(formId); if (!form) return
+  form.querySelectorAll('.form-input').forEach(function(inp) {
+    inp.value = ''; inp.className = 'form-input'; inp.disabled = false
+  })
+  form.querySelectorAll('.val-msg').forEach(function(el) { el.textContent = ''; el.className = 'val-msg' })
+  var fill = document.getElementById('strFill'), lbl = document.getElementById('strLbl')
+  if (fill) fill.style.width = '0'
+  if (lbl)  { lbl.textContent = 'Enter a password'; lbl.style.color = '' }
+}
+
 function switchTab(tab) {
   var isLogin = tab === 'login'
-  document.getElementById('loginForm').style.display    = isLogin ? 'block' : 'none'
-  document.getElementById('registerForm').style.display = isLogin ? 'none'  : 'block'
+  resetForm(isLogin ? 'loginForm' : 'registerForm')
+  if (isLogin) { document.getElementById('rememberMe').checked = false }
+  hideBanners()
+  document.getElementById('loginForm').style.display    = isLogin ? 'flex' : 'none'
+  document.getElementById('registerForm').style.display = isLogin ? 'none' : 'flex'
   document.getElementById('tabLogin').classList.toggle('active', isLogin)
   document.getElementById('tabRegister').classList.toggle('active', !isLogin)
   document.getElementById('cardTitle').textContent = isLogin ? 'Welcome back' : 'Create your account'
   document.getElementById('cardSub').textContent   = isLogin ? 'Sign in to your InsightFlow account' : 'Start analysing data in minutes'
-  hideBanners()
 }
 
-/* ── Banners ── */
 function showErr(msg) {
   var id = document.getElementById('loginForm').style.display !== 'none' ? 'errBanner' : 'errBanner2'
-  var el = document.getElementById(id)
-  if (!el) return
+  var el = document.getElementById(id); if (!el) return
   el.textContent = msg; el.className = 'error-banner show'
   el.style.animation = 'none'; el.offsetHeight; el.style.animation = ''
 }
 function showOk(msg) {
   var id = document.getElementById('loginForm').style.display !== 'none' ? 'okBanner' : 'okBanner2'
-  var el = document.getElementById(id)
-  if (el) { el.textContent = msg; el.className = 'success-banner show' }
+  var el = document.getElementById(id); if (el) { el.textContent = msg; el.className = 'success-banner show' }
 }
 function hideBanners() {
-  ['errBanner','okBanner','errBanner2','okBanner2'].forEach(function(id){
+  ['errBanner','okBanner','errBanner2','okBanner2'].forEach(function(id) {
     var el = document.getElementById(id)
     if (el) el.className = el.className.includes('error') ? 'error-banner' : 'success-banner'
   })
 }
 
-/* ── Field validation ── */
 function setFieldState(id, state, msg) {
-  var inp    = document.getElementById(id)
-  var msgEl  = document.getElementById(id + 'Msg')
-  if (!inp) return
+  var inp = document.getElementById(id), msgEl = document.getElementById(id + 'Msg'); if (!inp) return
   inp.className = 'form-input' + (state === 'err' ? ' err' : state === 'ok' ? ' ok' : '')
-  if (msgEl) {
-    msgEl.textContent = msg || ''
-    msgEl.className = 'val-msg' + (msg ? ' show ' + state : '')
-  }
-}
-function clearErr(id) {
-  var inp = document.getElementById(id)
-  if (inp) inp.className = 'form-input'
-  var msg = document.getElementById(id + 'Msg')
-  if (msg) msg.className = 'val-msg'
-  hideBanners()
-}
-function validateEmail(id) {
-  var val = document.getElementById(id).value.trim()
-  if (!val) { setFieldState(id, 'err', 'Email is required'); return false }
-  if (!/^[^@]+@[^@]+\.[^@]+$/.test(val)) { setFieldState(id, 'err', 'Enter a valid email address'); return false }
-  setFieldState(id, 'ok', '')
-  return true
-}
-function validateName() {
-  var val = document.getElementById('rName').value.trim()
-  if (!val || val.length < 2) { setFieldState('rName', 'err', 'Name must be at least 2 characters'); return false }
-  setFieldState('rName', 'ok', '')
-  return true
+  if (msgEl) { msgEl.textContent = msg || ''; msgEl.className = 'val-msg' + (msg ? ' show ' + state : '') }
 }
 
-/* ── Password strength ── */
 function checkStrength(v) {
-  var fill = document.getElementById('strFill')
-  var lbl  = document.getElementById('strLbl')
+  var fill = document.getElementById('strFill'), lbl = document.getElementById('strLbl')
   if (!v) { fill.style.width = '0'; lbl.textContent = 'Enter a password'; lbl.style.color = ''; return }
   var s = 0
-  if (v.length >= 6)           s++
-  if (v.length >= 10)          s++
-  if (/[A-Z]/.test(v))         s++
-  if (/[0-9]/.test(v))         s++
-  if (/[^A-Za-z0-9]/.test(v)) s++
+  if (v.length >= 6) s++; if (v.length >= 10) s++
+  if (/[A-Z]/.test(v)) s++; if (/[0-9]/.test(v)) s++; if (/[^A-Za-z0-9]/.test(v)) s++
   var lvl = [
-    {w:'20%', bg:'#ef4444', t:'Too weak'},
-    {w:'40%', bg:'#f97316', t:'Weak'},
-    {w:'60%', bg:'#f59e0b', t:'Fair'},
-    {w:'80%', bg:'#84cc16', t:'Good'},
-    {w:'100%',bg:'#10b981', t:'Strong'}
-  ][Math.min(s - 1, 4)] || {w:'20%', bg:'#ef4444', t:'Too weak'}
-  fill.style.width      = lvl.w
-  fill.style.background = lvl.bg
-  lbl.textContent       = lvl.t
-  lbl.style.color       = lvl.bg
+    {w:'20%',bg:'#ef4444',t:'Too weak'},{w:'40%',bg:'#f97316',t:'Weak'},
+    {w:'60%',bg:'#f59e0b',t:'Fair'},{w:'80%',bg:'#84cc16',t:'Good'},{w:'100%',bg:'#10b981',t:'Strong'}
+  ][Math.min(s-1,4)] || {w:'20%',bg:'#ef4444',t:'Too weak'}
+  fill.style.width = lvl.w; fill.style.background = lvl.bg; lbl.textContent = lvl.t; lbl.style.color = lvl.bg
 }
 
-/* ── Show/hide password ── */
 function toggleEye(id, btn) {
   var inp = document.getElementById(id)
-  if (inp.type === 'password') { inp.type = 'text';     btn.style.opacity = '.8' }
-  else                         { inp.type = 'password'; btn.style.opacity = '.35' }
+  if (inp.type === 'password') { inp.type = 'text'; btn.style.opacity = '.8' }
+  else { inp.type = 'password'; btn.style.opacity = '.35' }
 }
 
-/* ── Button loading state ── */
 function setLoading(btnId, on) {
-  var btn = document.getElementById(btnId)
-  if (!btn) return
-  btn.disabled = on
-  btn.classList.toggle('loading', on)
+  var btn = document.getElementById(btnId); if (!btn) return
+  btn.disabled = on; btn.classList.toggle('loading', on)
 }
 
-/* ── Remember Me ── */
-function saveRememberMe(email) {
-  if (document.getElementById('rememberMe').checked) {
-    localStorage.setItem('insightflow_remember', email)
-  } else {
-    localStorage.removeItem('insightflow_remember')
-  }
-}
-window.addEventListener('DOMContentLoaded', function() {
-  var rem = localStorage.getItem('insightflow_remember')
-  if (rem) {
-    document.getElementById('lEmail').value   = rem
-    document.getElementById('rememberMe').checked = true
-  }
-})
-
-/* ── LOGIN ── */
 function doLogin() {
   hideBanners()
   var email = document.getElementById('lEmail').value.trim().toLowerCase()
   var pass  = document.getElementById('lPass').value
-
-  // Client-side validation
   var ok = true
-  if (!email) { setFieldState('lEmail', 'err', 'Email is required'); ok = false }
-  else if (!/^[^@]+@[^@]+\.[^@]+$/.test(email)) { setFieldState('lEmail', 'err', 'Enter a valid email'); ok = false }
-  if (!pass)  { setFieldState('lPass',  'err', 'Password is required'); ok = false }
+  if (!email) { setFieldState('lEmail','err','Email is required'); ok = false }
+  else if (!/^[^@]+@[^@]+\.[^@]+$/.test(email)) { setFieldState('lEmail','err','Enter a valid email'); ok = false }
+  if (!pass) { setFieldState('lPass','err','Password is required'); ok = false }
   if (!ok) return
 
   setLoading('loginBtn', true)
-
-  // Generate token for backend session tracking
   var token = ''
-  try {
-    var arr = new Uint8Array(32)
-    window.crypto.getRandomValues(arr)
-    token = Array.from(arr).map(function(b){ return b.toString(16).padStart(2,'0') }).join('')
-  } catch(e) {}
+  try { var arr = new Uint8Array(32); window.crypto.getRandomValues(arr); token = Array.from(arr).map(function(b){return b.toString(16).padStart(2,'0')}).join('') } catch(e) {}
 
   fetch(API + '/login', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({email: email, password: pass, token: token})
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({email:email, password:pass, token:token})
   })
-  .then(function(r){ return r.json() })
+  .then(function(r){return r.json()})
   .then(function(data) {
     setLoading('loginBtn', false)
     if (data.status === 'success') {
-      saveRememberMe(email)
-      // Create session
-      if (window.Auth) {
-        window.Auth.setSession(data.email, data.name)
+      if (document.getElementById('rememberMe').checked) {
+        localStorage.setItem('insightflow_remember', email)
       } else {
-        localStorage.setItem('userEmail', data.email)
+        localStorage.removeItem('insightflow_remember')
       }
+      localStorage.setItem('userEmail', data.email)
       showOk('Login successful! Redirecting...')
       var dest = 'dashboard.html'
-      try { dest = sessionStorage.getItem('insightflow_redirect') || 'dashboard.html' } catch(e){}
-      try { sessionStorage.removeItem('insightflow_redirect') } catch(e){}
+      try { dest = sessionStorage.getItem('insightflow_redirect') || 'dashboard.html' } catch(e) {}
+      try { sessionStorage.removeItem('insightflow_redirect') } catch(e) {}
       setTimeout(function(){ window.location.href = dest }, 600)
     } else {
-      setFieldState('lPass', 'err', '')
+      setFieldState('lPass','err','')
       showErr(data.message || 'Invalid email or password')
     }
   })
-  .catch(function() {
-    setLoading('loginBtn', false)
-    showErr('Cannot reach server. Make sure Flask is running.')
-  })
+  .catch(function() { setLoading('loginBtn', false); showErr('Cannot reach server. Make sure Flask is running.') })
 }
 
-/* ── REGISTER ── */
 function doRegister() {
   hideBanners()
   var name  = document.getElementById('rName').value.trim()
   var email = document.getElementById('rEmail').value.trim().toLowerCase()
   var pass  = document.getElementById('rPass').value
   var conf  = document.getElementById('rConf').value
-
   var ok = true
-  if (!name || name.length < 2) { setFieldState('rName',  'err', 'Name must be at least 2 characters'); ok = false }
-  if (!email || !/^[^@]+@[^@]+\.[^@]+$/.test(email)) { setFieldState('rEmail', 'err', 'Enter a valid email'); ok = false }
-  if (!pass || pass.length < 6) { setFieldState('rPass',  'err', 'Password must be at least 6 characters'); ok = false }
-  if (pass !== conf)             { setFieldState('rConf',  'err', 'Passwords do not match'); ok = false }
+  if (!name || name.length < 2) { setFieldState('rName','err','Name must be at least 2 characters'); ok = false }
+  if (!email || !/^[^@]+@[^@]+\.[^@]+$/.test(email)) { setFieldState('rEmail','err','Enter a valid email'); ok = false }
+  if (!pass || pass.length < 6) { setFieldState('rPass','err','Password must be at least 6 characters'); ok = false }
+  if (pass !== conf) { setFieldState('rConf','err','Passwords do not match'); ok = false }
   if (!ok) return
 
   setLoading('registerBtn', true)
-
   fetch(API + '/register', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({name: name, email: email, password: pass})
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({name:name, email:email, password:pass})
   })
-  .then(function(r){ return r.json() })
+  .then(function(r){return r.json()})
   .then(function(data) {
     setLoading('registerBtn', false)
     if (data.status === 'success') {
       showOk('Account created! Signing you in...')
-      // Auto-login after register
       setTimeout(function() {
+        resetForm('registerForm')
         document.getElementById('lEmail').value = email
         document.getElementById('lPass').value  = pass
         switchTab('login')
         setTimeout(doLogin, 300)
       }, 800)
-    } else {
-      showErr(data.message || 'Registration failed')
-    }
+    } else { showErr(data.message || 'Registration failed') }
   })
-  .catch(function() {
-    setLoading('registerBtn', false)
-    showErr('Cannot reach server. Make sure Flask is running.')
-  })
+  .catch(function() { setLoading('registerBtn', false); showErr('Cannot reach server. Make sure Flask is running.') })
 }
 
 /* ── Forgot password ── */
 function showForgot() {
-  showErr('Password reset is not yet available. Please contact support.')
+  var tabs = document.querySelector('.tabs'), lf = document.getElementById('loginForm')
+  var hdr = document.getElementById('cardTitle'), sub = document.getElementById('cardSub')
+  if (tabs) tabs.style.display = 'none'
+  if (lf)   lf.style.display = 'none'
+  if (hdr)  hdr.textContent = 'Forgot Password'
+  if (sub)  sub.textContent = 'Enter your email to retrieve your password'
+
+  var existing = document.getElementById('forgotPanel'); if (existing) existing.remove()
+
+  var panel = document.createElement('div')
+  panel.id = 'forgotPanel'
+  panel.className = 'form-scroll'
+  panel.innerHTML =
+    '<div class="form-body" style="justify-content:flex-start">' +
+      '<div class="form-group">' +
+        '<label class="form-label">Email Address</label>' +
+        '<input class="form-input" type="email" id="forgotEmail" placeholder="you@example.com" oninput="clearForgotState()">' +
+        '<div class="val-msg" id="forgotMsg"></div>' +
+      '</div>' +
+      '<button class="submit-btn" id="forgotBtn" onclick="submitForgot()" style="margin-bottom:12px">' +
+        '<span class="btn-text">Retrieve Password</span>' +
+        '<div class="btn-spinner"></div>' +
+      '</button>' +
+      '<div id="pwReveal"></div>' +
+      '<div class="toggle-row" style="margin-top:12px">Remember it? <span onclick="closeForgot()">Back to Sign In</span></div>' +
+    '</div>'
+
+  document.querySelector('.auth-card').appendChild(panel)
+  setTimeout(function(){ var e = document.getElementById('forgotEmail'); if (e) e.focus() }, 50)
+}
+
+function clearForgotState() {
+  var msgEl = document.getElementById('forgotMsg')
+  var emailEl = document.getElementById('forgotEmail')
+  var reveal = document.getElementById('pwReveal')
+  if (msgEl)   { msgEl.textContent = ''; msgEl.className = 'val-msg' }
+  if (emailEl) emailEl.className = 'form-input'
+  if (reveal)  reveal.innerHTML = ''
+}
+
+function closeForgot() {
+  var panel = document.getElementById('forgotPanel'); if (panel) panel.remove()
+  var tabs = document.querySelector('.tabs'), lf = document.getElementById('loginForm')
+  var hdr = document.getElementById('cardTitle'), sub = document.getElementById('cardSub')
+  if (tabs) tabs.style.display = 'flex'
+  if (lf)   lf.style.display = 'flex'
+  if (hdr)  hdr.textContent = 'Welcome back'
+  if (sub)  sub.textContent = 'Sign in to your InsightFlow account'
+}
+
+function submitForgot() {
+  var emailEl = document.getElementById('forgotEmail')
+  var msgEl   = document.getElementById('forgotMsg')
+  var btn     = document.getElementById('forgotBtn')
+  var reveal  = document.getElementById('pwReveal')
+  if (!emailEl || !msgEl) return
+
+  var val = emailEl.value.trim().toLowerCase()
+
+  // Clear previous reveal
+  if (reveal) reveal.innerHTML = ''
+  msgEl.className = 'val-msg'
+
+  // Client-side email check
+  if (!val || !/^[^@]+@[^@]+\.[^@]+$/.test(val)) {
+    emailEl.className = 'form-input err'
+    msgEl.className = 'val-msg show err'
+    msgEl.textContent = 'Enter a valid email address.'
+    return
+  }
+
+  // Show loading
+  emailEl.disabled = true
+  if (btn) { btn.disabled = true; btn.classList.add('loading') }
+
+  fetch(API + '/forgot-password', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: val })
+  })
+  .then(function(r) { return r.json() })
+  .then(function(data) {
+    if (btn) { btn.disabled = false; btn.classList.remove('loading') }
+    emailEl.disabled = false
+
+    if (data.status === 'success') {
+      // ── Show the retrieved password on screen ──
+      emailEl.className = 'form-input ok'
+      msgEl.className = 'val-msg show ok'
+      msgEl.textContent = 'Account found! Your password is shown below.'
+
+      if (reveal) {
+        reveal.innerHTML =
+          '<div class="pw-reveal-box">' +
+            '<div class="pw-reveal-label">Your Password</div>' +
+            '<div class="pw-reveal-row">' +
+              '<div class="pw-reveal-value" id="revealedPw">' + escapeHtml(data.password) + '</div>' +
+              '<button class="pw-copy-btn" onclick="copyPassword()">Copy</button>' +
+            '</div>' +
+            '<div class="pw-reveal-hint">Use this to sign in. Keep it safe!</div>' +
+          '</div>'
+      }
+    } else {
+      // ── Email not found or no plain password stored ──
+      emailEl.className = 'form-input err'
+      msgEl.className = 'val-msg show err'
+      msgEl.textContent = data.message || 'No account found with that email.'
+    }
+  })
+  .catch(function() {
+    if (btn) { btn.disabled = false; btn.classList.remove('loading') }
+    emailEl.disabled = false
+    emailEl.className = 'form-input err'
+    msgEl.className = 'val-msg show err'
+    msgEl.textContent = 'Cannot reach server. Make sure Flask is running.'
+  })
+}
+
+function copyPassword() {
+  var el = document.getElementById('revealedPw')
+  if (!el) return
+  var btn = document.querySelector('.pw-copy-btn')
+  navigator.clipboard.writeText(el.textContent).then(function() {
+    if (btn) { btn.textContent = 'Copied!'; setTimeout(function(){ btn.textContent = 'Copy' }, 1800) }
+  }).catch(function() {
+    // Fallback for older browsers
+    var ta = document.createElement('textarea')
+    ta.value = el.textContent
+    document.body.appendChild(ta)
+    ta.select()
+    document.execCommand('copy')
+    document.body.removeChild(ta)
+    if (btn) { btn.textContent = 'Copied!'; setTimeout(function(){ btn.textContent = 'Copy' }, 1800) }
+  })
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
 }
 </script>
 </body>

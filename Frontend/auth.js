@@ -24,7 +24,7 @@
   var SESSION_KEY    = 'insightflow_session'
   var LEGACY_KEY     = 'userEmail'            // old key — still supported
   var SESSION_TTL_MS = 8 * 60 * 60 * 1000    // 8 hours
-  var LOGIN_PAGE     = 'index.html'
+  var LOGIN_PAGE     = 'login.html'
   var API_BASE       = 'http://127.0.0.1:5000'
 
   /* ══════════════════════════════════════
@@ -56,13 +56,15 @@
       var legacyEmail = localStorage.getItem(LEGACY_KEY)
       if (legacyEmail && legacyEmail.indexOf('@') > -1) {
         /* Upgrade old session to new format transparently */
+        var now = Date.now()
         var upgraded = {
-          email:     legacyEmail,
-          name:      legacyEmail.split('@')[0],
-          token:     genToken(),
-          loginTime: Date.now(),
-          expiresAt: Date.now() + SESSION_TTL_MS,
-          upgraded:  true   // flag so we know it came from legacy
+          email:      legacyEmail,
+          name:       legacyEmail.split('@')[0],
+          token:      genToken(),
+          loginTime:  now,
+          expiresAt:  now + SESSION_TTL_MS,
+          loginExpiry: now + SESSION_TTL_MS,
+          upgraded:   true
         }
         try { localStorage.setItem(SESSION_KEY, JSON.stringify(upgraded)) } catch (e) {}
         return upgraded
@@ -93,6 +95,10 @@
     var s = readSession()
     if (!s) return
     s.expiresAt = Date.now() + SESSION_TTL_MS
+    // Preserve loginExpiry — never overwrite it
+    if (!s.loginExpiry && s.loginTime) {
+      s.loginExpiry = s.loginTime + SESSION_TTL_MS
+    }
     try { localStorage.setItem(SESSION_KEY, JSON.stringify(s)) } catch (e) {}
   }
 
@@ -104,12 +110,14 @@
 
     /* Called after successful login */
     setSession: function (email, name) {
+      var expiry = Date.now() + SESSION_TTL_MS
       var session = {
-        email:     email,
-        name:      name || email.split('@')[0],
-        token:     genToken(),
-        loginTime: Date.now(),
-        expiresAt: Date.now() + SESSION_TTL_MS
+        email:      email,
+        name:       name || email.split('@')[0],
+        token:      genToken(),
+        loginTime:  Date.now(),
+        expiresAt:  expiry,
+        loginExpiry: expiry   // fixed at login — never changed by slideExpiry
       }
       try {
         localStorage.setItem(SESSION_KEY, JSON.stringify(session))

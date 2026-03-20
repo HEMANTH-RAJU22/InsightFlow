@@ -12,10 +12,10 @@ body.account-body{
   display:flex!important;flex-direction:column!important;
   position:fixed!important;top:0!important;left:0!important;right:0!important;bottom:0!important;
   width:100%!important;height:100%!important;overflow:hidden!important;
-  background:#0b0f1a!important;animation:none!important;background-image:none!important;
+  background:linear-gradient(135deg,#0f172a,#1f2a40,#0f172a)!important;background-size:400% 400%!important;animation:bgMove 12s infinite!important;
   margin:0!important;padding:0!important;font-family:Arial,Helvetica,sans-serif!important;
 }
-body.account-body::before,body.account-body::after{display:none!important}
+body.account-body::before{display:none!important}body.account-body::after{display:none!important}
 body.account-body .container{display:contents!important}
 body.account-body button{padding:unset!important;border:unset!important;background:unset!important;color:unset!important;border-radius:unset!important;cursor:pointer}
 body.account-body .ac-btn{padding:12px 26px!important;border-radius:11px!important;font-size:13px!important;font-weight:700!important;letter-spacing:.5px!important;cursor:pointer!important;transition:all .22s!important;border:none!important;font-family:Arial,sans-serif!important;width:fit-content!important;display:inline-block!important}
@@ -29,7 +29,7 @@ body.account-body .ac-table .load-btn{background:rgba(255,140,0,.1)!important;co
 body.account-body .ac-table .load-btn:hover{background:rgba(255,140,0,.2)!important}
 
 /* TOPBAR */
-.r-topbar{height:60px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 40px;background:rgba(15,23,42,0.98);border-bottom:1px solid rgba(255,255,255,0.07);z-index:100;box-sizing:border-box;width:100%}
+.r-topbar{height:60px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 50px;background:rgba(31,42,64,.97);border-bottom:1px solid rgba(255,255,255,.07);z-index:100;box-sizing:border-box;width:100%}
 .r-logo{font-size:24px;font-weight:bold;letter-spacing:2px;background:linear-gradient(90deg,#ff8c00,#ffb347,#ff8c00);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:logoGlow 6s linear infinite;cursor:pointer}
 .r-nav{display:flex;gap:25px;align-items:center}
 .r-nav span{font-size:16px;cursor:pointer;letter-spacing:1px;padding:5px 10px;background:linear-gradient(90deg,#ff8c00,#ffb347,#ff8c00);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;transition:.3s;font-family:Arial,Helvetica,sans-serif}
@@ -40,7 +40,7 @@ body.account-body .ac-table .load-btn:hover{background:rgba(255,140,0,.2)!import
 .r-body{flex:1;display:flex;overflow:hidden;min-height:0;width:100%}
 
 /* SIDEBAR */
-.r-sidebar{width:220px;flex-shrink:0;background:#070c17;border-right:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;overflow:hidden;position:relative}
+.r-sidebar{width:220px;flex-shrink:0;background:rgba(7,12,23,.85);border-right:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;overflow:hidden;position:relative}
 .r-sidebar::-webkit-scrollbar{display:none}
 .r-sidebar{scrollbar-width:none}
 
@@ -82,7 +82,7 @@ body.account-body .ac-table .load-btn:hover{background:rgba(255,140,0,.2)!import
 @keyframes rBlink{0%,100%{opacity:1;box-shadow:0 0 10px #10b981}50%{opacity:.25;box-shadow:none}}
 
 /* CANVAS */
-.r-canvas{flex:1;overflow-y:auto;overflow-x:hidden;padding:24px 32px 32px;display:flex;flex-direction:column;gap:20px;background:#0b0f1a;min-width:0}
+.r-canvas{flex:1;overflow-y:auto;overflow-x:hidden;padding:24px 32px 32px;display:flex;flex-direction:column;gap:20px;background:transparent;min-width:0}
 .r-canvas::-webkit-scrollbar{width:4px}
 .r-canvas::-webkit-scrollbar-thumb{background:rgba(255,140,0,.3);border-radius:4px}
 
@@ -233,9 +233,13 @@ body.account-body .ac-table .load-btn:hover{background:rgba(255,140,0,.2)!import
 .ac-empty a{color:#ff8c00;text-decoration:none;font-size:13px;font-weight:600;padding:9px 20px;border-radius:9px;background:rgba(255,140,0,.1);border:1px solid rgba(255,140,0,.25);transition:all .2s}
 .ac-empty a:hover{background:rgba(255,140,0,.2)}
 
+/* danger outline button */
+.ac-btn-danger-outline{background:rgba(239,68,68,.06)!important;color:#ef4444!important;border:1px solid rgba(239,68,68,.25)!important;padding:6px 16px!important;border-radius:9px!important;font-size:12px!important;font-weight:700!important;cursor:pointer!important;font-family:Arial,sans-serif!important;transition:all .2s!important;letter-spacing:.3px!important}
+.ac-btn-danger-outline:hover{background:rgba(239,68,68,.14)!important;border-color:rgba(239,68,68,.4)!important}
 /* SPINNER */
 .ac-spinner{width:32px;height:32px;border-radius:50%;border:3px solid rgba(255,255,255,.07);border-top-color:#ff8c00;animation:spin .7s linear infinite;margin:48px auto}
 @keyframes spin{to{transform:rotate(360deg)}}
+@keyframes bgMove{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
 
 .ac-charts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}
 .ac-chart-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:12px;overflow:hidden;transition:all .2s}
@@ -548,7 +552,10 @@ body.account-body .ac-table .load-btn:hover{background:rgba(255,140,0,.2)!import
       <div class="ac-card">
         <div class="ac-card-header">
           <div class="hico">&#128172;</div><h2>Chat History</h2>
-          <a href="chatbot.html" style="margin-left:auto;font-size:12px;color:#ff8c00;text-decoration:none;font-weight:600;padding:6px 14px;background:rgba(255,140,0,.1);border:1px solid rgba(255,140,0,.25);border-radius:8px">Open Chat</a>
+          <div style="display:flex;gap:8px;margin-left:auto">
+            <button onclick="clearChatHistory()" class="ac-btn-danger-outline">&#128465; Clear History</button>
+            <a href="chatbot.html" style="font-size:12px;color:#ff8c00;text-decoration:none;font-weight:700;padding:6px 16px;background:rgba(255,140,0,.08);border:1px solid rgba(255,140,0,.3);border-radius:9px;letter-spacing:.3px">Open Chat</a>
+          </div>
         </div>
         <div id="chatHistContent"><div class="ac-spinner"></div></div>
       </div>
@@ -558,8 +565,11 @@ body.account-body .ac-table .load-btn:hover{background:rgba(255,140,0,.2)!import
     <div class="ac-section" id="sec-activity">
       <div class="ac-card">
         <div class="ac-card-header">
-          <div class="hico">📋</div><h2>Activity Log</h2>
-          <button class="ac-btn ac-btn-outline" style="margin-left:auto;padding:7px 16px;font-size:11px" onclick="exportActivityCSV()">↓ Export CSV</button>
+          <div class="hico">&#128203;</div><h2>Activity Log</h2>
+          <div style="display:flex;gap:8px;margin-left:auto">
+            <button onclick="clearActivityLog()" class="ac-btn-danger-outline">&#128465; Clear Log</button>
+            <button onclick="exportActivityCSV()" class="ac-btn ac-btn-outline" style="padding:6px 16px!important;font-size:12px!important;border:1px solid rgba(255,140,0,.3)!important;color:#ff8c00!important;background:rgba(255,140,0,.06)!important;border-radius:9px!important;font-weight:700!important;letter-spacing:.3px!important">&#8595; Export CSV</button>
+          </div>
         </div>
         <div id="activityContent"><div class="ac-spinner"></div></div>
       </div>
@@ -572,9 +582,7 @@ body.account-body .ac-table .load-btn:hover{background:rgba(255,140,0,.2)!import
 var API       = 'http://127.0.0.1:5000'
 var userEmail = ''
 var activityData = []
-var _sessionExpiresAt = 0   // frozen at page load, not re-read every second
-var _countdownStart   = 0   // performance.now() at page load
-var _countdownMs      = 0   // total ms remaining at page load
+var _fixedExpiry = 0   // set once on page load, never updated by slideExpiry
 
 /* ── Init ── */
 window.addEventListener('DOMContentLoaded', function() {
@@ -589,12 +597,18 @@ window.addEventListener('DOMContentLoaded', function() {
     if (t) t.textContent = new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'})
   }, 1000)
 
-  // Capture countdown snapshot at exact page load moment
+  // Read loginExpiry (fixed at login, never slid by activity).
+  // If missing (old session), compute from loginTime + 8h.
+  // Never use expiresAt — that gets bumped on every mouse move.
   var _initSession = window.Auth ? window.Auth.getSession() : null
-  if (_initSession && _initSession.expiresAt) {
-    _sessionExpiresAt = _initSession.expiresAt
-    _countdownStart   = performance.now()
-    _countdownMs      = _initSession.expiresAt - Date.now()
+  if (_initSession) {
+    if (_initSession.loginExpiry) {
+      _fixedExpiry = _initSession.loginExpiry
+    } else if (_initSession.loginTime) {
+      _fixedExpiry = _initSession.loginTime + (8 * 60 * 60 * 1000)
+    } else {
+      _fixedExpiry = _initSession.expiresAt || 0
+    }
   }
 
   // Session badge + live countdown every second
@@ -620,19 +634,14 @@ window.addEventListener('DOMContentLoaded', function() {
   if (savedAvatar) applyAvatar(savedAvatar)
 })
 
-/* ── Session badge — smooth countdown using performance.now() delta ── */
+/* ── Session badge — counts down to actual logout time ── */
 function updateSessionBadge() {
-  var ms
-  if (_countdownMs > 0 && _countdownStart > 0) {
-    // Use performance.now() delta — not affected by slideExpiry mutations
-    var elapsed = performance.now() - _countdownStart
-    ms = _countdownMs - elapsed
-  } else if (_sessionExpiresAt) {
-    ms = _sessionExpiresAt - Date.now()
-  } else {
+  if (!_fixedExpiry) return
+  var ms = _fixedExpiry - Date.now()
+  if (ms <= 0) {
+    if (window.Auth) window.Auth.logout()
     return
   }
-  if (ms <= 0) { if (window.Auth) window.Auth.logout(); return }
   var h   = Math.floor(ms / 3600000)
   var m   = Math.floor((ms % 3600000) / 60000)
   var sec = Math.floor((ms % 60000) / 1000)
@@ -782,12 +791,10 @@ function loadSessionInfo() {
 function extendSession() {
   if (!window.Auth) { toast('Auth module not loaded', 'err'); return }
   window.Auth.touch()
-  // Re-snapshot after extension
+  // Update frozen expiry after manual extension
   var s = window.Auth.getSession()
   if (s && s.expiresAt) {
-    _sessionExpiresAt = s.expiresAt
-    _countdownStart   = performance.now()
-    _countdownMs      = s.expiresAt - Date.now()
+    _fixedExpiry = s.expiresAt
   }
   loadSessionInfo()
   updateSessionBadge()
@@ -1117,6 +1124,41 @@ function deleteChartById(id, btn) {
   .catch(function(){ toast('Could not reach server','err') })
 }
 
+function clearChatHistory() {
+  if (!confirm('Clear all chat history? This cannot be undone.')) return
+  fetch('http://127.0.0.1:5000/chat/history/clear', {
+    method: 'DELETE',
+    headers: {'Content-Type':'application/json', 'X-User-Email': userEmail}
+  })
+  .then(function(r){ return r.json() })
+  .then(function(d) {
+    if (d.status === 'success') {
+      toast('Chat history cleared', 'ok')
+      document.getElementById('chatHistContent').innerHTML =
+        '<div class="ac-empty"><div class="ico">&#128172;</div><p>No chat history yet.</p><a href="chatbot.html">Open Chat &#8594;</a></div>'
+    } else { toast('Could not clear: ' + (d.error||'error'), 'err') }
+  })
+  .catch(function(){ toast('Could not reach server', 'err') })
+}
+
+function clearActivityLog() {
+  if (!confirm('Clear all activity log? This cannot be undone.')) return
+  fetch('http://127.0.0.1:5000/activity/clear', {
+    method: 'DELETE',
+    headers: {'Content-Type':'application/json', 'X-User-Email': userEmail}
+  })
+  .then(function(r){ return r.json() })
+  .then(function(d) {
+    if (d.status === 'success') {
+      toast('Activity log cleared', 'ok')
+      activityData = []
+      document.getElementById('activityContent').innerHTML =
+        '<div class="ac-empty"><div class="ico">&#128202;</div><p>No activity recorded yet.</p></div>'
+    } else { toast('Could not clear: ' + (d.error||'error'), 'err') }
+  })
+  .catch(function(){ toast('Could not reach server', 'err') })
+}
+
 function loadChatHistorySection() {
   var email = userEmail
   if (!email) return
@@ -1130,17 +1172,83 @@ function loadChatHistorySection() {
         el.innerHTML = '<div class="ac-empty"><div class="ico">&#128172;</div><p>No chat history yet.<br>Start a conversation with the AI Analyst.</p><a href="chatbot.html">Open Chat &#8594;</a></div>'
         return
       }
-      var items = hist.map(function(h) {
-        var isUser = h.role === 'user'
-        var roleIco = isUser ? '&#128100;' : '&#129302;'
-        var roleCls = isUser ? 'role-user' : 'role-assistant'
-        var time = h.created_at ? new Date(h.created_at).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : ''
-        var msg = esc(h.message)
-        if (msg.length > 250) msg = msg.substring(0,250) + '...'
-        return '<div class="ac-chat-row"><div class="ac-chat-role ' + roleCls + '">' + roleIco + '</div>'
-          + '<div class="ac-chat-msg">' + msg + '</div><div class="ac-chat-time">' + time + '</div></div>'
-      }).join('')
-      el.innerHTML = '<div class="ac-chat-list">' + items + '</div>'
+
+      // Deduplicate: remove consecutive duplicate messages
+      var deduped = []
+      for (var i = 0; i < hist.length; i++) {
+        if (deduped.length === 0) { deduped.push(hist[i]); continue }
+        var prev = deduped[deduped.length - 1]
+        if (prev.role === hist[i].role && prev.message === hist[i].message) continue
+        deduped.push(hist[i])
+      }
+
+      // Group into Q&A pairs (user msg + next AI reply = one conversation turn)
+      var pairs = []
+      for (var i = 0; i < deduped.length; i++) {
+        if (deduped[i].role === 'user') {
+          var pair = { user: deduped[i], ai: null }
+          if (i + 1 < deduped.length && deduped[i+1].role === 'assistant') {
+            pair.ai = deduped[i+1]
+            i++
+          }
+          pairs.push(pair)
+        }
+      }
+
+      // Group pairs by date
+      var byDate = {}
+      var dateOrder = []
+      pairs.forEach(function(p) {
+        var dateKey = p.user.created_at
+          ? new Date(p.user.created_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})
+          : 'Unknown'
+        if (!byDate[dateKey]) { byDate[dateKey] = []; dateOrder.push(dateKey) }
+        byDate[dateKey].push(p)
+      })
+
+      var html = ''
+      dateOrder.forEach(function(date) {
+        // Date group header
+        html += '<div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;'
+              + 'color:rgba(255,255,255,.2);padding:12px 0 6px;display:flex;align-items:center;gap:10px">'
+              + '<div style="flex:1;height:1px;background:rgba(255,255,255,.06)"></div>'
+              + date
+              + '<div style="flex:1;height:1px;background:rgba(255,255,255,.06)"></div></div>'
+
+        byDate[date].forEach(function(p) {
+          var time = p.user.created_at
+            ? new Date(p.user.created_at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})
+            : ''
+
+          // User question
+          var userMsg = esc(p.user.message)
+          html += '<div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);'
+                + 'border-radius:12px;overflow:hidden;margin-bottom:8px">'
+
+          // User row
+          html += '<div style="display:flex;gap:10px;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.05)">'
+                + '<div style="width:26px;height:26px;border-radius:7px;background:rgba(255,140,0,.15);border:1px solid rgba(255,140,0,.2);'
+                + 'display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">&#128100;</div>'
+                + '<div style="flex:1;font-size:13px;color:white;font-weight:500;line-height:1.5">' + userMsg + '</div>'
+                + '<div style="font-size:10px;color:rgba(255,255,255,.2);white-space:nowrap;align-self:flex-start;padding-top:2px">' + time + '</div>'
+                + '</div>'
+
+          // AI reply
+          if (p.ai) {
+            var aiMsg = esc(p.ai.message)
+            if (aiMsg.length > 300) aiMsg = aiMsg.substring(0,300) + '...'
+            html += '<div style="display:flex;gap:10px;padding:12px 14px;background:rgba(255,255,255,.02)">'
+                  + '<div style="width:26px;height:26px;border-radius:7px;background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.2);'
+                  + 'display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">&#129302;</div>'
+                  + '<div style="flex:1;font-size:12px;color:rgba(255,255,255,.55);line-height:1.6">' + aiMsg + '</div>'
+                  + '</div>'
+          }
+
+          html += '</div>'
+        })
+      })
+
+      el.innerHTML = '<div style="display:flex;flex-direction:column">' + html + '</div>'
     })
     .catch(function() {
       var el = document.getElementById('chatHistContent')

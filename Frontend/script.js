@@ -549,9 +549,6 @@ function loadDataset(){
   /* simple greeting */
   appendBotMessage("Hi! I'm ready to analyze **" + fileName + "**. Use the quick buttons or ask me anything.")
 
-  // Load past chat history from DB (shows previous conversations)
-  loadChatHistoryFromDB()
-
   enableChatInput()
   let inp = document.getElementById("chatInput")
   if(inp) inp.focus()
@@ -643,12 +640,23 @@ function enableChatInput(){
 
 
 /* ── Message rendering ─────────────────────────────────────── */
+function getUserInitial() {
+  try {
+    if (window.Auth && window.Auth.getName()) return window.Auth.getName().charAt(0).toUpperCase()
+    var raw = localStorage.getItem('insightflow_session')
+    if (raw) { var s = JSON.parse(raw); if (s && s.name) return s.name.charAt(0).toUpperCase() }
+    var email = localStorage.getItem('userEmail') || ''
+    if (email) return email.charAt(0).toUpperCase()
+  } catch(e) {}
+  return 'U'
+}
+
 function appendUserMessage(text){
   let win = document.getElementById("chatWindow")
   if(!win) return
   let div = document.createElement("div")
   div.className = "chat-message user-message"
-  div.innerHTML = `<div class="user-avatar">YOU</div><div class="message-bubble">${escapeHtml(text)}</div>`
+  div.innerHTML = `<div class="user-avatar">${getUserInitial()}</div><div class="message-bubble">${escapeHtml(text)}</div>`
   win.appendChild(div)
   win.scrollTop = win.scrollHeight
 }
