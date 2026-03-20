@@ -1,11 +1,14 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from flask_mail import Mail, Message
 import pandas as pd
 import warnings
 import os
 import re
 import math
 import logging
+import secrets
+from datetime import datetime, timedelta
 from groq import Groq
 from dotenv import load_dotenv
 import bcrypt
@@ -38,6 +41,16 @@ CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=False)
 
 # ── File size limit: 15 MB ──
 app.config["MAX_CONTENT_LENGTH"] = 15 * 1024 * 1024
+
+# ── Mail config ──
+app.config["MAIL_SERVER"]         = "smtp.gmail.com"
+app.config["MAIL_PORT"]           = 587
+app.config["MAIL_USE_TLS"]        = True
+app.config["MAIL_USERNAME"]       = os.environ.get("MAIL_USERNAME")
+app.config["MAIL_PASSWORD"]       = os.environ.get("MAIL_PASSWORD")
+app.config["MAIL_DEFAULT_SENDER"] = os.environ.get("MAIL_DEFAULT_SENDER")
+mail = Mail(app)
+
 
 @app.errorhandler(413)
 def too_large(e):
@@ -107,7 +120,6 @@ def register():
         email    = data.get("email", "").strip().lower()
         password = data.get("password", "")
 
-        # Validation
         if not name or not email or not password:
             return jsonify({"status": "error", "message": "All fields are required"})
         if len(name) < 2:
@@ -122,12 +134,13 @@ def register():
             return jsonify({"status": "error", "message": "Email already registered"})
 
         hashed = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+
+        # Store plain password for retrieval feature
         cursor.execute(
-            "INSERT INTO users(name, email, password) VALUES(%s, %s, %s)",
-            (name, email, hashed)
+            "INSERT INTO users(name, email, password, plain_password) VALUES(%s, %s, %s, %s)",
+            (name, email, hashed, password)
         )
         db.commit()
-        # Log registration activity
         cursor.execute(
             "INSERT INTO activity_log(user_id, action, detail, ip_address) VALUES(LAST_INSERT_ID(),%s,%s,%s)",
             ("register", email, request.remote_addr or "unknown")
@@ -176,7 +189,6 @@ def login():
                 "INSERT INTO activity_log(user_id, action, detail, ip_address) VALUES(%s,%s,%s,%s)",
                 (user["id"], "login", email, ip)
             )
-            # Save session token to sessions table
             token      = data.get("token", "")
             user_agent = request.headers.get("User-Agent", "")[:255]
             if token:
@@ -206,6 +218,166 @@ def login():
 
 
 # ─────────────────────────────────────────
+# FORGOT PASSWORD — retrieve plain password from DB by email
+#
+# REQUIRED: Add plain_password column to your users table (run once):
+#
+#   ALTER TABLE users ADD COLUMN plain_password VARCHAR(255) DEFAULT NULL;
+#
+# The register route now saves the plain password into this column.
+# ─────────────────────────────────────────
+
+@app.route("/forgot-password", methods=["POST"])
+def forgot_password():
+    data  = request.json or {}
+    email = data.get("email", "").strip().lower()
+
+    if not email or not re.match(r"^[^@]+@[^@]+\.[^@]+$", email):
+        return jsonify({"status": "error", "message": "Invalid email address"}), 400
+
+    db, cursor = get_db()
+    if not db:
+        return jsonify({"status": "error", "message": "Database unavailable"}), 500
+
+    try:
+        cursor.execute("SELECT name, plain_password FROM users WHERE email=%s", (email,))
+        user = cursor.fetchone()
+
+        if not user:
+            return jsonify({
+                "status":  "error",
+                "message": "No account found with that email address."
+            })
+
+        plain = user.get("plain_password") or ""
+
+        if not plain:
+            return jsonify({
+                "status":  "error",
+                "message": "Password could not be retrieved for this account."
+            })
+
+        log.info("Password retrieved for: %s", email)
+        return jsonify({
+            "status":   "success",
+            "name":     user["name"],
+            "password": plain
+        })
+
+    except Exception as e:
+        log.error("Forgot password error: %s", e)
+        return jsonify({"status": "error", "message": "Request failed"}), 500
+    finally:
+        cursor.close()
+        db.close()
+
+
+# ─────────────────────────────────────────
+# VERIFY RESET TOKEN
+# ─────────────────────────────────────────
+
+@app.route("/verify-reset-token", methods=["POST"])
+def verify_reset_token():
+    data  = request.json or {}
+    token = data.get("token", "").strip()
+
+    if not token:
+        return jsonify({"valid": False})
+
+    db, cursor = get_db()
+    if not db:
+        return jsonify({"valid": False})
+
+    try:
+        cursor.execute(
+            "SELECT email, expires_at FROM password_resets WHERE token=%s",
+            (token,)
+        )
+        row = cursor.fetchone()
+
+        if not row:
+            return jsonify({"valid": False})
+
+        if datetime.now() > row["expires_at"]:
+            cursor.execute("DELETE FROM password_resets WHERE token=%s", (token,))
+            db.commit()
+            return jsonify({"valid": False, "reason": "expired"})
+
+        return jsonify({"valid": True})
+
+    except Exception as e:
+        log.error("Verify token error: %s", e)
+        return jsonify({"valid": False})
+    finally:
+        cursor.close()
+        db.close()
+
+
+# ─────────────────────────────────────────
+# RESET PASSWORD
+# ─────────────────────────────────────────
+
+@app.route("/reset-password", methods=["POST"])
+def reset_password():
+    data     = request.json or {}
+    token    = data.get("token", "").strip()
+    password = data.get("password", "")
+
+    if not token or not password:
+        return jsonify({"status": "error", "message": "Token and password are required"}), 400
+    if len(password) < 6:
+        return jsonify({"status": "error", "message": "Password must be at least 6 characters"}), 400
+
+    db, cursor = get_db()
+    if not db:
+        return jsonify({"status": "error", "message": "Database unavailable"}), 500
+
+    try:
+        cursor.execute(
+            "SELECT email, expires_at FROM password_resets WHERE token=%s",
+            (token,)
+        )
+        row = cursor.fetchone()
+
+        if not row:
+            return jsonify({"status": "error", "message": "Invalid reset link"})
+
+        if datetime.now() > row["expires_at"]:
+            cursor.execute("DELETE FROM password_resets WHERE token=%s", (token,))
+            db.commit()
+            return jsonify({"status": "expired", "message": "Reset link has expired. Please request a new one."})
+
+        email  = row["email"]
+        hashed = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+
+        # Update both hashed and plain password
+        cursor.execute(
+            "UPDATE users SET password=%s, plain_password=%s WHERE email=%s",
+            (hashed, password, email)
+        )
+        cursor.execute("DELETE FROM password_resets WHERE token=%s", (token,))
+
+        cursor.execute("SELECT id FROM users WHERE email=%s", (email,))
+        u = cursor.fetchone()
+        if u:
+            cursor.execute(
+                "INSERT INTO activity_log(user_id, action, detail, ip_address) VALUES(%s,%s,%s,%s)",
+                (u["id"], "password_reset", email, request.remote_addr or "unknown")
+            )
+
+        db.commit()
+        log.info("Password reset successful for: %s", email)
+        return jsonify({"status": "success", "message": "Password updated successfully"})
+
+    except Exception as e:
+        log.error("Reset password error: %s", e)
+        return jsonify({"status": "error", "message": "Reset failed"}), 500
+    finally:
+        cursor.close()
+        db.close()
+
+
+# ─────────────────────────────────────────
 # ACCOUNT — GET
 # ─────────────────────────────────────────
 
@@ -214,7 +386,6 @@ def get_account(email):
     db, cursor = get_db()
     if not db:
         return jsonify({"error": "Database unavailable"}), 500
-
     try:
         cursor.execute("SELECT name, email, created_at, last_login FROM users WHERE email=%s", (email,))
         user = cursor.fetchone()
@@ -238,7 +409,6 @@ def update_account():
     db, cursor = get_db()
     if not db:
         return jsonify({"status": "error", "message": "Database unavailable"}), 500
-
     try:
         data     = request.json or {}
         email    = data.get("email", "").strip().lower()
@@ -254,7 +424,11 @@ def update_account():
             if len(new_pass) < 6:
                 return jsonify({"status": "error", "message": "Password must be at least 6 characters"})
             hashed = bcrypt.hashpw(new_pass.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
-            cursor.execute("UPDATE users SET password=%s WHERE email=%s", (hashed, email))
+            # Update both hashed and plain password
+            cursor.execute(
+                "UPDATE users SET password=%s, plain_password=%s WHERE email=%s",
+                (hashed, new_pass, email)
+            )
 
         db.commit()
         log.info("Account updated: %s", email)
@@ -294,7 +468,6 @@ def upload():
         if df is None:
             return jsonify({"error": "Could not parse file"}), 400
 
-        # Clean
         df = df.dropna(how="all")
         df.columns = [str(c).strip() for c in df.columns]
 
@@ -309,7 +482,6 @@ def upload():
         numeric_cols  = list(df.select_dtypes(include="number").columns)
         cat_cols      = list(df.select_dtypes(exclude="number").columns)
 
-        # Up to 500 rows preview
         preview = df.head(500).fillna("").values.tolist()
 
         result = {
@@ -326,7 +498,7 @@ def upload():
             "headers":      list(df.columns),
             "fileName":     file.filename
         }
-        # Save dataset metadata to DB (best-effort — don't fail upload if DB is down)
+
         try:
             db2, cur2 = get_db()
             if db2:
@@ -335,7 +507,6 @@ def upload():
                     cur2.execute("SELECT id FROM users WHERE email=%s", (email_hdr,))
                     u = cur2.fetchone()
                     if u:
-                        # Get actual file size
                         try:
                             file.seek(0, 2); fsize = file.tell(); file.seek(0)
                         except Exception:
@@ -347,13 +518,10 @@ def upload():
                                 missing_vals, duplicates, headers)
                                VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
                             (
-                                u["id"], file.filename,
-                                fsize,
-                                ext.lstrip("."),
+                                u["id"], file.filename, fsize, ext.lstrip("."),
                                 total_rows, total_columns,
                                 len(numeric_cols), len(cat_cols),
-                                missing, duplicates,
-                                str(list(df.columns))
+                                missing, duplicates, str(list(df.columns))
                             )
                         )
                         cur2.execute(
@@ -418,12 +586,7 @@ def _read_file(file, ext):
 
 
 # ─────────────────────────────────────────
-# ANALYZE — per-column statistics
-# ─────────────────────────────────────────
-
-
-# ─────────────────────────────────────────
-# LOGOUT — log the action
+# LOGOUT
 # ─────────────────────────────────────────
 
 @app.route("/logout", methods=["POST"])
@@ -442,7 +605,6 @@ def logout():
                         "INSERT INTO activity_log(user_id, action, ip_address) VALUES(%s,%s,%s)",
                         (u["id"], "logout", request.remote_addr or "unknown")
                     )
-                    # Deactivate session token
                     if token:
                         cursor.execute(
                             "UPDATE sessions SET is_active=0 WHERE token=%s",
@@ -456,9 +618,13 @@ def logout():
                 db.close()
     return jsonify({"status": "ok"})
 
+
+# ─────────────────────────────────────────
+# ANALYZE
+# ─────────────────────────────────────────
+
 @app.route("/analyze", methods=["POST"])
 def analyze():
-    """Rich per-column stats for the frontend dashboard charts."""
     data    = request.json or {}
     headers = data.get("headers", [])
     rows    = data.get("dataset", data.get("preview", []))
@@ -571,7 +737,6 @@ def chat():
         reply = response.choices[0].message.content
         log.info("Chat reply: %d chars", len(reply))
 
-        # Save both messages to chat_history table (best-effort)
         if user_email:
             try:
                 db2, cur2 = get_db()
@@ -580,7 +745,6 @@ def chat():
                     u = cur2.fetchone()
                     if u:
                         uid = u["id"]
-                        # Resolve dataset_id from datasets table if not provided
                         if not dataset_id:
                             cur2.execute(
                                 "SELECT id FROM datasets WHERE user_id=%s ORDER BY uploaded_at DESC LIMIT 1",
@@ -588,7 +752,6 @@ def chat():
                             )
                             ds = cur2.fetchone()
                             if ds: dataset_id = ds["id"]
-
                         cur2.execute(
                             "INSERT INTO chat_history(user_id, dataset_id, role, message) VALUES(%s,%s,%s,%s)",
                             (uid, dataset_id, "user", user_message)
@@ -611,12 +774,11 @@ def chat():
 
 
 # ─────────────────────────────────────────
-# AI AUTO-SUMMARY — one-click dataset summary
+# AI AUTO-SUMMARY
 # ─────────────────────────────────────────
 
 @app.route("/summary", methods=["POST"])
 def summary():
-    """Generate a natural-language summary of the dataset using AI."""
     data    = request.json or {}
     headers = data.get("headers", [])
     rows    = data.get("dataset", data.get("preview", []))
@@ -657,12 +819,11 @@ def summary():
 
 
 # ─────────────────────────────────────────
-# AI COLUMN INSIGHT — single column analysis
+# AI COLUMN INSIGHT
 # ─────────────────────────────────────────
 
 @app.route("/column-insight", methods=["POST"])
 def column_insight():
-    """AI insight for a single column."""
     data     = request.json or {}
     col      = data.get("column", "")
     values   = data.get("values", [])
@@ -694,9 +855,8 @@ def column_insight():
         return jsonify({"error": str(e)}), 500
 
 
-
 # ─────────────────────────────────────────
-# DATASET HISTORY — user's past uploads
+# DATASET HISTORY
 # ─────────────────────────────────────────
 
 @app.route("/datasets/<email>")
@@ -717,7 +877,6 @@ def dataset_history(email):
             (u["id"],)
         )
         rows = cursor.fetchall()
-        # Convert datetime to string for JSON
         for r in rows:
             if r.get("uploaded_at"):
                 r["uploaded_at"] = str(r["uploaded_at"])
@@ -731,7 +890,7 @@ def dataset_history(email):
 
 
 # ─────────────────────────────────────────
-# ACTIVITY LOG — recent user actions
+# ACTIVITY LOG
 # ─────────────────────────────────────────
 
 @app.route("/activity/<email>")
@@ -763,9 +922,8 @@ def activity(email):
         db.close()
 
 
-
 # ─────────────────────────────────────────
-# SAVED CHARTS — save & retrieve
+# SAVED CHARTS
 # ─────────────────────────────────────────
 
 @app.route("/charts/save", methods=["POST"])
@@ -862,7 +1020,7 @@ def delete_chart(chart_id):
 
 
 # ─────────────────────────────────────────
-# CHAT HISTORY — retrieve past conversations
+# CHAT HISTORY
 # ─────────────────────────────────────────
 
 @app.route("/chat/history/<email>")
@@ -878,7 +1036,7 @@ def chat_history_get(email):
         cursor.execute(
             """SELECT role, message, dataset_id, created_at
                FROM chat_history WHERE user_id=%s
-               ORDER BY created_at DESC LIMIT 100""",
+               ORDER BY created_at ASC LIMIT 200""",
             (u["id"],)
         )
         rows = cursor.fetchall()
@@ -892,6 +1050,63 @@ def chat_history_get(email):
     finally:
         cursor.close()
         db.close()
+
+
+# ─────────────────────────────────────────
+# CLEAR CHAT HISTORY
+# ─────────────────────────────────────────
+
+@app.route("/chat/history/clear", methods=["DELETE"])
+def clear_chat_history():
+    user_email = request.headers.get("X-User-Email", "").strip().lower()
+    if not user_email:
+        return jsonify({"error": "Not authenticated"}), 401
+    db, cursor = get_db()
+    if not db:
+        return jsonify({"error": "Database unavailable"}), 500
+    try:
+        cursor.execute("SELECT id FROM users WHERE email=%s", (user_email,))
+        u = cursor.fetchone()
+        if not u:
+            return jsonify({"error": "User not found"}), 404
+        cursor.execute("DELETE FROM chat_history WHERE user_id=%s", (u["id"],))
+        db.commit()
+        return jsonify({"status": "success", "deleted": cursor.rowcount})
+    except Exception as e:
+        log.error("Clear chat error: %s", e)
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close()
+        db.close()
+
+
+# ─────────────────────────────────────────
+# CLEAR ACTIVITY LOG
+# ─────────────────────────────────────────
+
+@app.route("/activity/clear", methods=["DELETE"])
+def clear_activity():
+    user_email = request.headers.get("X-User-Email", "").strip().lower()
+    if not user_email:
+        return jsonify({"error": "Not authenticated"}), 401
+    db, cursor = get_db()
+    if not db:
+        return jsonify({"error": "Database unavailable"}), 500
+    try:
+        cursor.execute("SELECT id FROM users WHERE email=%s", (user_email,))
+        u = cursor.fetchone()
+        if not u:
+            return jsonify({"error": "User not found"}), 404
+        cursor.execute("DELETE FROM activity_log WHERE user_id=%s", (u["id"],))
+        db.commit()
+        return jsonify({"status": "success", "deleted": cursor.rowcount})
+    except Exception as e:
+        log.error("Clear activity error: %s", e)
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close()
+        db.close()
+
 
 # ─────────────────────────────────────────
 # RUN
