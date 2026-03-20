@@ -1,46 +1,1152 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script src="auth.js"></script>
 <meta charset="UTF-8">
-<title>Account - InsightFlow</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Account — InsightFlow</title>
+<script src="auth.js"></script>
 <link rel="stylesheet" href="style.css">
+<style>
+html{margin:0!important;padding:0!important;height:100%!important;overflow:hidden!important}
+body.account-body{
+  display:flex!important;flex-direction:column!important;
+  position:fixed!important;top:0!important;left:0!important;right:0!important;bottom:0!important;
+  width:100%!important;height:100%!important;overflow:hidden!important;
+  background:#0b0f1a!important;animation:none!important;background-image:none!important;
+  margin:0!important;padding:0!important;font-family:Arial,Helvetica,sans-serif!important;
+}
+body.account-body::before,body.account-body::after{display:none!important}
+body.account-body .container{display:contents!important}
+body.account-body button{padding:unset!important;border:unset!important;background:unset!important;color:unset!important;border-radius:unset!important;cursor:pointer}
+body.account-body .ac-btn{padding:12px 26px!important;border-radius:11px!important;font-size:13px!important;font-weight:700!important;letter-spacing:.5px!important;cursor:pointer!important;transition:all .22s!important;border:none!important;font-family:Arial,sans-serif!important;width:fit-content!important;display:inline-block!important}
+body.account-body .ac-btn-primary{background:linear-gradient(135deg,#ff8c00,#ff5500)!important;color:white!important;box-shadow:0 4px 18px rgba(255,140,0,.4)!important}
+body.account-body .ac-btn-primary:hover{transform:translateY(-2px)!important;box-shadow:0 8px 26px rgba(255,140,0,.55)!important}
+body.account-body .ac-btn-outline{background:rgba(255,255,255,.05)!important;color:rgba(255,255,255,.6)!important;border:1px solid rgba(255,255,255,.1)!important}
+body.account-body .ac-btn-outline:hover{background:rgba(255,255,255,.09)!important;color:white!important}
+body.account-body .ac-btn-danger{background:rgba(239,68,68,.08)!important;color:#ef4444!important;border:1px solid rgba(239,68,68,.2)!important}
+body.account-body .ac-btn-danger:hover{background:rgba(239,68,68,.16)!important}
+body.account-body .ac-table .load-btn{background:rgba(255,140,0,.1)!important;color:#ff8c00!important;border:1px solid rgba(255,140,0,.25)!important;padding:4px 12px!important;border-radius:20px!important;font-size:11px!important;font-weight:700!important}
+body.account-body .ac-table .load-btn:hover{background:rgba(255,140,0,.2)!important}
+
+/* TOPBAR */
+.r-topbar{height:60px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 40px;background:rgba(15,23,42,0.98);border-bottom:1px solid rgba(255,255,255,0.07);z-index:100;box-sizing:border-box;width:100%}
+.r-logo{font-size:24px;font-weight:bold;letter-spacing:2px;background:linear-gradient(90deg,#ff8c00,#ffb347,#ff8c00);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:logoGlow 6s linear infinite;cursor:pointer}
+.r-nav{display:flex;gap:25px;align-items:center}
+.r-nav span{font-size:16px;cursor:pointer;letter-spacing:1px;padding:5px 10px;background:linear-gradient(90deg,#ff8c00,#ffb347,#ff8c00);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;transition:.3s;font-family:Arial,Helvetica,sans-serif}
+.r-nav span:hover{animation:logoGlow 4s linear infinite;transform:scale(1.05)}
+@keyframes logoGlow{0%{background-position:0% center}100%{background-position:200% center}}
+
+/* LAYOUT */
+.r-body{flex:1;display:flex;overflow:hidden;min-height:0;width:100%}
+
+/* SIDEBAR */
+.r-sidebar{width:220px;flex-shrink:0;background:#070c17;border-right:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;overflow:hidden;position:relative}
+.r-sidebar::-webkit-scrollbar{display:none}
+.r-sidebar{scrollbar-width:none}
+
+/* top accent bar */
+.r-sidebar::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#ff8c00 0%,#ff5500 60%,transparent 100%);z-index:2}
+
+/* user card */
+.r-sb-brand{padding:22px 16px 18px;display:flex;align-items:center;gap:13px;border-bottom:1px solid rgba(255,255,255,.05)}
+.r-sb-avatar-wrap{position:relative;flex-shrink:0}
+.r-sb-brand-icon{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#ff8c00,#ff5500);display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800;color:white;cursor:pointer;transition:all .2s;box-shadow:0 0 0 2px rgba(255,140,0,.25);overflow:hidden}
+.r-sb-brand-icon:hover{box-shadow:0 0 0 3px rgba(255,140,0,.5);transform:scale(1.05)}
+
+.r-sb-brand-title{font-size:14px;font-weight:700;color:white;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px}
+.r-sb-brand-role{font-size:10px;color:rgba(255,255,255,.25);margin-top:2px;letter-spacing:.3px}
+.r-sb-div{height:1px;background:rgba(255,255,255,.04);margin:8px 14px}
+
+/* ── removed old chip classes — replaced by sb-* below ── */
+
+/* SIDEBAR NAV */
+.sb-group-label{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.18);padding:14px 14px 5px;display:flex;align-items:center;gap:8px}
+.sb-group-label::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.05)}
+.sb-item{display:flex;align-items:center;gap:11px;padding:10px 14px;border-radius:10px;font-size:12.5px;font-weight:600;color:rgba(255,255,255,.32);cursor:pointer;transition:all .15s;position:relative;user-select:none;margin:0 6px}
+.sb-item:hover{background:rgba(255,255,255,.05);color:rgba(255,255,255,.75)}
+.sb-item.on{background:rgba(255,140,0,.1);color:#ff8c00}
+.sb-item.on .sb-icon-wrap{background:rgba(255,140,0,.18);border-color:rgba(255,140,0,.3)}
+.sb-item.on::after{content:'';position:absolute;left:0;top:25%;bottom:25%;width:2.5px;border-radius:0 2px 2px 0;background:#ff8c00}
+.sb-icon-wrap{width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.sb-item:hover .sb-icon-wrap{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.09)}
+.sb-icon{width:14px;height:14px;flex-shrink:0;stroke:currentColor;fill:none}
+.sb-badge{margin-left:auto;width:7px;height:7px;border-radius:50%;background:#10b981;box-shadow:0 0 6px #10b981;animation:rBlink 2s infinite;flex-shrink:0}
+.sb-divider{height:1px;background:rgba(255,255,255,.05);margin:8px 14px}
+.sb-item-danger{color:rgba(239,68,68,.45)!important}
+.sb-item-danger:hover{background:rgba(239,68,68,.08)!important;color:#ef4444!important}
+.sb-item-danger:hover .sb-icon-wrap{background:rgba(239,68,68,.1)!important;border-color:rgba(239,68,68,.15)!important}
+.r-sb-live{margin-top:auto;padding:13px 16px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(255,255,255,.05);background:rgba(16,185,129,.025)}
+.r-sb-live-left{display:flex;align-items:center;gap:8px;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#10b981}
+.r-ldot{width:7px;height:7px;border-radius:50%;background:#10b981;box-shadow:0 0 8px #10b981;animation:rBlink 2s infinite;flex-shrink:0}
+.r-sb-live-time{font-size:10px;color:rgba(255,255,255,.2);font-weight:500}
+@keyframes rBlink{0%,100%{opacity:1;box-shadow:0 0 10px #10b981}50%{opacity:.25;box-shadow:none}}
+
+/* CANVAS */
+.r-canvas{flex:1;overflow-y:auto;overflow-x:hidden;padding:24px 32px 32px;display:flex;flex-direction:column;gap:20px;background:#0b0f1a;min-width:0}
+.r-canvas::-webkit-scrollbar{width:4px}
+.r-canvas::-webkit-scrollbar-thumb{background:rgba(255,140,0,.3);border-radius:4px}
+
+/* PAGE HEADER */
+.pg-header{display:flex;align-items:center;justify-content:space-between;flex-shrink:0;width:100%}
+.pg-header-left{display:flex;align-items:center;gap:14px}
+.pg-header-icon{width:46px;height:46px;border-radius:13px;background:linear-gradient(135deg,rgba(255,140,0,.2),rgba(255,80,0,.1));border:1px solid rgba(255,140,0,.25);display:flex;align-items:center;justify-content:center;font-size:20px}
+.pg-header-title{font-size:22px;font-weight:700;color:white;letter-spacing:.2px}
+.pg-header-sub{font-size:12px;color:rgba(255,255,255,.3);margin-top:2px}
+.pg-header-right{display:flex;align-items:center;gap:10px}
+.pg-session-badge{font-size:11px;font-weight:600;padding:6px 14px;border-radius:20px;background:rgba(16,185,129,.08);color:#10b981;border:1px solid rgba(16,185,129,.2);letter-spacing:.3px;cursor:default}
+
+/* SECTIONS */
+.ac-section{display:none;flex-direction:column;gap:20px;width:100%}
+.ac-section.active{display:flex}
+
+/* CARD */
+.ac-card{background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:28px 32px;display:flex;flex-direction:column;gap:22px;box-shadow:0 8px 32px rgba(0,0,0,.3);width:100%;box-sizing:border-box}
+.ac-card-header{display:flex;align-items:center;gap:10px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,.06)}
+.ac-card-header h2{font-size:16px;font-weight:700;color:white;margin:0;letter-spacing:.2px}
+.hico{width:32px;height:32px;border-radius:9px;background:rgba(255,140,0,.12);border:1px solid rgba(255,140,0,.2);display:flex;align-items:center;justify-content:center;font-size:15px}
+
+/* PROFILE HERO */
+.ac-profile-hero{display:flex;align-items:center;gap:22px;padding:20px 24px;border-radius:13px;background:linear-gradient(135deg,rgba(255,140,0,.07),rgba(255,80,0,.03));border:1px solid rgba(255,140,0,.12)}
+.ac-avatar{width:74px;height:74px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,#ff8c00,#ff5500);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:white;box-shadow:0 6px 24px rgba(255,140,0,.45),0 0 0 3px rgba(255,140,0,.15);overflow:hidden;position:relative}
+.ac-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.ac-avatar-upload{position:absolute;bottom:0;left:0;right:0;height:34px;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;opacity:0;transition:opacity .2s;border-radius:0 0 50% 50%}
+.ac-avatar:hover .ac-avatar-upload{opacity:1}
+.ac-profile-info{flex:1;display:flex;flex-direction:column;gap:5px}
+.ac-profile-name{font-size:22px;font-weight:700;color:white;letter-spacing:.2px}
+.ac-profile-email{font-size:13px;color:rgba(255,255,255,.4)}
+.ac-profile-badges{display:flex;gap:8px;margin-top:4px;flex-wrap:wrap}
+.ac-badge{font-size:10px;font-weight:700;letter-spacing:.8px;padding:3px 10px;border-radius:20px;text-transform:uppercase}
+.badge-active{background:rgba(16,185,129,.1);color:#10b981;border:1px solid rgba(16,185,129,.25)}
+
+/* DATASET STATS STRIP */
+.ac-stats-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.ac-stat{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:16px;text-align:center;transition:all .2s;position:relative;overflow:hidden}
+.ac-stat::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#ff8c00,transparent);opacity:.35}
+.ac-stat:hover{border-color:rgba(255,140,0,.2);transform:translateY(-2px)}
+.ac-stat-val{font-size:26px;font-weight:800;color:#ff8c00;letter-spacing:-1px;line-height:1}
+.ac-stat-lbl{font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,.22);margin-top:5px}
+
+/* SESSION INFO */
+.ac-session-info{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-radius:11px;background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.15)}
+.ac-session-left{display:flex;align-items:center;gap:10px}
+.ac-session-dot{width:8px;height:8px;border-radius:50%;background:#10b981;box-shadow:0 0 8px #10b981;animation:rBlink 2s infinite;flex-shrink:0}
+.ac-session-text{font-size:13px;color:#10b981;font-weight:600}
+.ac-session-detail{font-size:11px;color:rgba(255,255,255,.3);margin-top:2px}
+.ac-session-time{font-size:20px;font-weight:800;color:#10b981;letter-spacing:-1px}
+
+/* FORM */
+.ac-field{display:flex;flex-direction:column;gap:7px}
+.ac-field label{font-size:10px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:rgba(255,255,255,.28)}
+.ac-field-wrap{position:relative}
+.ac-field input{width:100%;padding:12px 16px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:11px;color:white;font-size:14px;font-family:Arial,sans-serif;transition:border-color .2s,background .2s;outline:none;box-sizing:border-box}
+.ac-field input:focus{border-color:rgba(255,140,0,.5);background:rgba(255,140,0,.04)}
+.ac-field input::placeholder{color:rgba(255,255,255,.2)}
+.pw-toggle{position:absolute;right:14px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:16px;opacity:.4;transition:opacity .2s;user-select:none}
+.pw-toggle:hover{opacity:.8}
+.ac-field-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+
+/* BUTTONS */
+.ac-btn{padding:12px 26px;border-radius:11px;font-size:13px;font-weight:700;letter-spacing:.5px;cursor:pointer;transition:all .22s;border:none;font-family:Arial,sans-serif;width:fit-content}
+.ac-btn-primary{background:linear-gradient(135deg,#ff8c00,#ff5500);color:white;box-shadow:0 4px 18px rgba(255,140,0,.4)}
+.ac-btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 26px rgba(255,140,0,.55)}
+.ac-btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.ac-btn-outline{background:rgba(255,255,255,.05);color:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.1)!important}
+.ac-btn-outline:hover{background:rgba(255,255,255,.09);color:white}
+.ac-btn-danger{background:rgba(239,68,68,.08);color:#ef4444;border:1px solid rgba(239,68,68,.2)!important}
+.ac-btn-danger:hover{background:rgba(239,68,68,.16);transform:translateY(-1px)}
+.ac-btn-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+/* FEEDBACK MESSAGES */
+.ac-msg{font-size:13px;font-weight:600;padding:11px 16px;border-radius:9px;display:none}
+.ac-msg.ok{background:rgba(16,185,129,.1);color:#10b981;border:1px solid rgba(16,185,129,.2)}
+.ac-msg.err{background:rgba(239,68,68,.1);color:#ef4444;border:1px solid rgba(239,68,68,.2)}
+
+/* TOAST */
+.ac-toast{
+  position:fixed;bottom:28px;right:28px;z-index:9999;
+  padding:13px 20px;border-radius:12px;font-size:13px;font-weight:600;
+  display:flex;align-items:center;gap:10px;min-width:240px;
+  box-shadow:0 8px 32px rgba(0,0,0,.5);
+  transform:translateY(80px);opacity:0;
+  transition:transform .3s cubic-bezier(.34,1.56,.64,1),opacity .3s;pointer-events:none;
+}
+.ac-toast.show{transform:translateY(0);opacity:1}
+.ac-toast.ok{background:#0d1f17;border:1px solid rgba(16,185,129,.3);color:#10b981}
+.ac-toast.err{background:#1f0d0d;border:1px solid rgba(239,68,68,.3);color:#ef4444}
+.ac-toast.info{background:#0d1626;border:1px solid rgba(255,140,0,.3);color:#ff8c00}
+.ac-toast-ico{font-size:16px}
+
+/* PASSWORD STRENGTH */
+.pw-strength{display:flex;flex-direction:column;gap:6px}
+.pw-strength-bar{height:5px;border-radius:5px;background:rgba(255,255,255,.08);overflow:hidden}
+.pw-strength-fill{height:100%;border-radius:5px;transition:width .3s,background .3s;width:0}
+.pw-strength-lbl{font-size:11px;color:rgba(255,255,255,.3);font-weight:600}
+
+/* TABLE */
+.ac-table-wrap{overflow-x:auto;border-radius:11px;border:1px solid rgba(255,255,255,.07)}
+.ac-table{width:100%;border-collapse:collapse;font-size:13px}
+.ac-table thead tr{background:rgba(255,255,255,.04)}
+.ac-table th{padding:12px 18px;text-align:left;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.25);border-bottom:1px solid rgba(255,255,255,.07);white-space:nowrap}
+.ac-table td{padding:13px 18px;color:rgba(255,255,255,.72);border-bottom:1px solid rgba(255,255,255,.04)}
+.ac-table tbody tr:last-child td{border-bottom:none}
+.ac-table tbody tr:hover{background:rgba(255,255,255,.03)}
+.ac-table td strong{color:white;font-weight:600}
+.ac-table .load-btn{font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;cursor:pointer;background:rgba(255,140,0,.1);color:#ff8c00;border:1px solid rgba(255,140,0,.25);transition:all .2s;font-family:Arial,sans-serif}
+.ac-table .load-btn:hover{background:rgba(255,140,0,.2);transform:translateY(-1px)}
+
+/* FILE TYPE BADGES */
+.ft-badge{font-size:9px;font-weight:700;letter-spacing:.8px;padding:3px 9px;border-radius:20px;text-transform:uppercase;display:inline-block}
+.ft-csv{background:rgba(16,185,129,.12);color:#10b981;border:1px solid rgba(16,185,129,.25)}
+.ft-xlsx,.ft-xls{background:rgba(59,130,246,.12);color:#3b82f6;border:1px solid rgba(59,130,246,.25)}
+.ft-json{background:rgba(245,158,11,.12);color:#f59e0b;border:1px solid rgba(245,158,11,.25)}
+.ft-sql{background:rgba(139,92,246,.12);color:#8b5cf6;border:1px solid rgba(139,92,246,.25)}
+.ft-txt{background:rgba(6,182,212,.12);color:#06b6d4;border:1px solid rgba(6,182,212,.25)}
+.ft-other{background:rgba(255,255,255,.07);color:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.1)}
+
+/* ACTIVITY */
+.ac-activity-list{display:flex;flex-direction:column;gap:8px}
+.ac-act-item{display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);transition:background .15s}
+.ac-act-item:hover{background:rgba(255,255,255,.05)}
+.ac-act-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.ac-act-label{font-size:13px;color:white;font-weight:600;flex:1;min-width:0}
+.ac-act-detail{font-size:11px;color:rgba(255,255,255,.3);font-weight:400;margin-left:6px}
+.ac-act-ip{font-size:11px;color:rgba(255,255,255,.2);font-weight:400;margin-left:6px}
+.ac-act-time{font-size:11px;color:rgba(255,255,255,.22);white-space:nowrap;flex-shrink:0}
+
+/* DELETE ACCOUNT */
+.ac-danger-zone{padding:20px 24px;border-radius:13px;background:rgba(239,68,68,.04);border:1px solid rgba(239,68,68,.15);display:flex;align-items:center;justify-content:space-between;gap:20px}
+.ac-danger-text h3{font-size:14px;font-weight:700;color:#ef4444;margin:0 0 4px}
+.ac-danger-text p{font-size:12px;color:rgba(255,255,255,.35);margin:0}
+
+/* CONFIRM MODAL */
+.ac-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;display:none;align-items:center;justify-content:center}
+.ac-modal-overlay.open{display:flex}
+.ac-modal{background:#0d1626;border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:32px;max-width:420px;width:90%;display:flex;flex-direction:column;gap:20px;box-shadow:0 24px 64px rgba(0,0,0,.6)}
+.ac-modal h3{font-size:18px;font-weight:700;color:white;margin:0}
+.ac-modal p{font-size:14px;color:rgba(255,255,255,.45);margin:0;line-height:1.6}
+.ac-modal-btns{display:flex;gap:10px;justify-content:flex-end}
+
+/* EMPTY */
+.ac-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:52px 24px;color:rgba(255,255,255,.22);text-align:center}
+.ac-empty .ico{font-size:44px;opacity:.35;line-height:1}
+.ac-empty p{font-size:13px;line-height:1.7;color:rgba(255,255,255,.28)}
+.ac-empty a{color:#ff8c00;text-decoration:none;font-size:13px;font-weight:600;padding:9px 20px;border-radius:9px;background:rgba(255,140,0,.1);border:1px solid rgba(255,140,0,.25);transition:all .2s}
+.ac-empty a:hover{background:rgba(255,140,0,.2)}
+
+/* SPINNER */
+.ac-spinner{width:32px;height:32px;border-radius:50%;border:3px solid rgba(255,255,255,.07);border-top-color:#ff8c00;animation:spin .7s linear infinite;margin:48px auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.ac-charts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}
+.ac-chart-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:12px;overflow:hidden;transition:all .2s}
+.ac-chart-card:hover{border-color:rgba(255,140,0,.25);transform:translateY(-2px)}
+.ac-chart-thumb{height:110px;background:rgba(255,255,255,.03);display:flex;align-items:center;justify-content:center;border-bottom:1px solid rgba(255,255,255,.05);overflow:hidden}
+.ac-chart-thumb img{width:100%;height:100%;object-fit:cover}
+.ac-chart-thumb .no-thumb{font-size:32px;opacity:.3}
+.ac-chart-info{padding:12px 14px}
+.ac-chart-name{font-size:13px;font-weight:600;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ac-chart-meta{font-size:11px;color:rgba(255,255,255,.3);margin-top:3px}
+.ac-chart-actions{display:flex;gap:6px;margin-top:10px}
+.ac-chart-btn{flex:1;padding:5px 0;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:none;font-family:Arial,sans-serif;transition:all .15s}
+.ac-chart-btn-load{background:rgba(255,140,0,.12)!important;color:#ff8c00!important;border:1px solid rgba(255,140,0,.2)!important}
+.ac-chart-btn-load:hover{background:rgba(255,140,0,.22)!important}
+.ac-chart-btn-del{background:rgba(239,68,68,.08)!important;color:#ef4444!important;border:1px solid rgba(239,68,68,.15)!important}
+.ac-chart-btn-del:hover{background:rgba(239,68,68,.18)!important}
+.ac-chat-list{display:flex;flex-direction:column;gap:8px}
+.ac-chat-row{display:flex;gap:12px;padding:11px 14px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05)}
+.ac-chat-role{width:28px;height:28px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px}
+.role-user{background:rgba(255,140,0,.15);border:1px solid rgba(255,140,0,.2)}
+.role-assistant{background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.2)}
+.ac-chat-msg{flex:1;font-size:13px;color:rgba(255,255,255,.72);line-height:1.5;word-break:break-word}
+.ac-chat-time{font-size:10px;color:rgba(255,255,255,.2);white-space:nowrap;align-self:flex-start;margin-top:2px}
+</style>
 </head>
+<body class="account-body">
 
-<body onload="loadAccount()">
-
-<div class="container">
-
-<!-- Sidebar -->
-
-<div class="sidebar">
-<h2>InsightFlow</h2>
-
-<ul>
-<li onclick="goDashboard()">Dashboard</li>
-<li class="active">Account</li>
-<li onclick="logout()">Logout</li>
-</ul>
-
+<!-- TOAST -->
+<div class="ac-toast" id="acToast">
+  <span class="ac-toast-ico" id="acToastIco">✓</span>
+  <span id="acToastMsg">Done</span>
 </div>
 
+<!-- CONFIRM MODAL -->
+<div class="ac-modal-overlay" id="confirmModal">
+  <div class="ac-modal">
+    <h3 id="modalTitle">Are you sure?</h3>
+    <p id="modalBody">This action cannot be undone.</p>
+    <div class="ac-modal-btns">
+      <button class="ac-btn ac-btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="ac-btn ac-btn-danger" id="modalConfirmBtn">Confirm</button>
+    </div>
+  </div>
+</div>
 
-<!-- Main Content -->
+<!-- AVATAR INPUT -->
+<input type="file" id="avatarFileInput" accept="image/*" style="display:none" onchange="handleAvatarUpload(this)">
 
-<div class="main">
+<!-- TOPBAR -->
+<div class="r-topbar">
+  <div class="r-logo" onclick="window.location.href='dashboard.html'">INSIGHTFLOW</div>
+  <div class="r-nav">
+    <span onclick="window.location.href='dashboard.html'">← Dashboard</span>
+    <span onclick="confirmLogout()">Logout</span>
+  </div>
+</div>
 
-<h1>Account Settings</h1>
+<div class="r-body">
 
-<div class="account-card">
+  <!-- SIDEBAR -->
+  <div class="r-sidebar">
 
-<h2 id="username">User Name</h2>
+    <!-- User card -->
+    <div class="r-sb-brand">
+      <div class="r-sb-avatar-wrap">
+        <div class="r-sb-brand-icon" id="sbAvatar" onclick="document.getElementById('avatarFileInput').click()" title="Click to change photo">?</div>
+      </div>
+      <div style="min-width:0;flex:1">
+        <div class="r-sb-brand-title" id="sbName">Loading...</div>
+        <div class="r-sb-brand-role">Account Settings</div>
+      </div>
+    </div>
 
-<p id="email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="a7d2d4c2d5e7c2cac6cecb89c4c8ca">[email&#160;protected]</a></p>
+    <!-- Nav -->
+    <nav style="flex:1;padding:12px 10px;display:flex;flex-direction:column;gap:2px;overflow:hidden">
 
-<div class="account-actions">
+      <div class="sb-group-label">Settings</div>
 
-<button class="change-btn">
-Change Password
-</button>
+      <div class="sb-item on" onclick="showTab('profile')" id="tab-profile">
+        <div class="sb-icon-wrap"><svg class="sb-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
+        <span>Profile</span>
+      </div>
 
-<button class="logout-btn" onclick="logout()"
+      <div class="sb-item" onclick="showTab('password')" id="tab-password">
+        <div class="sb-icon-wrap"><svg class="sb-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+        <span>Password</span>
+      </div>
+
+      <div class="sb-item" onclick="showTab('session')" id="tab-session">
+        <div class="sb-icon-wrap"><svg class="sb-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        <span>Session</span>
+        <span class="sb-badge" id="sbSessionBadge"></span>
+      </div>
+
+      <div class="sb-group-label">Data</div>
+
+      <div class="sb-item" onclick="showTab('history')" id="tab-history">
+        <div class="sb-icon-wrap"><svg class="sb-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div>
+        <span>Upload History</span>
+      </div>
+
+      <div class="sb-item" onclick="showTab('charts')" id="tab-charts">
+        <div class="sb-icon-wrap"><svg class="sb-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+        <span>Saved Charts</span>
+      </div>
+
+      <div class="sb-item" onclick="showTab('chathist')" id="tab-chathist">
+        <div class="sb-icon-wrap"><svg class="sb-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+        <span>Chat History</span>
+      </div>
+
+      <div class="sb-item" onclick="showTab('activity')" id="tab-activity">
+        <div class="sb-icon-wrap"><svg class="sb-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+        <span>Activity Log</span>
+      </div>
+
+      <div class="sb-divider"></div>
+
+      <div class="sb-item sb-item-danger" onclick="confirmLogout()">
+        <div class="sb-icon-wrap"><svg class="sb-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div>
+        <span>Logout</span>
+      </div>
+
+    </nav>
+
+    <div class="r-sb-live">
+      <div class="r-sb-live-left"><div class="r-ldot"></div>Live</div>
+      <div class="r-sb-live-time" id="sbTime">—</div>
+    </div>
+  </div>
+
+  <!-- CANVAS -->
+  <div class="r-canvas">
+
+    <!-- Page Header -->
+    <div class="pg-header">
+      <div class="pg-header-left">
+        <div class="pg-header-icon">⚙️</div>
+        <div>
+          <div class="pg-header-title">Account Settings</div>
+          <div class="pg-header-sub">Manage your profile, security and data</div>
+        </div>
+      </div>
+      <div class="pg-header-right">
+        <div class="pg-session-badge" id="sessionBadge" title="Time remaining in session">● Session active</div>
+      </div>
+    </div>
+
+    <!-- ══ PROFILE ══ -->
+    <div class="ac-section active" id="sec-profile">
+      <div class="ac-card">
+        <div class="ac-card-header"><div class="hico">👤</div><h2>Profile</h2></div>
+
+        <!-- Avatar + info -->
+        <div class="ac-profile-hero">
+          <div class="ac-avatar" id="acAvatar">
+            <span id="acAvatarText">?</span>
+            <div class="ac-avatar-upload" onclick="document.getElementById('avatarFileInput').click()" title="Upload photo">📷</div>
+          </div>
+          <div class="ac-profile-info">
+            <div class="ac-profile-name"  id="acName">Loading...</div>
+            <div class="ac-profile-email" id="acEmail">—</div>
+            <div class="ac-profile-badges">
+              <span class="ac-badge badge-active">✓ Active</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dataset stats strip -->
+        <div class="ac-stats-strip">
+          <div class="ac-stat"><div class="ac-stat-val" id="statUploads">—</div><div class="ac-stat-lbl">Uploads</div></div>
+          <div class="ac-stat"><div class="ac-stat-val" id="statRows">—</div><div class="ac-stat-lbl">Total Rows</div></div>
+          <div class="ac-stat"><div class="ac-stat-val" id="statLast">—</div><div class="ac-stat-lbl">Last Upload</div></div>
+        </div>
+
+        <!-- Edit name (hidden by default) -->
+        <div id="editNamePanel" style="display:none;flex-direction:column;gap:16px">
+          <div class="ac-field">
+            <label>Display Name</label>
+            <input type="text" id="inputName" placeholder="Your display name">
+          </div>
+          <div id="msgProfile" class="ac-msg"></div>
+          <div class="ac-btn-row">
+            <button class="ac-btn ac-btn-primary" onclick="saveName()">Save Changes</button>
+            <button class="ac-btn ac-btn-outline" onclick="toggleEditName(false)">Cancel</button>
+          </div>
+        </div>
+        <div class="ac-btn-row" id="editNameBtn">
+          <button class="ac-btn ac-btn-outline" onclick="toggleEditName(true)">✏ Edit Display Name</button>
+        </div>
+      </div>
+
+      <!-- Danger zone — collapsed by default -->
+      <div class="ac-card" style="border-color:rgba(239,68,68,.1)">
+        <div class="ac-card-header" style="cursor:pointer;user-select:none" onclick="toggleDangerZone()">
+          <div class="hico" style="background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.2)">⚠️</div>
+          <h2 style="color:#ef4444">Danger Zone</h2>
+          <span id="dangerChevron" style="margin-left:auto;color:rgba(239,68,68,.5);font-size:12px;transition:transform .2s">▼</span>
+        </div>
+        <div id="dangerZoneContent" style="display:none;flex-direction:column;gap:0">
+          <div class="ac-danger-zone">
+            <div class="ac-danger-text">
+              <h3>Delete Account</h3>
+              <p>Permanently delete your account and all data. This cannot be undone.</p>
+            </div>
+            <button class="ac-btn ac-btn-danger" onclick="confirmDelete()">Delete Account</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PASSWORD ══ -->
+    <div class="ac-section" id="sec-password">
+      <div class="ac-card">
+        <div class="ac-card-header"><div class="hico">🔒</div><h2>Change Password</h2></div>
+
+        <div class="ac-field">
+          <label>Current Password</label>
+          <div class="ac-field-wrap">
+            <input type="password" id="inputCurr" placeholder="Enter your current password">
+            <span class="pw-toggle" onclick="togglePw('inputCurr',this)">👁</span>
+          </div>
+        </div>
+
+        <div class="ac-field-row">
+          <div class="ac-field">
+            <label>New Password</label>
+            <div class="ac-field-wrap">
+              <input type="password" id="inputNew" placeholder="Minimum 6 characters" oninput="checkStrength(this.value)">
+              <span class="pw-toggle" onclick="togglePw('inputNew',this)">👁</span>
+            </div>
+          </div>
+          <div class="ac-field">
+            <label>Confirm New Password</label>
+            <div class="ac-field-wrap">
+              <input type="password" id="inputConf" placeholder="Repeat new password">
+              <span class="pw-toggle" onclick="togglePw('inputConf',this)">👁</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pw-strength">
+          <div class="pw-strength-bar"><div class="pw-strength-fill" id="strFill"></div></div>
+          <div class="pw-strength-lbl" id="strLbl">Enter a new password to check strength</div>
+        </div>
+
+        <div id="msgPassword" class="ac-msg"></div>
+        <button class="ac-btn ac-btn-primary" onclick="changePassword()">Update Password</button>
+      </div>
+    </div>
+
+    <!-- ══ SESSION ══ -->
+    <div class="ac-section" id="sec-session">
+      <div class="ac-card">
+        <div class="ac-card-header"><div class="hico">⏱️</div><h2>Session</h2></div>
+
+        <div class="ac-session-info">
+          <div class="ac-session-left">
+            <div class="ac-session-dot"></div>
+            <div>
+              <div class="ac-session-text">Session Active</div>
+              <div class="ac-session-detail" id="sessionDetail">Logged in on this device</div>
+            </div>
+          </div>
+          <div class="ac-session-time" id="sessionTimeLeft">—</div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.25)">Session Details</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:14px">
+              <div style="font-size:10px;color:rgba(255,255,255,.25);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px">Login Time</div>
+              <div style="font-size:13px;color:white;font-weight:600" id="sessionLoginTime">—</div>
+            </div>
+            <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:14px">
+              <div style="font-size:10px;color:rgba(255,255,255,.25);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px">Expires At</div>
+              <div style="font-size:13px;color:white;font-weight:600" id="sessionExpiry">—</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ac-btn-row">
+          <button class="ac-btn ac-btn-primary" onclick="extendSession()">Extend Session +8h</button>
+          <button class="ac-btn ac-btn-danger" onclick="doLogout()">End Session</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ UPLOAD HISTORY ══ -->
+    <div class="ac-section" id="sec-history">
+      <div class="ac-card">
+        <div class="ac-card-header"><div class="hico">📂</div><h2>Upload History</h2></div>
+        <div id="historyContent"><div class="ac-spinner"></div></div>
+      </div>
+    </div>
+
+    <!-- == SAVED CHARTS == -->
+    <div class="ac-section" id="sec-charts">
+      <div class="ac-card">
+        <div class="ac-card-header">
+          <div class="hico">&#128202;</div><h2>Saved Charts</h2>
+          <a href="visualize.html" style="margin-left:auto;font-size:12px;color:#ff8c00;text-decoration:none;font-weight:600;padding:6px 14px;background:rgba(255,140,0,.1);border:1px solid rgba(255,140,0,.25);border-radius:8px">+ Build Chart</a>
+        </div>
+        <div id="chartsContent"><div class="ac-spinner"></div></div>
+      </div>
+    </div>
+
+    <!-- == CHAT HISTORY == -->
+    <div class="ac-section" id="sec-chathist">
+      <div class="ac-card">
+        <div class="ac-card-header">
+          <div class="hico">&#128172;</div><h2>Chat History</h2>
+          <a href="chatbot.html" style="margin-left:auto;font-size:12px;color:#ff8c00;text-decoration:none;font-weight:600;padding:6px 14px;background:rgba(255,140,0,.1);border:1px solid rgba(255,140,0,.25);border-radius:8px">Open Chat</a>
+        </div>
+        <div id="chatHistContent"><div class="ac-spinner"></div></div>
+      </div>
+    </div>
+
+    <!-- ══ ACTIVITY LOG ══ -->
+    <div class="ac-section" id="sec-activity">
+      <div class="ac-card">
+        <div class="ac-card-header">
+          <div class="hico">📋</div><h2>Activity Log</h2>
+          <button class="ac-btn ac-btn-outline" style="margin-left:auto;padding:7px 16px;font-size:11px" onclick="exportActivityCSV()">↓ Export CSV</button>
+        </div>
+        <div id="activityContent"><div class="ac-spinner"></div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+var API       = 'http://127.0.0.1:5000'
+var userEmail = ''
+var activityData = []
+var _sessionExpiresAt = 0   // frozen at page load, not re-read every second
+var _countdownStart   = 0   // performance.now() at page load
+var _countdownMs      = 0   // total ms remaining at page load
+
+/* ── Init ── */
+window.addEventListener('DOMContentLoaded', function() {
+  userEmail = (window.Auth && window.Auth.getEmail())
+            ? window.Auth.getEmail()
+            : (localStorage.getItem('userEmail') || '')
+  if (!userEmail) { window.location.href = 'index.html'; return }
+
+  // Clock
+  setInterval(function() {
+    var t = document.getElementById('sbTime')
+    if (t) t.textContent = new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'})
+  }, 1000)
+
+  // Capture countdown snapshot at exact page load moment
+  var _initSession = window.Auth ? window.Auth.getSession() : null
+  if (_initSession && _initSession.expiresAt) {
+    _sessionExpiresAt = _initSession.expiresAt
+    _countdownStart   = performance.now()
+    _countdownMs      = _initSession.expiresAt - Date.now()
+  }
+
+  // Session badge + live countdown every second
+  updateSessionBadge()
+  setInterval(updateSessionBadge, 1000)
+
+  loadProfile()
+  loadHistory()
+  loadChartsSection()
+  loadChatHistorySection()
+  loadActivity()
+  loadSessionInfo()
+  setInterval(loadSessionInfo, 10000)
+
+  // Wire modal confirm button (must be after DOM ready)
+  var mbtn = document.getElementById('modalConfirmBtn')
+  if (mbtn) mbtn.onclick = function() { closeModal(); if (_modalCb) _modalCb() }
+  var overlay = document.getElementById('confirmModal')
+  if (overlay) overlay.addEventListener('click', function(e) { if (e.target === this) closeModal() })
+
+  // Load saved avatar
+  var savedAvatar = localStorage.getItem('insightflow_avatar')
+  if (savedAvatar) applyAvatar(savedAvatar)
+})
+
+/* ── Session badge — smooth countdown using performance.now() delta ── */
+function updateSessionBadge() {
+  var ms
+  if (_countdownMs > 0 && _countdownStart > 0) {
+    // Use performance.now() delta — not affected by slideExpiry mutations
+    var elapsed = performance.now() - _countdownStart
+    ms = _countdownMs - elapsed
+  } else if (_sessionExpiresAt) {
+    ms = _sessionExpiresAt - Date.now()
+  } else {
+    return
+  }
+  if (ms <= 0) { if (window.Auth) window.Auth.logout(); return }
+  var h   = Math.floor(ms / 3600000)
+  var m   = Math.floor((ms % 3600000) / 60000)
+  var sec = Math.floor((ms % 60000) / 1000)
+  var pad = function(n){ return n < 10 ? '0' + n : '' + n }
+  var txt = h + 'h ' + pad(m) + 'm ' + pad(sec) + 's'
+  var badge = document.getElementById('sessionBadge')
+  if (badge) badge.textContent = '● ' + txt
+  var tl = document.getElementById('sessionTimeLeft')
+  if (tl) tl.textContent = txt
+}
+
+/* ── Tab switcher ── */
+function showTab(name) {
+  ['profile','password','session','history','charts','chathist','activity'].forEach(function(t) {
+    var sec = document.getElementById('sec-' + t)
+    var tab = document.getElementById('tab-' + t)
+    if (sec) sec.classList.remove('active')
+    if (tab) tab.classList.remove('on')
+  })
+  var sec = document.getElementById('sec-' + name)
+  var tab = document.getElementById('tab-' + name)
+  if (sec) sec.classList.add('active')
+  if (tab) tab.classList.add('on')
+  var canvas = document.querySelector('.r-canvas')
+  if (canvas) canvas.scrollTop = 0
+}
+
+/* ── Toast notification (replaces alert) ── */
+var toastTimer = null
+function toast(msg, type) {
+  var el  = document.getElementById('acToast')
+  var ico = document.getElementById('acToastIco')
+  var txt = document.getElementById('acToastMsg')
+  ico.textContent = type === 'ok' ? '✓' : type === 'err' ? '✕' : 'ℹ'
+  txt.textContent = msg
+  el.className = 'ac-toast ' + (type || 'info') + ' show'
+  if (toastTimer) clearTimeout(toastTimer)
+  toastTimer = setTimeout(function(){ el.classList.remove('show') }, 3500)
+}
+
+/* ── Confirm modal ── */
+var _modalCb = null
+function openModal(title, body, cb, danger) {
+  document.getElementById('modalTitle').textContent  = title
+  document.getElementById('modalBody').textContent   = body
+  var mbtn2 = document.getElementById('modalConfirmBtn')
+  if (mbtn2) {
+    mbtn2.textContent = danger ? 'Yes, ' + danger : 'Confirm'
+    mbtn2.className = 'ac-btn ' + (danger ? 'ac-btn-danger' : 'ac-btn-primary')
+  }
+  _modalCb = cb
+  var ov = document.getElementById('confirmModal')
+  if (ov) ov.classList.add('open')
+}
+function closeModal() {
+  document.getElementById('confirmModal').classList.remove('open')
+  _modalCb = null
+}
+// Modal button wiring — must be inside DOMContentLoaded (done in init below)
+
+/* ── Toggle edit name panel ── */
+function toggleEditName(show) {
+  var panel  = document.getElementById('editNamePanel')
+  var btnRow = document.getElementById('editNameBtn')
+  panel.style.display  = show ? 'flex' : 'none'
+  btnRow.style.display = show ? 'none' : 'flex'
+  if (show) document.getElementById('inputName').focus()
+}
+
+/* ── Toggle danger zone ── */
+function toggleDangerZone() {
+  var content  = document.getElementById('dangerZoneContent')
+  var chevron  = document.getElementById('dangerChevron')
+  var open     = content.style.display !== 'none'
+  content.style.display  = open ? 'none' : 'flex'
+  chevron.style.transform = open ? '' : 'rotate(180deg)'
+}
+
+/* ── Logout with confirm ── */
+function confirmLogout() {
+  if (!confirm('Log out of InsightFlow?')) return
+  doLogout()
+}
+
+function doLogout() {
+  // Notify backend (fire and forget)
+  try {
+    var email = window.Auth ? window.Auth.getEmail() : localStorage.getItem('userEmail')
+    var token = window.Auth ? window.Auth.getToken() : ''
+    if (email) fetch('http://127.0.0.1:5000/logout', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({email:email, token:token})
+    }).catch(function(){})
+  } catch(e){}
+  // Wipe all session data
+  try { localStorage.removeItem('insightflow_session') } catch(e){}
+  try { localStorage.removeItem('userEmail') } catch(e){}
+  try { localStorage.removeItem('insightflow_dataset') } catch(e){}
+  // Redirect to login
+  window.location.replace('index.html')
+}
+
+/* ── Avatar upload ── */
+function handleAvatarUpload(input) {
+  var file = input.files[0]
+  if (!file) return
+  if (file.size > 2 * 1024 * 1024) { toast('Image must be under 2MB', 'err'); return }
+  var reader = new FileReader()
+  reader.onload = function(e) {
+    applyAvatar(e.target.result)
+    localStorage.setItem('insightflow_avatar', e.target.result)
+    toast('Profile photo updated', 'ok')
+  }
+  reader.readAsDataURL(file)
+  input.value = ''
+}
+function applyAvatar(dataUrl) {
+  var av  = document.getElementById('acAvatar')
+  var txt = document.getElementById('acAvatarText')
+  var sb  = document.getElementById('sbAvatar')
+  if (txt) txt.style.display = 'none'
+  var existing = av ? av.querySelector('img') : null
+  if (!existing && av) {
+    var img = document.createElement('img')
+    img.src = dataUrl
+    av.insertBefore(img, av.firstChild)
+  } else if (existing) {
+    existing.src = dataUrl
+  }
+  if (sb) { sb.textContent = ''; sb.style.backgroundImage = 'url(' + dataUrl + ')'; sb.style.backgroundSize = 'cover'; sb.style.backgroundPosition = 'center' }
+}
+
+/* ── Session info tab ── */
+function loadSessionInfo() {
+  if (!window.Auth) return
+  var s = window.Auth.getSession()
+  if (!s) return
+  var lt = document.getElementById('sessionLoginTime')
+  var ex = document.getElementById('sessionExpiry')
+  var sd = document.getElementById('sessionDetail')
+  if (lt && s.loginTime) lt.textContent = new Date(s.loginTime).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})
+  if (ex && s.expiresAt) ex.textContent = new Date(s.expiresAt).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})
+  // Static — does not tick
+  if (sd) sd.textContent = 'Signed in as ' + (s.email || userEmail)
+}
+
+function extendSession() {
+  if (!window.Auth) { toast('Auth module not loaded', 'err'); return }
+  window.Auth.touch()
+  // Re-snapshot after extension
+  var s = window.Auth.getSession()
+  if (s && s.expiresAt) {
+    _sessionExpiresAt = s.expiresAt
+    _countdownStart   = performance.now()
+    _countdownMs      = s.expiresAt - Date.now()
+  }
+  loadSessionInfo()
+  updateSessionBadge()
+  toast('Session extended by 8 hours', 'ok')
+}
+
+/* ══ PROFILE ══ */
+function loadProfile() {
+  // ── Instant render — try Auth name, then session JSON, then email prefix ──
+  var instant = ''
+  if (window.Auth && window.Auth.getName()) {
+    instant = window.Auth.getName()
+  } else {
+    try {
+      var raw = localStorage.getItem('insightflow_session')
+      if (raw) { var parsed = JSON.parse(raw); if (parsed && parsed.name) instant = parsed.name }
+    } catch(e) {}
+  }
+  if (!instant || instant === userEmail) instant = userEmail.split('@')[0]
+  setName(instant)
+  document.getElementById('acEmail').textContent = userEmail
+  document.getElementById('inputName').value     = instant
+
+  // ── Then update from DB ──
+  fetch(API + '/account/' + encodeURIComponent(userEmail))
+    .then(function(r){ return r.json() })
+    .then(function(d) {
+      var name = (d && d.name) ? d.name : instant
+      setName(name)
+      document.getElementById('acEmail').textContent = (d && d.email) ? d.email : userEmail
+      document.getElementById('inputName').value     = name
+    })
+    .catch(function() {})  // keep instant values on network failure
+
+  fetch(API + '/datasets/' + encodeURIComponent(userEmail))
+    .then(function(r){ return r.json() })
+    .then(function(d) {
+      var ds = d.datasets || []
+      document.getElementById('statUploads').textContent = ds.length
+      var total = ds.reduce(function(s,x){ return s + (x.total_rows || 0) }, 0)
+      document.getElementById('statRows').textContent = fmtNum(total)
+      document.getElementById('statLast').textContent = ds.length > 0 && ds[0].uploaded_at
+        ? new Date(ds[0].uploaded_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short'})
+        : '—'
+    })
+    .catch(function() {
+      ['statUploads','statRows','statLast'].forEach(function(id){ document.getElementById(id).textContent = '—' })
+    })
+}
+
+function setName(name) {
+  document.getElementById('acName').textContent    = name
+  document.getElementById('sbName').textContent    = name
+  var savedAvatar = localStorage.getItem('insightflow_avatar')
+  if (!savedAvatar) {
+    var txt = document.getElementById('acAvatarText')
+    if (txt) { txt.style.display = ''; txt.textContent = name.charAt(0).toUpperCase() }
+    var sb = document.getElementById('sbAvatar')
+    if (sb && !sb.style.backgroundImage) sb.textContent = name.charAt(0).toUpperCase()
+  }
+}
+
+function saveName() {
+  var name = document.getElementById('inputName').value.trim()
+  if (!name || name.length < 2) { toast('Name must be at least 2 characters.', 'err'); return }
+  fetch(API + '/account/update', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({email:userEmail, name:name})
+  })
+  .then(function(r){ return r.json() })
+  .then(function(d) {
+    if (d.status === 'success') {
+      setName(name)
+      if (window.Auth) {
+        var s = window.Auth.getSession()
+        if (s) { s.name = name; try{ localStorage.setItem('insightflow_session', JSON.stringify(s)) }catch(e){} }
+      }
+      toast('Name updated successfully', 'ok')
+    } else { toast(d.message || 'Update failed', 'err') }
+  })
+  .catch(function(){ toast('Could not reach server', 'err') })
+}
+
+/* ── Delete account ── */
+function confirmDelete() {
+  openModal(
+    'Delete your account?',
+    'All your data including upload history, chat history and saved charts will be permanently deleted. This cannot be undone.',
+    function() {
+      toast('Account deletion is not yet implemented on the server.', 'info')
+    },
+    'Delete'
+  )
+}
+
+/* ══ PASSWORD ══ */
+function togglePw(id, btn) {
+  var inp = document.getElementById(id)
+  if (inp.type === 'password') { inp.type = 'text'; btn.style.opacity = '.9' }
+  else                         { inp.type = 'password'; btn.style.opacity = '.4' }
+}
+
+function checkStrength(v) {
+  var fill = document.getElementById('strFill')
+  var lbl  = document.getElementById('strLbl')
+  if (!v) { fill.style.width='0'; lbl.textContent='Enter a new password to check strength'; lbl.style.color=''; return }
+  var s = 0
+  if (v.length >= 6) s++; if (v.length >= 10) s++
+  if (/[A-Z]/.test(v)) s++; if (/[0-9]/.test(v)) s++; if (/[^A-Za-z0-9]/.test(v)) s++
+  var lvl = [{w:'20%',bg:'#ef4444',t:'Too weak'},{w:'40%',bg:'#f97316',t:'Weak'},{w:'60%',bg:'#f59e0b',t:'Fair'},{w:'80%',bg:'#84cc16',t:'Good'},{w:'100%',bg:'#10b981',t:'Strong'}]
+  var l = lvl[Math.min(s-1,4)] || lvl[0]
+  fill.style.width=l.w; fill.style.background=l.bg
+  lbl.textContent=l.t; lbl.style.color=l.bg
+}
+
+function changePassword() {
+  var curr = document.getElementById('inputCurr').value
+  var nw   = document.getElementById('inputNew').value
+  var conf = document.getElementById('inputConf').value
+  if (!curr||!nw||!conf) { toast('All fields are required.', 'err'); return }
+  if (nw.length < 6)     { toast('Password must be at least 6 characters.', 'err'); return }
+  if (nw !== conf)        { toast('New passwords do not match.', 'err'); return }
+
+  fetch(API + '/login', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({email:userEmail, password:curr})
+  })
+  .then(function(r){ return r.json() })
+  .then(function(d) {
+    if (d.status !== 'success') { toast('Current password is incorrect.', 'err'); return }
+    return fetch(API + '/account/update', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({email:userEmail, password:nw})
+    })
+    .then(function(r){ return r.json() })
+    .then(function(u) {
+      if (u.status === 'success') {
+        toast('Password updated successfully', 'ok')
+        document.getElementById('inputCurr').value = ''
+        document.getElementById('inputNew').value  = ''
+        document.getElementById('inputConf').value = ''
+        document.getElementById('strFill').style.width = '0'
+        document.getElementById('strLbl').textContent  = 'Enter a new password to check strength'
+        document.getElementById('strLbl').style.color  = ''
+      } else { toast(u.message || 'Update failed', 'err') }
+    })
+  })
+  .catch(function(){ toast('Could not reach server', 'err') })
+}
+
+/* ══ UPLOAD HISTORY ══ */
+function loadHistory() {
+  fetch(API + '/datasets/' + encodeURIComponent(userEmail))
+    .then(function(r){ return r.json() })
+    .then(function(d) {
+      var ds = d.datasets || []
+      var el = document.getElementById('historyContent')
+      if (!ds.length) {
+        el.innerHTML = '<div class="ac-empty"><div class="ico">📂</div><p>No uploads yet.<br>Upload your first dataset from the dashboard.</p><a href="dashboard.html">Go to Dashboard →</a></div>'
+        return
+      }
+      var rows = ds.map(function(x, idx) {
+        var t    = (x.file_type||'other').toLowerCase()
+        var date = x.uploaded_at ? new Date(x.uploaded_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '—'
+        var num  = x.numeric_cols !== null && x.numeric_cols !== undefined ? x.numeric_cols : '—'
+        var cat  = x.cat_cols     !== null && x.cat_cols     !== undefined ? x.cat_cols     : '—'
+        return '<tr>'
+          + '<td><strong>' + esc(x.file_name||'—') + '</strong></td>'
+          + '<td><span class="ft-badge ft-' + esc(t) + '">' + esc(t.toUpperCase()) + '</span></td>'
+          + '<td>' + fmtNum(x.total_rows) + '</td>'
+          + '<td>' + (x.total_cols||'—') + '</td>'
+          + '<td><span style="color:#10b981;font-weight:600">' + num + '</span> / <span style="color:#3b82f6;font-weight:600">' + cat + '</span></td>'
+          + '<td style="color:rgba(255,255,255,.35)">' + date + '</td>'
+          + '<td><button class="load-btn" onclick="reloadDataset(' + idx + ')">↗ Load</button></td>'
+          + '</tr>'
+      }).join('')
+      el.innerHTML = '<div class="ac-table-wrap"><table class="ac-table">'
+        + '<thead><tr><th>File</th><th>Type</th><th>Rows</th><th>Cols</th><th>Num / Cat</th><th>Uploaded</th><th></th></tr></thead>'
+        + '<tbody>' + rows + '</tbody></table></div>'
+      el._ds = ds
+    })
+    .catch(function() {
+      document.getElementById('historyContent').innerHTML =
+        '<div class="ac-empty"><div class="ico">⚠️</div><p>Could not load upload history.<br>Make sure Flask is running.</p></div>'
+    })
+}
+
+function reloadDataset(idx) {
+  var el = document.getElementById('historyContent')
+  var ds = el._ds
+  if (!ds || !ds[idx]) { toast('Dataset metadata not available', 'err'); return }
+  var d = ds[idx]
+  toast('Loading ' + (d.file_name || 'dataset') + '… please re-upload from dashboard.', 'info')
+  setTimeout(function(){ window.location.href = 'dashboard.html' }, 1800)
+}
+
+/* ══ ACTIVITY LOG ══ */
+function loadActivity() {
+  fetch(API + '/activity/' + encodeURIComponent(userEmail))
+    .then(function(r){ return r.json() })
+    .then(function(d) {
+      activityData = d.activity || []
+      renderActivity(activityData)
+    })
+    .catch(function() {
+      document.getElementById('activityContent').innerHTML =
+        '<div class="ac-empty"><div class="ico">⚠️</div><p>Could not load activity log.<br>Make sure Flask is running.</p></div>'
+    })
+}
+
+function renderActivity(acts) {
+  var el = document.getElementById('activityContent')
+  if (!acts.length) {
+    el.innerHTML = '<div class="ac-empty"><div class="ico">📋</div><p>No activity recorded yet.</p></div>'
+    return
+  }
+  var colMap = {login:'#10b981',login_failed:'#ef4444',logout:'#f59e0b',upload:'#3b82f6',register:'#8b5cf6'}
+  var lblMap = {login:'Logged in',login_failed:'Failed login attempt',logout:'Logged out',upload:'Dataset uploaded',register:'Account created'}
+  var items = acts.map(function(a) {
+    var col    = colMap[a.action] || '#778'
+    var label  = lblMap[a.action] || a.action
+    var time   = a.created_at ? new Date(a.created_at).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '—'
+    var detail = a.detail     ? '<span class="ac-act-detail">— ' + esc(a.detail)     + '</span>' : ''
+    var ip     = a.ip_address ? '<span class="ac-act-ip">· '     + esc(a.ip_address) + '</span>' : ''
+    return '<div class="ac-act-item">'
+      + '<div class="ac-act-dot" style="background:' + col + ';box-shadow:0 0 7px ' + col + '66"></div>'
+      + '<div class="ac-act-label">' + label + detail + ip + '</div>'
+      + '<div class="ac-act-time">' + time + '</div>'
+      + '</div>'
+  }).join('')
+  el.innerHTML = '<div class="ac-activity-list">' + items + '</div>'
+}
+
+function exportActivityCSV() {
+  if (!activityData.length) { toast('No activity data to export', 'err'); return }
+  var rows = ['Action,Detail,IP Address,Time']
+  activityData.forEach(function(a) {
+    rows.push([
+      '"' + (a.action||'') + '"',
+      '"' + (a.detail||'') + '"',
+      '"' + (a.ip_address||'') + '"',
+      '"' + (a.created_at||'') + '"'
+    ].join(','))
+  })
+  var blob = new Blob([rows.join('\n')], {type:'text/csv'})
+  var url  = URL.createObjectURL(blob)
+  var a    = document.createElement('a')
+  a.href = url; a.download = 'insightflow_activity.csv'; a.click()
+  URL.revokeObjectURL(url)
+  toast('Activity log exported', 'ok')
+}
+
+/* ── Helpers ── */
+function fmtNum(n) {
+  if (!n && n !== 0) return '—'
+  if (n >= 1e6) return (n/1e6).toFixed(1)+'M'
+  if (n >= 1e3) return (n/1e3).toFixed(1)+'K'
+  return Number(n).toLocaleString()
+}
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+}
+
+function loadChartsSection() {
+  var email = userEmail
+  if (!email) return
+  fetch('http://127.0.0.1:5000/charts/' + encodeURIComponent(email))
+    .then(function(r){ return r.json() })
+    .then(function(d) {
+      var charts = d.charts || []
+      var el = document.getElementById('chartsContent')
+      if (!el) return
+      if (!charts.length) {
+        el.innerHTML = '<div class="ac-empty"><div class="ico">&#128202;</div><p>No saved charts yet.<br>Build one in the Visualize page.</p><a href="visualize.html">Go to Visualize &#8594;</a></div>'
+        return
+      }
+      el._charts = charts
+      var cards = charts.map(function(c) {
+        var thumb = c.thumbnail ? '<img src="' + c.thumbnail + '" alt="">' : '<div class="no-thumb">&#128202;</div>'
+        var date  = c.created_at ? new Date(c.created_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '-'
+        return '<div class="ac-chart-card">'
+          + '<div class="ac-chart-thumb">' + thumb + '</div>'
+          + '<div class="ac-chart-info">'
+          + '<div class="ac-chart-name">' + esc(c.chart_name||'Chart') + '</div>'
+          + '<div class="ac-chart-meta">' + esc((c.chart_type||'').toUpperCase()) + ' &middot; ' + date + '</div>'
+          + '<div class="ac-chart-actions">'
+          + '<button class="ac-chart-btn ac-chart-btn-load" onclick="loadChartById(' + c.id + ')">&#8599; Load</button>'
+          + '<button class="ac-chart-btn ac-chart-btn-del"  onclick="deleteChartById(' + c.id + ',this)">&#x2715; Delete</button>'
+          + '</div></div></div>'
+      }).join('')
+      el.innerHTML = '<div class="ac-charts-grid">' + cards + '</div>'
+    })
+    .catch(function() {
+      var el = document.getElementById('chartsContent')
+      if (el) el.innerHTML = '<div class="ac-empty"><div class="ico">&#9888;</div><p>Could not load charts.</p></div>'
+    })
+}
+
+function loadChartById(id) {
+  var el = document.getElementById('chartsContent')
+  var charts = (el && el._charts) ? el._charts : []
+  var c = null
+  for (var i=0;i<charts.length;i++) { if (charts[i].id===id){c=charts[i];break} }
+  if (!c) { toast('Chart not found','err'); return }
+  try {
+    localStorage.setItem('insightflow_load_chart', c.config)
+    toast('Opening Visualize...','ok')
+    setTimeout(function(){ window.location.href='visualize.html' }, 1000)
+  } catch(e) { toast('Could not load chart','err') }
+}
+
+function deleteChartById(id, btn) {
+  if (!confirm('Delete this chart?')) return
+  fetch('http://127.0.0.1:5000/charts/delete/' + id, {
+    method: 'DELETE',
+    headers: {'Content-Type':'application/json','X-User-Email': userEmail}
+  })
+  .then(function(r){ return r.json() })
+  .then(function(d) {
+    if (d.status==='success') {
+      var card = btn
+      while(card && !card.classList.contains('ac-chart-card')) card = card.parentNode
+      if (card) card.remove()
+      toast('Chart deleted','ok')
+    } else { toast('Delete failed','err') }
+  })
+  .catch(function(){ toast('Could not reach server','err') })
+}
+
+function loadChatHistorySection() {
+  var email = userEmail
+  if (!email) return
+  fetch('http://127.0.0.1:5000/chat/history/' + encodeURIComponent(email))
+    .then(function(r){ return r.json() })
+    .then(function(d) {
+      var hist = d.history || []
+      var el = document.getElementById('chatHistContent')
+      if (!el) return
+      if (!hist.length) {
+        el.innerHTML = '<div class="ac-empty"><div class="ico">&#128172;</div><p>No chat history yet.<br>Start a conversation with the AI Analyst.</p><a href="chatbot.html">Open Chat &#8594;</a></div>'
+        return
+      }
+      var items = hist.map(function(h) {
+        var isUser = h.role === 'user'
+        var roleIco = isUser ? '&#128100;' : '&#129302;'
+        var roleCls = isUser ? 'role-user' : 'role-assistant'
+        var time = h.created_at ? new Date(h.created_at).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : ''
+        var msg = esc(h.message)
+        if (msg.length > 250) msg = msg.substring(0,250) + '...'
+        return '<div class="ac-chat-row"><div class="ac-chat-role ' + roleCls + '">' + roleIco + '</div>'
+          + '<div class="ac-chat-msg">' + msg + '</div><div class="ac-chat-time">' + time + '</div></div>'
+      }).join('')
+      el.innerHTML = '<div class="ac-chat-list">' + items + '</div>'
+    })
+    .catch(function() {
+      var el = document.getElementById('chatHistContent')
+      if (el) el.innerHTML = '<div class="ac-empty"><div class="ico">&#9888;</div><p>Could not load chat history.</p></div>'
+    })
+}
+</script>
+</body>
+</html>

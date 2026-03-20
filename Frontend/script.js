@@ -8,6 +8,23 @@ let headers     = []
 let currentPage = 1
 let rowsPerPage = 10
 
+/* ── Get auth email for all backend requests ── */
+function getAuthEmail() {
+  try {
+    if (window.Auth && window.Auth.getEmail()) return window.Auth.getEmail()
+    var raw = localStorage.getItem('insightflow_session')
+    if (raw) { var s = JSON.parse(raw); if (s && s.email) return s.email }
+  } catch(e) {}
+  return localStorage.getItem('userEmail') || ''
+}
+
+function authHeaders() {
+  var email = getAuthEmail()
+  var h = {'Content-Type': 'application/json'}
+  if (email) h['X-User-Email'] = email
+  return h
+}
+
 
 /* ── KPI counter animation ─────────────────────────────────── */
 function animateKPI(id, value){
@@ -141,7 +158,11 @@ function uploadFile(){
   let formData = new FormData()
   formData.append("file", file)
 
-  fetch("http://127.0.0.1:5000/upload", { method:"POST", body:formData })
+  fetch("http://127.0.0.1:5000/upload", {
+    method:"POST",
+    headers: getAuthEmail() ? {"X-User-Email": getAuthEmail()} : {},
+    body:formData
+  })
     .then(res => {
       if(!res.ok) throw new Error("HTTP " + res.status)
       return res.json()
@@ -286,10 +307,22 @@ function goDashboard(){ window.location.href = "login.html" }
 function goAccount(){   window.location.href = "account.html" }
 function goToChatbot(){ window.location.href = "chatbot.html" }
 function logout(){
-  if(window.Auth) window.Auth.logout()
-  else {
-    localStorage.removeItem("userEmail")
-    localStorage.removeItem("insightflow_dataset")
+  // Notify backend to deactivate session token
+  try {
+    var email = window.Auth ? window.Auth.getEmail() : localStorage.getItem("userEmail")
+    var token = window.Auth ? window.Auth.getToken() : ""
+    if(email) fetch("http://127.0.0.1:5000/logout", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({email:email, token:token})
+    }).catch(function(){})
+  } catch(e){}
+  // Always clear session regardless of Auth module
+  try { localStorage.removeItem("insightflow_session") } catch(e){}
+  try { localStorage.removeItem("userEmail") } catch(e){}
+  try { localStorage.removeItem("insightflow_dataset") } catch(e){}
+  if(window.Auth){
+    window.Auth.logout()
+  } else {
     window.location.href = "index.html"
   }
 }
@@ -302,20 +335,30 @@ function login(){
   let btn      = document.getElementById("mainButton")
 
   if(!email || !password){ alert("Email and password are required."); return }
-
   if(btn){ btn.disabled = true; btn.innerText = "Logging in..." }
+
+  // Generate token before login to save to backend sessions table
+  var loginToken = ""
+  try {
+    var arr = new Uint8Array(32)
+    window.crypto.getRandomValues(arr)
+    loginToken = Array.from(arr).map(function(b){return b.toString(16).padStart(2,'0')}).join('')
+  } catch(e){}
 
   fetch("http://127.0.0.1:5000/login", {
     method:"POST", headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({email, password})
+    body: JSON.stringify({email: email, password: password, token: loginToken})
   })
   .then(res => res.json())
   .then(data => {
     if(data.status === "success"){
-      // Use Auth module — creates secure session with token + expiry
-      if(window.Auth) window.Auth.setSession(data.email, data.name)
-      else localStorage.setItem("userEmail", data.email)  // fallback
-      // Redirect to intended page or dashboard
+      // Use Auth.setSession() — creates secure token + 8h expiry
+      if(window.Auth){
+        window.Auth.setSession(data.email, data.name)
+      } else {
+        localStorage.setItem("userEmail", data.email)
+      }
+      // Go back to where user was trying to go, or dashboard
       let dest = "dashboard.html"
       try { dest = sessionStorage.getItem("insightflow_redirect") || "dashboard.html" } catch(e){}
       try { sessionStorage.removeItem("insightflow_redirect") } catch(e){}
@@ -341,7 +384,6 @@ function register(){
   if(name.length < 2){ alert("Name must be at least 2 characters."); return }
   if(!/^[^@]+@[^@]+\.[^@]+$/.test(email)){ alert("Enter a valid email address."); return }
   if(password.length < 6){ alert("Password must be at least 6 characters."); return }
-
   if(btn){ btn.disabled = true; btn.innerText = "Registering..." }
 
   fetch("http://127.0.0.1:5000/register", {
@@ -353,7 +395,7 @@ function register(){
     if(btn){ btn.disabled = false; btn.innerText = "Register" }
     if(data.status === "success"){
       alert("Account created! Please log in.")
-      toggleForm()  // Switch back to login form
+      if(typeof toggleForm === "function") toggleForm()
     } else {
       alert(data.message || "Registration failed")
     }
@@ -392,12 +434,11 @@ function toggleForm(){
 }
 
 function loadAccount(){
-  let email = window.Auth ? window.Auth.getEmail() : localStorage.getItem("userEmail")
-  if(!email){ window.location.href = "index.html"; return }
-  fetch(`http://127.0.0.1:5000/account/${encodeURIComponent(email)}`)
-    .then(res => { if(!res.ok) throw new Error("Not found"); return res.json() })
+  let email = localStorage.getItem("userEmail")
+  if(!email) return
+  fetch(`http://127.0.0.1:5000/account/${email}`)
+    .then(res => res.json())
     .then(data => {
-      if(data.error){ console.warn("Account:", data.error); return }
       let u = document.getElementById("username")
       let e = document.getElementById("email")
       if(u) u.innerText = data.name  || ""
@@ -420,6 +461,46 @@ let chatHistory    = []
 let datasetContext = ""
 let isSending      = false
 
+
+/* ── Load past chat history from DB ── */
+function loadChatHistoryFromDB() {
+  var email = getAuthEmail()
+  if (!email) return
+  fetch("http://127.0.0.1:5000/chat/history/" + encodeURIComponent(email))
+    .then(function(r){ return r.json() })
+    .then(function(d) {
+      var hist = d.history || []
+      if (!hist.length) return
+      // Show a divider then past messages
+      var win = document.getElementById("chatWindow")
+      if (!win) return
+      var divider = document.createElement("div")
+      divider.style.cssText = "text-align:center;margin:12px 0;font-size:11px;color:rgba(255,255,255,.25);font-weight:600;letter-spacing:1px;display:flex;align-items:center;gap:10px"
+      divider.innerHTML = '<div style="flex:1;height:1px;background:rgba(255,255,255,.08)"></div>PREVIOUS CONVERSATION<div style="flex:1;height:1px;background:rgba(255,255,255,.08)"></div>'
+      win.insertBefore(divider, win.firstChild)
+      // Insert past messages at the TOP (oldest first)
+      var fragment = document.createDocumentFragment()
+      hist.forEach(function(h) {
+        if (h.role === 'user') {
+          var div = document.createElement("div")
+          div.className = "chat-message user-message"
+          div.innerHTML = "<p>" + h.message.replace(/</g,"&lt;") + "</p>"
+          div.style.opacity = ".6"
+          fragment.appendChild(div)
+        } else {
+          var div = document.createElement("div")
+          div.className = "chat-message bot-message"
+          div.innerHTML = "<p>" + formatMarkdown(h.message) + "</p>"
+          div.style.opacity = ".6"
+          fragment.appendChild(div)
+        }
+        // Also add to chatHistory for context
+        chatHistory.push({role: h.role, content: h.message})
+      })
+      win.insertBefore(fragment, divider.nextSibling)
+    })
+    .catch(function(){}) // silent fail — history is optional
+}
 
 /* ── Load dataset from sessionStorage ─────────────────────── */
 function loadDataset(){
@@ -468,6 +549,9 @@ function loadDataset(){
   /* simple greeting */
   appendBotMessage("Hi! I'm ready to analyze **" + fileName + "**. Use the quick buttons or ask me anything.")
 
+  // Load past chat history from DB (shows previous conversations)
+  loadChatHistoryFromDB()
+
   enableChatInput()
   let inp = document.getElementById("chatInput")
   if(inp) inp.focus()
@@ -490,7 +574,7 @@ function sendChat(){
 
   fetch("http://127.0.0.1:5000/chat", {
     method:"POST",
-    headers:{"Content-Type":"application/json"},
+    headers: authHeaders(),
     body: JSON.stringify({
       message:         userMsg,
       history:         chatHistory.slice(0, -1),
@@ -1035,6 +1119,57 @@ function buildSummaryStats(d){
 
 
 /* ── Download chart ── */
+/* ── Save chart to DB ── */
+function saveChartToDB() {
+  if (!chartInst) {
+    alert("Build a chart first, then save it.")
+    return
+  }
+  var name = prompt("Chart name:", "My Chart")
+  if (!name) return
+
+  // Get canvas thumbnail
+  var canvas = document.getElementById("myChart")
+  var thumbnail = null
+  try { if (canvas) thumbnail = canvas.toDataURL("image/png", 0.5) } catch(e){}
+
+  // Build config object from current chart state
+  var config = JSON.stringify({
+    chartType: typeof chartType    !== 'undefined' ? chartType    : 'bar',
+    xAxis:     typeof xAxisVal     !== 'undefined' ? xAxisVal     : null,
+    yAxis:     typeof yAxisVal     !== 'undefined' ? yAxisVal     : null,
+    color:     typeof chartColor   !== 'undefined' ? chartColor   : '#ff8c00',
+    maxPoints: (function(){ var el = document.getElementById("maxPoints"); return el ? el.value : 20 })(),
+    headers:   typeof vizHeaders   !== 'undefined' ? vizHeaders   : [],
+    fileName:  (function(){ try{ var d=JSON.parse(localStorage.getItem('insightflow_dataset')||'{}'); return d.fileName||'' }catch(e){return ''} })()
+  })
+
+  fetch("http://127.0.0.1:5000/charts/save", {
+    method: "POST",
+    headers: authHeaders(),
+    body: JSON.stringify({
+      chart_name: name,
+      chart_type: typeof chartType !== 'undefined' ? chartType : 'bar',
+      config:     config,
+      thumbnail:  thumbnail
+    })
+  })
+  .then(function(r){ return r.json() })
+  .then(function(d) {
+    if (d.status === "success") {
+      if (typeof toast === 'function') toast("Chart '" + name + "' saved!", 'ok')
+      else alert("Chart saved! View it in Account > Saved Charts.")
+    } else {
+      if (typeof toast === 'function') toast("Could not save: " + (d.error||'error'), 'err')
+      else alert("Could not save: " + (d.error || "unknown error"))
+    }
+  })
+  .catch(function() {
+    if (typeof toast === 'function') toast("Could not reach server.", 'err')
+    else alert("Could not reach server.")
+  })
+}
+
 function downloadChart(format){
   if(!chartInst){ alert("Generate a chart first"); return }
 
@@ -1103,10 +1238,22 @@ window.addEventListener("DOMContentLoaded", () => {
 /* ── Navigation ── */
 function goAccount(){ window.location.href = "account.html" }
 function logout(){
-  if(window.Auth) window.Auth.logout()
-  else {
-    localStorage.removeItem("userEmail")
-    localStorage.removeItem("insightflow_dataset")
+  // Notify backend to deactivate session token
+  try {
+    var email = window.Auth ? window.Auth.getEmail() : localStorage.getItem("userEmail")
+    var token = window.Auth ? window.Auth.getToken() : ""
+    if(email) fetch("http://127.0.0.1:5000/logout", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({email:email, token:token})
+    }).catch(function(){})
+  } catch(e){}
+  // Always clear session regardless of Auth module
+  try { localStorage.removeItem("insightflow_session") } catch(e){}
+  try { localStorage.removeItem("userEmail") } catch(e){}
+  try { localStorage.removeItem("insightflow_dataset") } catch(e){}
+  if(window.Auth){
+    window.Auth.logout()
+  } else {
     window.location.href = "index.html"
   }
 }
@@ -1515,10 +1662,22 @@ function exportPDF(){
 }
  
 function logout(){
-  if(window.Auth) window.Auth.logout()
-  else {
-    localStorage.removeItem("userEmail")
-    localStorage.removeItem("insightflow_dataset")
+  // Notify backend to deactivate session token
+  try {
+    var email = window.Auth ? window.Auth.getEmail() : localStorage.getItem("userEmail")
+    var token = window.Auth ? window.Auth.getToken() : ""
+    if(email) fetch("http://127.0.0.1:5000/logout", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({email:email, token:token})
+    }).catch(function(){})
+  } catch(e){}
+  // Always clear session regardless of Auth module
+  try { localStorage.removeItem("insightflow_session") } catch(e){}
+  try { localStorage.removeItem("userEmail") } catch(e){}
+  try { localStorage.removeItem("insightflow_dataset") } catch(e){}
+  if(window.Auth){
+    window.Auth.logout()
+  } else {
     window.location.href = "index.html"
   }
 }

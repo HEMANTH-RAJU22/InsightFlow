@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script src="auth.js"></script>
 <meta charset="UTF-8">
 <title>Visualize - InsightFlow</title>
 <link rel="stylesheet" href="style.css">
@@ -161,6 +160,13 @@
         <div class="download-btns">
           <button class="viz-action-btn" onclick="downloadChart('png')">↓ PNG</button>
           <button class="viz-action-btn" onclick="downloadChart('jpg')">↓ JPG</button>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label class="ctrl-label">SAVE TO ACCOUNT</label>
+        <div class="download-btns">
+          <button class="viz-action-btn" onclick="saveChartToDB()" style="background:linear-gradient(135deg,#ff8c00,#ff5500);color:white;border:none;font-weight:700;letter-spacing:.5px;cursor:pointer;border-radius:8px;padding:10px 16px;width:100%;font-family:Arial,sans-serif;transition:all .2s" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">&#128190; Save Chart</button>
         </div>
       </div>
 
