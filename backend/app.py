@@ -176,6 +176,15 @@ def login():
                 "INSERT INTO activity_log(user_id, action, detail, ip_address) VALUES(%s,%s,%s,%s)",
                 (user["id"], "login", email, ip)
             )
+            # Save session token to sessions table
+            token      = data.get("token", "")
+            user_agent = request.headers.get("User-Agent", "")[:255]
+            if token:
+                cursor.execute(
+                    """INSERT INTO sessions(user_id, token, ip_address, user_agent, expires_at, is_active)
+                       VALUES(%s,%s,%s,%s,DATE_ADD(NOW(), INTERVAL 8 HOUR),1)""",
+                    (user["id"], token, ip, user_agent)
+                )
             db.commit()
             log.info("Login OK: %s from %s", email, ip)
             return jsonify({"status": "success", "name": user["name"], "email": user["email"]})
@@ -207,7 +216,7 @@ def get_account(email):
         return jsonify({"error": "Database unavailable"}), 500
 
     try:
-        cursor.execute("SELECT name, email FROM users WHERE email=%s", (email,))
+        cursor.execute("SELECT name, email, created_at, last_login FROM users WHERE email=%s", (email,))
         user = cursor.fetchone()
         if user:
             return jsonify(user)
@@ -326,6 +335,11 @@ def upload():
                     cur2.execute("SELECT id FROM users WHERE email=%s", (email_hdr,))
                     u = cur2.fetchone()
                     if u:
+                        # Get actual file size
+                        try:
+                            file.seek(0, 2); fsize = file.tell(); file.seek(0)
+                        except Exception:
+                            fsize = 0
                         cur2.execute(
                             """INSERT INTO datasets
                                (user_id, file_name, file_size, file_type,
@@ -334,7 +348,7 @@ def upload():
                                VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
                             (
                                 u["id"], file.filename,
-                                request.content_length or 0,
+                                fsize,
                                 ext.lstrip("."),
                                 total_rows, total_columns,
                                 len(numeric_cols), len(cat_cols),
@@ -416,6 +430,7 @@ def _read_file(file, ext):
 def logout():
     data  = request.json or {}
     email = data.get("email", "").strip().lower()
+    token = data.get("token", "")
     if email:
         db, cursor = get_db()
         if db:
@@ -427,6 +442,12 @@ def logout():
                         "INSERT INTO activity_log(user_id, action, ip_address) VALUES(%s,%s,%s)",
                         (u["id"], "logout", request.remote_addr or "unknown")
                     )
+                    # Deactivate session token
+                    if token:
+                        cursor.execute(
+                            "UPDATE sessions SET is_active=0 WHERE token=%s",
+                            (token,)
+                        )
                     db.commit()
             except Exception as e:
                 log.warning("Logout log error: %s", e)
@@ -522,11 +543,12 @@ def chat():
     user_message = data.get("message", "").strip()
     history      = data.get("history", [])
     dataset_ctx  = data.get("dataset_context", "No dataset uploaded yet.")
+    user_email   = request.headers.get("X-User-Email", "").strip().lower()
+    dataset_id   = data.get("dataset_id", None)
 
     if not user_message:
         return jsonify({"error": "No message provided"}), 400
 
-    # Keep last 10 turns for better conversation context
     recent = history[-10:]
     ctx    = "\n".join(dataset_ctx.split("\n")[:50])
 
@@ -548,6 +570,39 @@ def chat():
         )
         reply = response.choices[0].message.content
         log.info("Chat reply: %d chars", len(reply))
+
+        # Save both messages to chat_history table (best-effort)
+        if user_email:
+            try:
+                db2, cur2 = get_db()
+                if db2:
+                    cur2.execute("SELECT id FROM users WHERE email=%s", (user_email,))
+                    u = cur2.fetchone()
+                    if u:
+                        uid = u["id"]
+                        # Resolve dataset_id from datasets table if not provided
+                        if not dataset_id:
+                            cur2.execute(
+                                "SELECT id FROM datasets WHERE user_id=%s ORDER BY uploaded_at DESC LIMIT 1",
+                                (uid,)
+                            )
+                            ds = cur2.fetchone()
+                            if ds: dataset_id = ds["id"]
+
+                        cur2.execute(
+                            "INSERT INTO chat_history(user_id, dataset_id, role, message) VALUES(%s,%s,%s,%s)",
+                            (uid, dataset_id, "user", user_message)
+                        )
+                        cur2.execute(
+                            "INSERT INTO chat_history(user_id, dataset_id, role, message) VALUES(%s,%s,%s,%s)",
+                            (uid, dataset_id, "assistant", reply)
+                        )
+                        db2.commit()
+                    cur2.close()
+                    db2.close()
+            except Exception as db_err:
+                log.warning("Chat DB save error: %s", db_err)
+
         return jsonify({"reply": reply})
 
     except Exception as e:
@@ -702,6 +757,137 @@ def activity(email):
         return jsonify({"activity": rows})
     except Exception as e:
         log.error("Activity error: %s", e)
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close()
+        db.close()
+
+
+
+# ─────────────────────────────────────────
+# SAVED CHARTS — save & retrieve
+# ─────────────────────────────────────────
+
+@app.route("/charts/save", methods=["POST"])
+def save_chart():
+    data       = request.json or {}
+    user_email = request.headers.get("X-User-Email", "").strip().lower()
+    if not user_email:
+        return jsonify({"error": "Not authenticated"}), 401
+
+    chart_name = data.get("chart_name", "Untitled Chart")[:255]
+    chart_type = data.get("chart_type", "bar")[:50]
+    config     = str(data.get("config", "{}"))
+    thumbnail  = data.get("thumbnail", None)
+
+    db, cursor = get_db()
+    if not db:
+        return jsonify({"error": "Database unavailable"}), 500
+    try:
+        cursor.execute("SELECT id FROM users WHERE email=%s", (user_email,))
+        u = cursor.fetchone()
+        if not u:
+            return jsonify({"error": "User not found"}), 404
+        cursor.execute(
+            """INSERT INTO saved_charts(user_id, chart_name, chart_type, config, thumbnail)
+               VALUES(%s,%s,%s,%s,%s)""",
+            (u["id"], chart_name, chart_type, config, thumbnail)
+        )
+        chart_id = cursor.lastrowid
+        db.commit()
+        log.info("Chart saved: %s for %s", chart_name, user_email)
+        return jsonify({"status": "success", "chart_id": chart_id})
+    except Exception as e:
+        log.error("Save chart error: %s", e)
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close()
+        db.close()
+
+
+@app.route("/charts/<email>")
+def get_charts(email):
+    db, cursor = get_db()
+    if not db:
+        return jsonify({"error": "Database unavailable"}), 500
+    try:
+        cursor.execute("SELECT id FROM users WHERE email=%s", (email,))
+        u = cursor.fetchone()
+        if not u:
+            return jsonify({"charts": []})
+        cursor.execute(
+            """SELECT id, chart_name, chart_type, config, thumbnail, created_at
+               FROM saved_charts WHERE user_id=%s
+               ORDER BY created_at DESC LIMIT 50""",
+            (u["id"],)
+        )
+        rows = cursor.fetchall()
+        for r in rows:
+            if r.get("created_at"):
+                r["created_at"] = str(r["created_at"])
+        return jsonify({"charts": rows})
+    except Exception as e:
+        log.error("Get charts error: %s", e)
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close()
+        db.close()
+
+
+@app.route("/charts/delete/<int:chart_id>", methods=["DELETE"])
+def delete_chart(chart_id):
+    user_email = request.headers.get("X-User-Email", "").strip().lower()
+    if not user_email:
+        return jsonify({"error": "Not authenticated"}), 401
+    db, cursor = get_db()
+    if not db:
+        return jsonify({"error": "Database unavailable"}), 500
+    try:
+        cursor.execute("SELECT id FROM users WHERE email=%s", (user_email,))
+        u = cursor.fetchone()
+        if not u:
+            return jsonify({"error": "User not found"}), 404
+        cursor.execute(
+            "DELETE FROM saved_charts WHERE id=%s AND user_id=%s",
+            (chart_id, u["id"])
+        )
+        db.commit()
+        return jsonify({"status": "success"})
+    except Exception as e:
+        log.error("Delete chart error: %s", e)
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close()
+        db.close()
+
+
+# ─────────────────────────────────────────
+# CHAT HISTORY — retrieve past conversations
+# ─────────────────────────────────────────
+
+@app.route("/chat/history/<email>")
+def chat_history_get(email):
+    db, cursor = get_db()
+    if not db:
+        return jsonify({"error": "Database unavailable"}), 500
+    try:
+        cursor.execute("SELECT id FROM users WHERE email=%s", (email,))
+        u = cursor.fetchone()
+        if not u:
+            return jsonify({"history": []})
+        cursor.execute(
+            """SELECT role, message, dataset_id, created_at
+               FROM chat_history WHERE user_id=%s
+               ORDER BY created_at DESC LIMIT 100""",
+            (u["id"],)
+        )
+        rows = cursor.fetchall()
+        for r in rows:
+            if r.get("created_at"):
+                r["created_at"] = str(r["created_at"])
+        return jsonify({"history": list(reversed(rows))})
+    except Exception as e:
+        log.error("Chat history error: %s", e)
         return jsonify({"error": str(e)}), 500
     finally:
         cursor.close()
