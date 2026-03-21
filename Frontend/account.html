@@ -233,6 +233,28 @@ body.account-body .ac-table .load-btn:hover{background:rgba(255,140,0,.2)!import
 .ac-empty a{color:#ff8c00;text-decoration:none;font-size:13px;font-weight:600;padding:9px 20px;border-radius:9px;background:rgba(255,140,0,.1);border:1px solid rgba(255,140,0,.25);transition:all .2s}
 .ac-empty a:hover{background:rgba(255,140,0,.2)}
 
+
+/* Activity log buttons */
+.ac-log-btn {
+  background: rgba(255,140,0,0.06) !important;
+  color: #ff8c00 !important;
+  border: 1px solid rgba(255,140,0,0.25) !important;
+  padding: 6px 16px !important;
+  border-radius: 9px !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.3px !important;
+  cursor: pointer !important;
+  font-family: Arial, sans-serif !important;
+  transition: all 0.2s !important;
+}
+.ac-log-btn:hover {
+  background: rgba(255,140,0,0.14) !important;
+  border-color: rgba(255,140,0,0.4) !important;
+  color: white !important;
+  transform: translateY(-1px) !important;
+}
+
 /* danger outline button */
 .ac-btn-danger-outline{background:rgba(239,68,68,.06)!important;color:#ef4444!important;border:1px solid rgba(239,68,68,.25)!important;padding:6px 16px!important;border-radius:9px!important;font-size:12px!important;font-weight:700!important;cursor:pointer!important;font-family:Arial,sans-serif!important;transition:all .2s!important;letter-spacing:.3px!important}
 .ac-btn-danger-outline:hover{background:rgba(239,68,68,.14)!important;border-color:rgba(239,68,68,.4)!important}
@@ -358,7 +380,7 @@ body.account-body .ac-table .load-btn:hover{background:rgba(255,140,0,.2)!import
 
       <div class="sb-divider"></div>
 
-      <div class="sb-item sb-item-danger" onclick="confirmLogout()">
+        <div class="sb-item sb-item-danger" onclick="confirmLogout()">
         <div class="sb-icon-wrap"><svg class="sb-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div>
         <span>Logout</span>
       </div>
@@ -433,13 +455,13 @@ body.account-body .ac-table .load-btn:hover{background:rgba(255,140,0,.2)!import
       </div>
 
       <!-- Danger zone — collapsed by default -->
-      <div class="ac-card" style="border-color:rgba(239,68,68,.1)">
+      <div class="ac-card" id="dangerZoneCard" style="border-color:rgba(239,68,68,.1);display:none">
         <div class="ac-card-header" style="cursor:pointer;user-select:none" onclick="toggleDangerZone()">
           <div class="hico" style="background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.2)">⚠️</div>
           <h2 style="color:#ef4444">Danger Zone</h2>
           <span id="dangerChevron" style="margin-left:auto;color:rgba(239,68,68,.5);font-size:12px;transition:transform .2s">▼</span>
         </div>
-        <div id="dangerZoneContent" style="display:none;flex-direction:column;gap:0">
+        <div id="dangerZoneContent" style="display:none!important;flex-direction:column;gap:0">
           <div class="ac-danger-zone">
             <div class="ac-danger-text">
               <h3>Delete Account</h3>
@@ -553,8 +575,8 @@ body.account-body .ac-table .load-btn:hover{background:rgba(255,140,0,.2)!import
         <div class="ac-card-header">
           <div class="hico">&#128172;</div><h2>Chat History</h2>
           <div style="display:flex;gap:8px;margin-left:auto">
-            <button onclick="clearChatHistory()" class="ac-btn-danger-outline">&#128465; Clear History</button>
-            <a href="chatbot.html" style="font-size:12px;color:#ff8c00;text-decoration:none;font-weight:700;padding:6px 16px;background:rgba(255,140,0,.08);border:1px solid rgba(255,140,0,.3);border-radius:9px;letter-spacing:.3px">Open Chat</a>
+            <button onclick="clearChatHistory()" style="background:linear-gradient(135deg,#ff8c00,#e07000)!important;color:white!important;border:none!important;padding:6px 16px!important;border-radius:9px!important;font-size:12px!important;font-weight:700!important;letter-spacing:0.3px!important;cursor:pointer!important;font-family:Arial,sans-serif!important;transition:all 0.2s!important;box-shadow:0 2px 8px rgba(255,140,0,0.3)!important;text-decoration:none!important;display:inline-block!important">&#128465; Clear History</button>
+            <a href="chatbot.html" style="background:linear-gradient(135deg,#ff8c00,#e07000)!important;color:white!important;border:none!important;padding:6px 16px!important;border-radius:9px!important;font-size:12px!important;font-weight:700!important;letter-spacing:0.3px!important;cursor:pointer!important;font-family:Arial,sans-serif!important;transition:all 0.2s!important;box-shadow:0 2px 8px rgba(255,140,0,0.3)!important;text-decoration:none!important;display:inline-block!important">Open Chat</a>
           </div>
         </div>
         <div id="chatHistContent"><div class="ac-spinner"></div></div>
@@ -567,8 +589,8 @@ body.account-body .ac-table .load-btn:hover{background:rgba(255,140,0,.2)!import
         <div class="ac-card-header">
           <div class="hico">&#128203;</div><h2>Activity Log</h2>
           <div style="display:flex;gap:8px;margin-left:auto">
-            <button onclick="clearActivityLog()" class="ac-btn-danger-outline">&#128465; Clear Log</button>
-            <button onclick="exportActivityCSV()" class="ac-btn ac-btn-outline" style="padding:6px 16px!important;font-size:12px!important;border:1px solid rgba(255,140,0,.3)!important;color:#ff8c00!important;background:rgba(255,140,0,.06)!important;border-radius:9px!important;font-weight:700!important;letter-spacing:.3px!important">&#8595; Export CSV</button>
+            <button onclick="clearActivityLog()" style="background:linear-gradient(135deg,#ff8c00,#e07000)!important;color:white!important;border:none!important;padding:6px 16px!important;border-radius:9px!important;font-size:12px!important;font-weight:700!important;letter-spacing:0.3px!important;cursor:pointer!important;font-family:Arial,sans-serif!important;transition:all 0.2s!important;box-shadow:0 2px 8px rgba(255,140,0,0.3)!important;text-decoration:none!important;display:inline-block!important">&#128465; Clear Log</button>
+            <button onclick="exportActivityCSV()" style="background:linear-gradient(135deg,#ff8c00,#e07000)!important;color:white!important;border:none!important;padding:6px 16px!important;border-radius:9px!important;font-size:12px!important;font-weight:700!important;letter-spacing:0.3px!important;cursor:pointer!important;font-family:Arial,sans-serif!important;transition:all 0.2s!important;box-shadow:0 2px 8px rgba(255,140,0,0.3)!important;text-decoration:none!important;display:inline-block!important">&#8595; Export CSV</button>
           </div>
         </div>
         <div id="activityContent"><div class="ac-spinner"></div></div>
@@ -712,12 +734,30 @@ function toggleEditName(show) {
 }
 
 /* ── Toggle danger zone ── */
+function showDangerZone() {
+  var card = document.getElementById('dangerZoneCard')
+  if(card) {
+    card.style.setProperty('display','block','important')
+    card.scrollIntoView({behavior:'smooth'})
+    // auto expand content
+    var content2 = document.getElementById('dangerZoneContent')
+    var chevron  = document.getElementById('dangerChevron')
+    if(content2) content2.style.setProperty('display','flex','important')
+    if(chevron)  chevron.style.transform = 'rotate(180deg)'
+  }
+}
+
 function toggleDangerZone() {
   var content  = document.getElementById('dangerZoneContent')
   var chevron  = document.getElementById('dangerChevron')
-  var open     = content.style.display !== 'none'
-  content.style.display  = open ? 'none' : 'flex'
-  chevron.style.transform = open ? '' : 'rotate(180deg)'
+  var open     = content.style.display === 'flex' || content.style.display === 'block'
+  if(open){
+    content.style.setProperty('display','none','important')
+    chevron.style.transform = ''
+  } else {
+    content.style.setProperty('display','flex','important')
+    chevron.style.transform = 'rotate(180deg)'
+  }
 }
 
 /* ── Logout with confirm ── */

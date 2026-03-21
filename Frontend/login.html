@@ -297,6 +297,54 @@ html,body{
 <script>
 var API = 'http://127.0.0.1:5000'
 
+// Handle reset token in URL
+window.addEventListener('load', function() {
+  var params = new URLSearchParams(window.location.search)
+  var token  = params.get('reset')
+  if (token) {
+    // Show reset password form
+    document.getElementById('resetSection') && showResetForm(token)
+  }
+})
+
+function showResetForm(token) {
+  var el = document.getElementById('resetSection')
+  if (!el) return
+  el.style.display = 'block'
+  document.querySelector('.tabs') && (document.querySelector('.tabs').style.display = 'none')
+  document.getElementById('loginForm') && (document.getElementById('loginForm').style.display = 'none')
+  document.getElementById('registerForm') && (document.getElementById('registerForm').style.display = 'none')
+  document.getElementById('forgotForm') && (document.getElementById('forgotForm').style.display = 'none')
+  el.querySelector('[data-token]') && el.querySelector('[data-token]').setAttribute('data-token', token)
+}
+
+function submitReset() {
+  var el    = document.getElementById('resetSection')
+  var token = el ? el.querySelector('[data-token]').getAttribute('data-token') : ''
+  var pw1   = document.getElementById('resetPw1') ? document.getElementById('resetPw1').value : ''
+  var pw2   = document.getElementById('resetPw2') ? document.getElementById('resetPw2').value : ''
+  var msg   = document.getElementById('resetMsg')
+
+  if (!pw1 || pw1.length < 6) { if(msg){msg.textContent='Password must be at least 6 characters';msg.className='val-msg show err'} return }
+  if (pw1 !== pw2) { if(msg){msg.textContent='Passwords do not match';msg.className='val-msg show err'} return }
+
+  fetch(API + '/reset-password', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token: token, password: pw1 })
+  })
+  .then(function(r){ return r.json() })
+  .then(function(data){
+    if (data.status === 'success') {
+      if(msg){msg.textContent='Password reset successfully! Redirecting to login...';msg.className='val-msg show ok'}
+      setTimeout(function(){ window.location.href = 'login.html' }, 2000)
+    } else {
+      if(msg){msg.textContent=data.message||'Reset failed. Link may be expired.';msg.className='val-msg show err'}
+    }
+  })
+  .catch(function(){ if(msg){msg.textContent='Connection error.';msg.className='val-msg show err'} })
+}
+
 window.addEventListener('DOMContentLoaded', function() {
   document.getElementById('lEmail').value = ''
   document.getElementById('rememberMe').checked = false
@@ -557,24 +605,28 @@ function submitForgot() {
     emailEl.disabled = false
 
     if (data.status === 'success') {
-      // ── Show the retrieved password on screen ──
+      // ── Email verified — show set new password form directly ──
       emailEl.className = 'form-input ok'
       msgEl.className = 'val-msg show ok'
-      msgEl.textContent = 'Account found! Your password is shown below.'
+      msgEl.textContent = 'Email verified! Set your new password below.'
 
       if (reveal) {
         reveal.innerHTML =
-          '<div class="pw-reveal-box">' +
-            '<div class="pw-reveal-label">Your Password</div>' +
-            '<div class="pw-reveal-row">' +
-              '<div class="pw-reveal-value" id="revealedPw">' + escapeHtml(data.password) + '</div>' +
-              '<button class="pw-copy-btn" onclick="copyPassword()">Copy</button>' +
+          '<div class="pw-reveal-box" style="margin-top:10px">' +
+            '<div style="margin-bottom:8px">' +
+              '<label style="font-size:9px;font-weight:700;letter-spacing:1.5px;color:rgba(255,255,255,.3);text-transform:uppercase;display:block;margin-bottom:4px">New Password</label>' +
+              '<input id="newPw1" type="password" placeholder="Min 6 characters" style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:9px 12px;color:white;font-size:13px;outline:none;box-sizing:border-box">' +
             '</div>' +
-            '<div class="pw-reveal-hint">Use this to sign in. Keep it safe!</div>' +
+            '<div style="margin-bottom:12px">' +
+              '<label style="font-size:9px;font-weight:700;letter-spacing:1.5px;color:rgba(255,255,255,.3);text-transform:uppercase;display:block;margin-bottom:4px">Confirm Password</label>' +
+              '<input id="newPw2" type="password" placeholder="Repeat password" style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:9px 12px;color:white;font-size:13px;outline:none;box-sizing:border-box">' +
+            '</div>' +
+            '<div id="newPwMsg" style="font-size:11px;margin-bottom:10px"></div>' +
+            '<button onclick="submitNewPassword(' + JSON.stringify(val) + ')" style="width:100%;background:linear-gradient(135deg,#ff8c00,#e07000);color:white;border:none;padding:10px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer">Set New Password</button>' +
           '</div>'
       }
     } else {
-      // ── Email not found or no plain password stored ──
+      // ── Email not found ──
       emailEl.className = 'form-input err'
       msgEl.className = 'val-msg show err'
       msgEl.textContent = data.message || 'No account found with that email.'
@@ -586,6 +638,44 @@ function submitForgot() {
     emailEl.className = 'form-input err'
     msgEl.className = 'val-msg show err'
     msgEl.textContent = 'Cannot reach server. Make sure Flask is running.'
+  })
+}
+
+function submitNewPassword(email) {
+  var pw1 = document.getElementById('newPw1') ? document.getElementById('newPw1').value : ''
+  var pw2 = document.getElementById('newPw2') ? document.getElementById('newPw2').value : ''
+  var msg = document.getElementById('newPwMsg')
+
+  if (!pw1 || pw1.length < 6) {
+    if (msg) { msg.textContent = 'Password must be at least 6 characters'; msg.style.color = '#ef4444' }
+    return
+  }
+  if (pw1 !== pw2) {
+    if (msg) { msg.textContent = 'Passwords do not match'; msg.style.color = '#ef4444' }
+    return
+  }
+
+  if (msg) { msg.textContent = 'Updating...'; msg.style.color = '#ff8c00' }
+
+  fetch(API + '/reset-password-direct', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: email, password: pw1 })
+  })
+  .then(function(r) { return r.json() })
+  .then(function(data) {
+    if (data.status === 'success') {
+      if (msg) { msg.textContent = '✓ Password updated! Redirecting to login...'; msg.style.color = '#10b981' }
+      setTimeout(function() {
+        closeForgot()
+        switchTab('login')
+      }, 1800)
+    } else {
+      if (msg) { msg.textContent = data.message || 'Update failed.'; msg.style.color = '#ef4444' }
+    }
+  })
+  .catch(function() {
+    if (msg) { msg.textContent = 'Connection error.'; msg.style.color = '#ef4444' }
   })
 }
 
@@ -615,5 +705,28 @@ function escapeHtml(str) {
     .replace(/"/g,'&quot;')
 }
 </script>
+
+  <!-- Reset Password Section (shown when ?reset=TOKEN in URL) -->
+  <div id="resetSection" style="display:none;position:fixed;inset:0;background:#0d1117;z-index:9999;display:none;align-items:center;justify-content:center">
+    <div style="background:#13171f;border:1px solid rgba(255,140,0,0.2);border-radius:16px;padding:32px;width:100%;max-width:400px;margin:20px">
+      <h2 style="color:white;font-size:18px;margin:0 0 4px">Reset Password</h2>
+      <p style="color:#555;font-size:13px;margin:0 0 24px">Enter your new password below.</p>
+      <div style="margin-bottom:14px">
+        <label style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:rgba(255,255,255,0.3);text-transform:uppercase;display:block;margin-bottom:4px">New Password</label>
+        <input id="resetPw1" type="password" placeholder="Min 6 characters"
+          style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px 14px;color:white;font-size:14px;outline:none;box-sizing:border-box">
+      </div>
+      <div style="margin-bottom:20px">
+        <label style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:rgba(255,255,255,0.3);text-transform:uppercase;display:block;margin-bottom:4px">Confirm Password</label>
+        <input id="resetPw2" type="password" placeholder="Repeat password"
+          style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px 14px;color:white;font-size:14px;outline:none;box-sizing:border-box">
+      </div>
+      <div id="resetMsg" class="val-msg" style="margin-bottom:14px"></div>
+      <button data-token="" onclick="submitReset()"
+        style="width:100%;background:linear-gradient(135deg,#ff8c00,#e07000);color:white;border:none;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer">
+        Set New Password
+      </button>
+    </div>
+  </div>
 </body>
 </html>
