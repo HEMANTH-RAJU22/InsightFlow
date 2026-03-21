@@ -1,6 +1,8 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from flask_mail import Mail, Message
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 import pandas as pd
 import warnings
 import os
@@ -12,9 +14,14 @@ from datetime import datetime, timedelta
 from groq import Groq
 from dotenv import load_dotenv
 import bcrypt
+import jwt as pyjwt
 
 load_dotenv()
 warnings.filterwarnings("ignore")
+
+# ── JWT Secret ──
+JWT_SECRET  = os.environ.get("JWT_SECRET", "insightflow-secret-change-in-production")
+JWT_EXPIRY  = 8  # hours
 
 # ── Logging ──
 logging.basicConfig(
@@ -37,7 +44,17 @@ groq_client = Groq(api_key=GROQ_API_KEY)
 
 # ── Flask app ──
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=False)
+# ── CORS — restrict to your domain in production ──
+ALLOWED_ORIGINS = os.environ.get("ALLOWED_ORIGINS", "*").split(",")
+CORS(app, resources={r"/*": {"origins": ALLOWED_ORIGINS}}, supports_credentials=False)
+
+# ── Rate Limiter ──
+limiter = Limiter(
+    key_func=get_remote_address,
+    app=app,
+    default_limits=["200 per hour"],
+    storage_uri="memory://"
+)
 
 # ── File size limit: 15 MB ──
 app.config["MAX_CONTENT_LENGTH"] = 15 * 1024 * 1024
@@ -80,6 +97,70 @@ def get_db():
 
 
 # ─────────────────────────────────────────
+# VERIFY TOKEN (frontend can call this to check if session is still valid)
+# ─────────────────────────────────────────
+
+@app.route("/verify-jwt", methods=["POST"])
+def verify_jwt_route():
+    data  = request.json or {}
+    token = data.get("token", "")
+    payload = verify_token(token)
+    if payload:
+        return jsonify({"valid": True, "email": payload["email"], "name": payload["name"]})
+    return jsonify({"valid": False}), 401
+
+
+# ─────────────────────────────────────────
+# JWT HELPERS
+# ─────────────────────────────────────────
+
+def create_token(user_id, email, name):
+    payload = {
+        "sub":   user_id,
+        "email": email,
+        "name":  name,
+        "iat":   datetime.utcnow(),
+        "exp":   datetime.utcnow() + timedelta(hours=JWT_EXPIRY)
+    }
+    return pyjwt.encode(payload, JWT_SECRET, algorithm="HS256")
+
+
+def verify_token(token):
+    """Returns payload dict or None if invalid/expired."""
+    try:
+        return pyjwt.decode(token, JWT_SECRET, algorithms=["HS256"])
+    except pyjwt.ExpiredSignatureError:
+        return None
+    except pyjwt.InvalidTokenError:
+        return None
+
+
+def require_auth(f):
+    """Decorator — returns 401 if no valid JWT."""
+    from functools import wraps
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        user = get_current_user()
+        if not user:
+            # Fallback: allow X-User-Email header for backward compat
+            email = request.headers.get("X-User-Email", "")
+            if not email:
+                return jsonify({"error": "Authentication required"}), 401
+        return f(*args, **kwargs)
+    return decorated
+
+
+def get_current_user():
+    """Extract verified user from Authorization header or X-User-Email fallback."""
+    auth = request.headers.get("Authorization", "")
+    if auth.startswith("Bearer "):
+        payload = verify_token(auth[7:])
+        if payload:
+            return payload
+    return None
+
+
+# ─────────────────────────────────────────
 # HEALTH CHECK
 # ─────────────────────────────────────────
 
@@ -109,6 +190,7 @@ def health():
 # ─────────────────────────────────────────
 
 @app.route("/register", methods=["POST"])
+@limiter.limit("5 per hour")   # Max 5 registrations per hour per IP
 def register():
     db, cursor = get_db()
     if not db:
@@ -126,8 +208,12 @@ def register():
             return jsonify({"status": "error", "message": "Name must be at least 2 characters"})
         if not re.match(r"^[^@]+@[^@]+\.[^@]+$", email):
             return jsonify({"status": "error", "message": "Invalid email address"})
-        if len(password) < 6:
-            return jsonify({"status": "error", "message": "Password must be at least 6 characters"})
+        if len(password) < 8:
+            return jsonify({"status": "error", "message": "Password must be at least 8 characters"})
+        if not re.search(r"[A-Z]", password):
+            return jsonify({"status": "error", "message": "Password must contain at least one uppercase letter"})
+        if not re.search(r"[0-9]", password):
+            return jsonify({"status": "error", "message": "Password must contain at least one number"})
 
         cursor.execute("SELECT id FROM users WHERE email=%s", (email,))
         if cursor.fetchone():
@@ -161,6 +247,7 @@ def register():
 # ─────────────────────────────────────────
 
 @app.route("/login", methods=["POST"])
+@limiter.limit("10 per minute")   # Max 10 login attempts per minute per IP
 def login():
     db, cursor = get_db()
     if not db:
@@ -182,6 +269,21 @@ def login():
         if user and user.get("is_active", 1) == 0:
             return jsonify({"status": "error", "message": "Account is disabled. Contact support."})
 
+        # ── Account lockout — check failed attempts in last 15 minutes ──
+        if user:
+            cursor.execute(
+                """SELECT COUNT(*) as cnt FROM activity_log
+                   WHERE user_id=%s AND action='login_failed'
+                   AND created_at > DATE_SUB(NOW(), INTERVAL 15 MINUTE)""",
+                (user["id"],)
+            )
+            fail_row = cursor.fetchone()
+            if fail_row and fail_row.get("cnt", 0) >= 5:
+                return jsonify({
+                    "status": "error",
+                    "message": "Account temporarily locked due to too many failed attempts. Try again in 15 minutes."
+                })
+
         if user and bcrypt.checkpw(password.encode("utf-8"), user["password"].encode("utf-8")):
             cursor.execute("UPDATE users SET last_login=NOW() WHERE id=%s", (user["id"],))
             cursor.execute(
@@ -197,8 +299,15 @@ def login():
                     (user["id"], token, ip, user_agent)
                 )
             db.commit()
+            token = create_token(user["id"], user["email"], user["name"])
             log.info("Login OK: %s from %s", email, ip)
-            return jsonify({"status": "success", "name": user["name"], "email": user["email"]})
+            return jsonify({
+                "status": "success",
+                "name":   user["name"],
+                "email":  user["email"],
+                "token":  token,
+                "expiry": JWT_EXPIRY
+            })
         else:
             uid = user["id"] if user else None
             cursor.execute(
@@ -230,6 +339,7 @@ def login():
 # ─────────────────────────────────────────
 
 @app.route("/forgot-password", methods=["POST"])
+@limiter.limit("5 per hour")   # Prevent email enumeration attacks
 def forgot_password():
     data  = request.json or {}
     email = data.get("email", "").strip().lower()
@@ -1136,6 +1246,15 @@ def clear_activity():
 # ─────────────────────────────────────────
 # RUN
 # ─────────────────────────────────────────
+
+# ── Rate limit exceeded handler ──
+@app.errorhandler(429)
+def rate_limit_exceeded(e):
+    return jsonify({
+        "status": "error",
+        "message": "Too many requests. Please slow down and try again later."
+    }), 429
+
 
 if __name__ == "__main__":
     log.info("Starting InsightFlow backend on port 5000")
