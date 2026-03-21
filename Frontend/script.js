@@ -8,21 +8,54 @@ let headers     = []
 let currentPage = 1
 let rowsPerPage = 10
 
-/* ── Get auth email for all backend requests ── */
-function getAuthEmail() {
-  try {
-    if (window.Auth && window.Auth.getEmail()) return window.Auth.getEmail()
+/* ── JWT & Session Helpers ───────────────────────────────── */
+function getJwtToken(){
+  // Prefer Auth module; fallback to direct key read
+  try{ if(window.Auth && window.Auth.getToken) return window.Auth.getToken() || ''; return localStorage.getItem('insightflow_jwt') || '' }catch(e){ return '' }
+}
+
+function getAuthEmail(){
+  try{
     var raw = localStorage.getItem('insightflow_session')
-    if (raw) { var s = JSON.parse(raw); if (s && s.email) return s.email }
-  } catch(e) {}
+    if(raw){ var s=JSON.parse(raw); if(s&&s.email) return s.email }
+  }catch(e){}
   return localStorage.getItem('userEmail') || ''
 }
 
-function authHeaders() {
+function authHeaders(){
+  var h = {'Content-Type':'application/json'}
   var email = getAuthEmail()
-  var h = {'Content-Type': 'application/json'}
-  if (email) h['X-User-Email'] = email
+  var token = getJwtToken()
+  if(email) h['X-User-Email'] = email
+  if(token) h['Authorization'] = 'Bearer ' + token
   return h
+}
+
+function isSessionValid(){
+  var token = getJwtToken()
+  if(!token) return false
+  try{
+    var payload = JSON.parse(atob(token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')))
+    return Date.now() < payload.exp * 1000
+  }catch(e){ return false }
+}
+
+function getTokenExpiry(){
+  var token = getJwtToken()
+  if(!token) return null
+  try{
+    var payload = JSON.parse(atob(token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')))
+    return new Date(payload.exp * 1000)
+  }catch(e){ return null }
+}
+
+function clearSession(){
+  try{ localStorage.removeItem('jwtToken') }catch(e){}
+  try{ localStorage.removeItem('insightflow_jwt') }catch(e){}
+  try{ localStorage.removeItem('userEmail') }catch(e){}
+  try{ localStorage.removeItem('userName') }catch(e){}
+  try{ localStorage.removeItem('insightflow_session') }catch(e){}
+  try{ localStorage.removeItem('insightflow_dataset') }catch(e){}
 }
 
 
@@ -158,11 +191,11 @@ function uploadFile(){
   let formData = new FormData()
   formData.append("file", file)
 
-  fetch("http://127.0.0.1:5000/upload", {
-    method:"POST",
-    headers: getAuthEmail() ? {"X-User-Email": getAuthEmail()} : {},
-    body:formData
-  })
+  var uploadHdrs = {}
+  var _email = getAuthEmail(); var _token = getJwtToken()
+  if(_email) uploadHdrs["X-User-Email"] = _email
+  if(_token) uploadHdrs["Authorization"] = "Bearer " + _token
+  fetch("http://127.0.0.1:5000/upload", { method:"POST", headers: uploadHdrs, body:formData })
     .then(res => {
       if(!res.ok) throw new Error("HTTP " + res.status)
       return res.json()
@@ -307,71 +340,42 @@ function goDashboard(){ window.location.href = "login.html" }
 function goAccount(){   window.location.href = "account.html" }
 function goToChatbot(){ window.location.href = "chatbot.html" }
 function logout(){
-  // Notify backend to deactivate session token
-  try {
-    var email = window.Auth ? window.Auth.getEmail() : localStorage.getItem("userEmail")
-    var token = window.Auth ? window.Auth.getToken() : ""
-    if(email) fetch("http://127.0.0.1:5000/logout", {
-      method:"POST", headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({email:email, token:token})
+  try{
+    var email = getAuthEmail()
+    if(email) fetch("http://127.0.0.1:5000/logout",{
+      method:"POST", headers: authHeaders(),
+      body: JSON.stringify({email:email})
     }).catch(function(){})
-  } catch(e){}
-  // Always clear session regardless of Auth module
-  try { localStorage.removeItem("insightflow_session") } catch(e){}
-  try { localStorage.removeItem("userEmail") } catch(e){}
-  try { localStorage.removeItem("insightflow_dataset") } catch(e){}
-  if(window.Auth){
-    window.Auth.logout()
-  } else {
-    window.location.href = "index.html"
-  }
+  }catch(e){}
+  clearSession()
+  if(window.Auth) window.Auth.logout()
+  else window.location.href = "index.html"
 }
 
 
 /* ── Auth ───────────────────────────────────────────────────── */
 function login(){
-  let email    = document.getElementById("emailInput").value.trim().toLowerCase()
+  let email    = document.getElementById("emailInput").value
   let password = document.getElementById("passwordInput").value
-  let btn      = document.getElementById("mainButton")
-
-  if(!email || !password){ alert("Email and password are required."); return }
-  if(btn){ btn.disabled = true; btn.innerText = "Logging in..." }
-
-  // Generate token before login to save to backend sessions table
-  var loginToken = ""
-  try {
-    var arr = new Uint8Array(32)
-    window.crypto.getRandomValues(arr)
-    loginToken = Array.from(arr).map(function(b){return b.toString(16).padStart(2,'0')}).join('')
-  } catch(e){}
-
   fetch("http://127.0.0.1:5000/login", {
     method:"POST", headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({email: email, password: password, token: loginToken})
+    body: JSON.stringify({email, password})
   })
   .then(res => res.json())
   .then(data => {
     if(data.status === "success"){
-      // Use Auth.setSession() — creates secure token + 8h expiry
-      if(window.Auth){
-        window.Auth.setSession(data.email, data.name)
-      } else {
-        localStorage.setItem("userEmail", data.email)
-      }
-      // Go back to where user was trying to go, or dashboard
+      // Store JWT via Auth module (single source of truth)
+      if(window.Auth && data.token){ window.Auth.setSession(data.token) }
+      else if(data.token){ try{ localStorage.setItem('insightflow_jwt', data.token) }catch(e){} }
       let dest = "dashboard.html"
-      try { dest = sessionStorage.getItem("insightflow_redirect") || "dashboard.html" } catch(e){}
-      try { sessionStorage.removeItem("insightflow_redirect") } catch(e){}
+      try{ dest = sessionStorage.getItem("insightflow_redirect") || "dashboard.html" }catch(e){}
+      try{ sessionStorage.removeItem("insightflow_redirect") }catch(e){}
       window.location.href = dest
     } else {
-      if(btn){ btn.disabled = false; btn.innerText = "Login" }
       alert(data.message || "Login failed")
     }
   })
-  .catch(() => {
-    if(btn){ btn.disabled = false; btn.innerText = "Login" }
-    alert("Cannot reach server. Make sure Flask is running.")
-  })
+  .catch(() => alert("Cannot reach server. Make sure Flask is running."))
 }
 
 function register(){
@@ -383,7 +387,9 @@ function register(){
   if(!name || !email || !password){ alert("All fields are required."); return }
   if(name.length < 2){ alert("Name must be at least 2 characters."); return }
   if(!/^[^@]+@[^@]+\.[^@]+$/.test(email)){ alert("Enter a valid email address."); return }
-  if(password.length < 6){ alert("Password must be at least 6 characters."); return }
+  if(password.length < 8){ alert("Password must be at least 8 characters."); return }
+  if(!/[A-Z]/.test(password)){ alert("Password must contain at least one uppercase letter."); return }
+  if(!/[0-9]/.test(password)){ alert("Password must contain at least one number."); return }
   if(btn){ btn.disabled = true; btn.innerText = "Registering..." }
 
   fetch("http://127.0.0.1:5000/register", {
@@ -462,46 +468,6 @@ let datasetContext = ""
 let isSending      = false
 
 
-/* ── Load past chat history from DB ── */
-function loadChatHistoryFromDB() {
-  var email = getAuthEmail()
-  if (!email) return
-  fetch("http://127.0.0.1:5000/chat/history/" + encodeURIComponent(email))
-    .then(function(r){ return r.json() })
-    .then(function(d) {
-      var hist = d.history || []
-      if (!hist.length) return
-      // Show a divider then past messages
-      var win = document.getElementById("chatWindow")
-      if (!win) return
-      var divider = document.createElement("div")
-      divider.style.cssText = "text-align:center;margin:12px 0;font-size:11px;color:rgba(255,255,255,.25);font-weight:600;letter-spacing:1px;display:flex;align-items:center;gap:10px"
-      divider.innerHTML = '<div style="flex:1;height:1px;background:rgba(255,255,255,.08)"></div>PREVIOUS CONVERSATION<div style="flex:1;height:1px;background:rgba(255,255,255,.08)"></div>'
-      win.insertBefore(divider, win.firstChild)
-      // Insert past messages at the TOP (oldest first)
-      var fragment = document.createDocumentFragment()
-      hist.forEach(function(h) {
-        if (h.role === 'user') {
-          var div = document.createElement("div")
-          div.className = "chat-message user-message"
-          div.innerHTML = "<p>" + h.message.replace(/</g,"&lt;") + "</p>"
-          div.style.opacity = ".6"
-          fragment.appendChild(div)
-        } else {
-          var div = document.createElement("div")
-          div.className = "chat-message bot-message"
-          div.innerHTML = "<p>" + formatMarkdown(h.message) + "</p>"
-          div.style.opacity = ".6"
-          fragment.appendChild(div)
-        }
-        // Also add to chatHistory for context
-        chatHistory.push({role: h.role, content: h.message})
-      })
-      win.insertBefore(fragment, divider.nextSibling)
-    })
-    .catch(function(){}) // silent fail — history is optional
-}
-
 /* ── Load dataset from sessionStorage ─────────────────────── */
 function loadDataset(){
   if(!document.getElementById("chatWindow")) return
@@ -571,7 +537,7 @@ function sendChat(){
 
   fetch("http://127.0.0.1:5000/chat", {
     method:"POST",
-    headers: authHeaders(),
+    headers:{"Content-Type":"application/json"},
     body: JSON.stringify({
       message:         userMsg,
       history:         chatHistory.slice(0, -1),
@@ -640,23 +606,12 @@ function enableChatInput(){
 
 
 /* ── Message rendering ─────────────────────────────────────── */
-function getUserInitial() {
-  try {
-    if (window.Auth && window.Auth.getName()) return window.Auth.getName().charAt(0).toUpperCase()
-    var raw = localStorage.getItem('insightflow_session')
-    if (raw) { var s = JSON.parse(raw); if (s && s.name) return s.name.charAt(0).toUpperCase() }
-    var email = localStorage.getItem('userEmail') || ''
-    if (email) return email.charAt(0).toUpperCase()
-  } catch(e) {}
-  return 'U'
-}
-
 function appendUserMessage(text){
   let win = document.getElementById("chatWindow")
   if(!win) return
   let div = document.createElement("div")
   div.className = "chat-message user-message"
-  div.innerHTML = `<div class="user-avatar">${getUserInitial()}</div><div class="message-bubble">${escapeHtml(text)}</div>`
+  div.innerHTML = `<div class="user-avatar">YOU</div><div class="message-bubble">${escapeHtml(text)}</div>`
   win.appendChild(div)
   win.scrollTop = win.scrollHeight
 }
@@ -704,6 +659,25 @@ function formatMarkdown(t){
 
 /* ── Init ───────────────────────────────────────────────────── */
 window.onload = function(){
+  // JWT session validity check on every page load
+  var _isAuthPage = ['index.html','login.html'].some(function(p){
+    return window.location.pathname.indexOf(p) !== -1 || window.location.pathname === '/'
+  })
+  if(!_isAuthPage && getAuthEmail()){
+    var _token = getJwtToken()
+    if(_token && !isSessionValid()){
+      clearSession()
+      alert('Your session has expired. Please log in again.')
+      window.location.href = 'index.html'
+      return
+    }
+    var _expiry = getTokenExpiry()
+    if(_expiry){
+      var _remaining = _expiry - Date.now()
+      if(_remaining > 0 && _remaining < 30 * 60 * 1000)
+        console.warn('InsightFlow: Session expires in', Math.round(_remaining/60000), 'minutes')
+    }
+  }
   if(document.getElementById("chatWindow")) loadDataset()
   if(document.getElementById("username"))   loadAccount()
 }
@@ -1127,57 +1101,6 @@ function buildSummaryStats(d){
 
 
 /* ── Download chart ── */
-/* ── Save chart to DB ── */
-function saveChartToDB() {
-  if (!chartInst) {
-    alert("Build a chart first, then save it.")
-    return
-  }
-  var name = prompt("Chart name:", "My Chart")
-  if (!name) return
-
-  // Get canvas thumbnail
-  var canvas = document.getElementById("myChart")
-  var thumbnail = null
-  try { if (canvas) thumbnail = canvas.toDataURL("image/png", 0.5) } catch(e){}
-
-  // Build config object from current chart state
-  var config = JSON.stringify({
-    chartType: typeof chartType    !== 'undefined' ? chartType    : 'bar',
-    xAxis:     typeof xAxisVal     !== 'undefined' ? xAxisVal     : null,
-    yAxis:     typeof yAxisVal     !== 'undefined' ? yAxisVal     : null,
-    color:     typeof chartColor   !== 'undefined' ? chartColor   : '#ff8c00',
-    maxPoints: (function(){ var el = document.getElementById("maxPoints"); return el ? el.value : 20 })(),
-    headers:   typeof vizHeaders   !== 'undefined' ? vizHeaders   : [],
-    fileName:  (function(){ try{ var d=JSON.parse(localStorage.getItem('insightflow_dataset')||'{}'); return d.fileName||'' }catch(e){return ''} })()
-  })
-
-  fetch("http://127.0.0.1:5000/charts/save", {
-    method: "POST",
-    headers: authHeaders(),
-    body: JSON.stringify({
-      chart_name: name,
-      chart_type: typeof chartType !== 'undefined' ? chartType : 'bar',
-      config:     config,
-      thumbnail:  thumbnail
-    })
-  })
-  .then(function(r){ return r.json() })
-  .then(function(d) {
-    if (d.status === "success") {
-      if (typeof toast === 'function') toast("Chart '" + name + "' saved!", 'ok')
-      else alert("Chart saved! View it in Account > Saved Charts.")
-    } else {
-      if (typeof toast === 'function') toast("Could not save: " + (d.error||'error'), 'err')
-      else alert("Could not save: " + (d.error || "unknown error"))
-    }
-  })
-  .catch(function() {
-    if (typeof toast === 'function') toast("Could not reach server.", 'err')
-    else alert("Could not reach server.")
-  })
-}
-
 function downloadChart(format){
   if(!chartInst){ alert("Generate a chart first"); return }
 
@@ -1246,663 +1169,350 @@ window.addEventListener("DOMContentLoaded", () => {
 /* ── Navigation ── */
 function goAccount(){ window.location.href = "account.html" }
 function logout(){
-  // Notify backend to deactivate session token
-  try {
-    var email = window.Auth ? window.Auth.getEmail() : localStorage.getItem("userEmail")
-    var token = window.Auth ? window.Auth.getToken() : ""
-    if(email) fetch("http://127.0.0.1:5000/logout", {
-      method:"POST", headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({email:email, token:token})
+  try{
+    var email = getAuthEmail()
+    if(email) fetch("http://127.0.0.1:5000/logout",{
+      method:"POST", headers: authHeaders(),
+      body: JSON.stringify({email:email})
     }).catch(function(){})
-  } catch(e){}
-  // Always clear session regardless of Auth module
-  try { localStorage.removeItem("insightflow_session") } catch(e){}
-  try { localStorage.removeItem("userEmail") } catch(e){}
-  try { localStorage.removeItem("insightflow_dataset") } catch(e){}
-  if(window.Auth){
-    window.Auth.logout()
-  } else {
-    window.location.href = "index.html"
-  }
+  }catch(e){}
+  clearSession()
+  if(window.Auth) window.Auth.logout()
+  else window.location.href = "index.html"
 }
 /* ============================================================
-   INSIGHTFLOW — report.js  (BI Dashboard Generator)
+   INSIGHTFLOW — report.js  (Dashboard Generator)
    ============================================================ */
- 
-let rptHeaders = []
-let rptDataset = []
-let rptMeta    = {}
-let biCharts   = []
- 
-const BI_COLORS = ["#ff8c00","#3b82f6","#10b981","#ec4899","#8b5cf6","#ef4444","#f59e0b","#06b6d4","#84cc16","#f97316"]
- 
+
+let rptHeaders  = []
+let rptDataset  = []
+let rptMeta     = {}
+let chartInsts  = []
+
+const CHART_COLORS = [
+  "#ff8c00","#3b82f6","#10b981","#ec4899",
+  "#8b5cf6","#ef4444","#f59e0b","#06b6d4"
+]
+
 /* ── Init ── */
-function initReport(){
-  // Hide everything first
-  const noMsg = document.getElementById("noDataMsg")
-  const wrapper = document.getElementById("dashboardWrapper")
-  const biDiv = document.getElementById("biDashboard")
-  
-  if(noMsg) noMsg.style.display = "none"
-  if(wrapper) wrapper.style.display = "none"
-  if(biDiv) biDiv.style.display = "none"
- 
+window.addEventListener("DOMContentLoaded", function(){
   const raw = localStorage.getItem("insightflow_dataset")
   if(!raw){
-    if(noMsg){ noMsg.style.display = "flex" }
+    document.getElementById("noDataMsg").style.display    = "block"
+    document.getElementById("reportContent").style.display = "none"
     return
   }
- 
+
   const d = JSON.parse(raw)
   rptHeaders = d.headers || []
   rptDataset = d.dataset || []
   rptMeta    = d
- 
-  // Show the appropriate dashboard based on what's available
-  if(wrapper) {
-    wrapper.style.display = "flex"
-    document.getElementById("dashboardTitle").innerText = d.fileName
-    document.getElementById("dashboardSubtitle").innerText = Number(d.rows).toLocaleString() + " rows • " + d.columns + " columns"
-  } else if(biDiv) {
-    biDiv.style.display = "flex"
-    // Old sidebar dashboard fallback
-    try {
-      document.getElementById("biFileName").innerText = d.fileName + "  ·  " + Number(d.rows).toLocaleString() + " rows  ·  " + d.columns + " cols"
-      document.getElementById("sidebarDsName").innerText = d.fileName
-      document.getElementById("sidebarDsRows").innerText = Number(d.rows).toLocaleString() + " rows · " + d.columns + " cols"
-    } catch(e) { /* element may not exist */ }
-  }
-  
-  if(noMsg) noMsg.style.display = "none"
- 
-  buildBI()
+
+  document.getElementById("reportMeta").innerText =
+    `${d.fileName}  ·  ${Number(d.rows).toLocaleString()} rows  ·  ${d.columns} columns`
+
+  buildDashboard()
+})
+
+
+/* ── Main builder ── */
+function buildDashboard(){
+  // destroy previous charts
+  chartInsts.forEach(c => c.destroy())
+  chartInsts = []
+
+  const numCols  = rptHeaders.filter((h,i) => isNumericCol(i))
+  const catCols  = rptHeaders.filter((h,i) => !isNumericCol(i))
+  const numIdx   = rptHeaders.map((h,i)=>i).filter(i => isNumericCol(i))
+  const catIdx   = rptHeaders.map((h,i)=>i).filter(i => !isNumericCol(i))
+
+  buildKPIs(numIdx, catIdx)
+  buildCharts(numIdx, catIdx)
+  buildAISuggestion(numCols, catCols)
 }
- 
-// Run immediately - HTML is already parsed since script is at bottom of body
-initReport()
- 
- 
-/* ── Detect numeric ── */
-function isNum(i){
-  const vals = rptDataset.map(r=>r[i]).filter(v=>v!=="")
-  return vals.map(v=>parseFloat(v)).filter(v=>!isNaN(v)).length > vals.length * 0.5
-}
- 
-function numCols(){ return rptHeaders.map((_,i)=>i).filter(isNum) }
-function catCols(){ return rptHeaders.map((_,i)=>i).filter(i=>!isNum(i)) }
- 
-function colStats(i){
-  const vals = rptDataset.map(r=>parseFloat(r[i])).filter(v=>!isNaN(v))
-  if(!vals.length) return null
-  const sum = vals.reduce((a,b)=>a+b,0)
-  return { min: Math.min(...vals), max: Math.max(...vals), avg: sum/vals.length, sum, count: vals.length }
-}
- 
-function topN(colIdx, n=8){
-  const counts = {}
-  rptDataset.forEach(r=>{ const v=String(r[colIdx]??""); counts[v]=(counts[v]||0)+1 })
-  return Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,n)
-}
- 
- 
-/* ── Filters ── */
-function buildFilters(){
-  const cats = catCols().slice(0,3)
-  const row  = document.getElementById("filterRow")
-  row.innerHTML = ""
-  cats.forEach(i => {
-    const btn = document.createElement("div")
-    btn.className = "bi-filter"
-    btn.innerText = rptHeaders[i]
-    row.appendChild(btn)
-  })
-}
- 
- 
-/* ── Main build ── */
-function buildBI(){
-  // FIXED: Added null checks for safer chart destruction
-  biCharts.forEach(c => {
-    try {
-      if(c && typeof c.destroy === 'function') {
-        c.destroy()
-      }
-    } catch(e) {
-      console.warn("Error destroying chart:", e)
-    }
-  })
-  biCharts = []
- 
-  // FIXED: Add empty state checking
-  if(!rptDataset || rptDataset.length === 0) {
-    console.warn("No dataset available for BI build")
-    return
-  }
- 
-  // Build in new modern layout
-  buildKPIs()
-  buildModernCharts()
-}
- 
- 
+
+
 /* ── KPI Cards ── */
-function buildKPIs(){
-  const sec = document.getElementById("biKpiSection")
-  sec.innerHTML = ""
-  const nums = numCols().slice(0,5)
-  const cats = catCols().slice(0,2)
- 
-  const accentColors = ["#ff8c00","#3b82f6","#10b981","#ec4899","#8b5cf6","#f59e0b","#06b6d4"]
- 
-  nums.forEach((i, idx) => {
-    const s = colStats(i)
-    if(!s) return
-    const prev   = s.avg * (0.88 + Math.random()*0.15)
-    const isUp   = s.avg >= prev
-    const pct    = Math.abs(((s.avg-prev)/prev)*100).toFixed(1)
-    const color  = accentColors[idx % accentColors.length]
-    const val    = s.avg % 1 === 0 ? s.avg.toLocaleString() : s.avg.toFixed(1)
- 
-    sec.innerHTML += `
-      <div class="bi-kpi">
-        <div class="bi-kpi-accent" style="background:${color}"></div>
-        <div class="bi-kpi-label">${rptHeaders[i]}</div>
-        <div class="bi-kpi-value">${val}</div>
-        <div class="bi-kpi-sub">Min ${s.min.toLocaleString()}  ·  Max ${s.max.toLocaleString()}</div>
-        <div class="bi-kpi-trend ${isUp?'up':'down'}">${isUp?'▲':'▼'} ${pct}%</div>
-      </div>`
-  })
- 
-  cats.forEach((i, idx) => {
-    const vals   = rptDataset.map(r=>r[i]).filter(v=>v!=="")
-    const unique = new Set(vals).size
-    const color  = accentColors[(nums.length + idx) % accentColors.length]
-    sec.innerHTML += `
-      <div class="bi-kpi">
-        <div class="bi-kpi-accent" style="background:${color}"></div>
-        <div class="bi-kpi-label">${rptHeaders[i]}</div>
-        <div class="bi-kpi-value">${unique}</div>
-        <div class="bi-kpi-sub">${vals.length.toLocaleString()} total entries</div>
-        <div class="bi-kpi-trend flat">● Categories</div>
-      </div>`
-  })
-}
- 
- 
-/* ── Row 1: Wide bar + Pie ── */
-function buildRow1(){
-  const sec  = document.getElementById("biRow1")
-  sec.innerHTML = ""
-  const nums = numCols()
-  const cats = catCols()
-  
-  // FIXED: Early return if insufficient data
-  if(!nums.length || !cats.length) {
-    sec.innerHTML = '<div class="bi-empty-state" style="grid-column: 1/-1; padding: 60px 20px;"><div class="bi-empty-state-icon">📊</div><div class="bi-empty-state-text">Insufficient data for visualization. Need both numeric and categorical columns.</div></div>'
-    return
-  }
- 
-  const xi = cats[0], yi = nums[0]
-  const rows = rptDataset.slice(0, 20)
- 
-  // Wide bar
-  const card1 = mkCard("BAR", `${rptHeaders[xi]} vs ${rptHeaders[yi]}`, 220)
-  sec.appendChild(card1)
-  const c1 = card1.querySelector("canvas")
-  
-  try {
-    const inst1 = new Chart(c1, {
-      type: "bar",
-      data: {
-        labels: rows.map(r=>String(r[xi]??"")),
-        datasets: [{ data: rows.map(r=>parseFloat(r[yi])||0),
-          backgroundColor: BI_COLORS[0]+"cc", borderColor: BI_COLORS[0],
-          borderWidth: 1, borderRadius: 4 }]
-      },
-      options: biOpts(false, BI_COLORS[0])
+function buildKPIs(numIdx, catIdx){
+  const row = document.getElementById("kpiRow")
+  row.innerHTML = ""
+
+  const kpis = []
+
+  numIdx.slice(0, 4).forEach(i => {
+    const vals = rptDataset.map(r => parseFloat(r[i])).filter(v => !isNaN(v))
+    if(!vals.length) return
+    const sum  = vals.reduce((a,b)=>a+b,0)
+    const avg  = sum / vals.length
+    const min  = Math.min(...vals)
+    const max  = Math.max(...vals)
+    const prev = avg * (0.85 + Math.random() * 0.15) // simulated previous
+    const trend = avg >= prev ? "up" : "down"
+    const pct   = Math.abs(((avg - prev)/prev)*100).toFixed(1)
+
+    kpis.push({
+      label: rptHeaders[i],
+      value: avg % 1 === 0 ? avg.toLocaleString() : avg.toFixed(2),
+      sub:   `Min ${min.toLocaleString()}  ·  Max ${max.toLocaleString()}`,
+      trend, pct
     })
-    biCharts.push(inst1)
-  } catch(e) {
-    console.error("Error creating bar chart:", e)
-  }
- 
-  // Pie
-  if(cats.length > 0){
-    const top = topN(cats[0])
-    const card2 = mkCard("PIE", `${rptHeaders[cats[0]]} Share`, 220)
-    sec.appendChild(card2)
-    const c2 = card2.querySelector("canvas")
-    
-    try {
-      const inst2 = new Chart(c2, {
-        type: "doughnut",
-        data: { labels: top.map(e=>e[0]), datasets: [{ data: top.map(e=>e[1]), backgroundColor: BI_COLORS, borderWidth: 2, borderColor: "#13171f" }] },
-        options: { ...biOpts(true), cutout: "60%" }
-      })
-      biCharts.push(inst2)
-    } catch(e) {
-      console.error("Error creating pie chart:", e)
-    }
-  }
+  })
+
+  catIdx.slice(0, 2).forEach(i => {
+    const vals   = rptDataset.map(r => r[i]).filter(v => v !== "" && v != null)
+    const unique = new Set(vals).size
+    kpis.push({
+      label: rptHeaders[i],
+      value: unique,
+      sub:   `${vals.length} total values`,
+      trend: "neutral", pct: "0"
+    })
+  })
+
+  kpis.forEach(k => {
+    const arrow = k.trend === "up"
+      ? `<span class="kpi-trend up">▲ ${k.pct}%</span>`
+      : k.trend === "down"
+      ? `<span class="kpi-trend down">▼ ${k.pct}%</span>`
+      : `<span class="kpi-trend neutral">● Categorical</span>`
+
+    row.innerHTML += `
+      <div class="rpt-kpi-card">
+        <div class="rpt-kpi-label">${k.label}</div>
+        <div class="rpt-kpi-value">${k.value}</div>
+        <div class="rpt-kpi-sub">${k.sub}</div>
+        ${arrow}
+      </div>
+    `
+  })
 }
- 
- 
-/* ── Row 2: 3 charts ── */
-function buildRow2(){
-  const sec  = document.getElementById("biRow2")
-  sec.innerHTML = ""
-  const nums = numCols()
-  const cats = catCols()
- 
-  // Line
-  if(nums.length > 0){
-    const yi   = nums[0]
-    const rows = rptDataset.slice(0, 30)
-    const card = mkCard("LINE", `${rptHeaders[yi]} Trend`, 180)
-    sec.appendChild(card)
-    
-    try {
-      const inst = new Chart(card.querySelector("canvas"), {
-        type: "line",
-        data: { labels: rows.map((_,i)=>`#${i+1}`),
-          datasets: [{ data: rows.map(r=>parseFloat(r[yi])||0),
-            borderColor: BI_COLORS[1], backgroundColor: BI_COLORS[1]+"22",
-            fill: true, tension: 0.4, pointRadius: 2, borderWidth: 2 }] },
-        options: biOpts(false, BI_COLORS[1])
-      })
-      biCharts.push(inst)
-    } catch(e) {
-      console.error("Error creating line chart:", e)
-    }
-  }
- 
-  // Horizontal bar
-  if(cats.length > 0 && nums.length > 0){
-    const xi = cats[0], yi = nums[nums.length > 1 ? 1 : 0]
-    const top = topN(xi, 6)
-    const card = mkCard("H-BAR", `Top ${rptHeaders[xi]}`, 180)
-    sec.appendChild(card)
-    
-    try {
-      const inst = new Chart(card.querySelector("canvas"), {
-        type: "bar",
-        data: { labels: top.map(e=>e[0]),
-          datasets: [{ data: top.map(e=>e[1]),
-            backgroundColor: BI_COLORS[2]+"cc", borderColor: BI_COLORS[2],
-            borderWidth: 1, borderRadius: 4 }] },
-        options: { ...biOpts(false, BI_COLORS[2]), indexAxis: "y" }
-      })
-      biCharts.push(inst)
-    } catch(e) {
-      console.error("Error creating horizontal bar chart:", e)
-    }
-  }
- 
-  // Polar / second pie
-  if(cats.length > 1){
-    const top  = topN(cats[1], 6)
-    const card = mkCard("POLAR", `${rptHeaders[cats[1]]} Distribution`, 180)
-    sec.appendChild(card)
-    
-    try {
-      const inst = new Chart(card.querySelector("canvas"), {
-        type: "polarArea",
-        data: { labels: top.map(e=>e[0]),
-          datasets: [{ data: top.map(e=>e[1]), backgroundColor: BI_COLORS.map(c=>c+"bb"), borderWidth: 1 }] },
-        options: biOpts(true)
-      })
-      biCharts.push(inst)
-    } catch(e) {
-      console.error("Error creating polar chart:", e)
-    }
-  } else if(nums.length > 1) {
-    // Scatter fallback
-    const xi = nums[0], yi = nums[1]
-    const rows = rptDataset.slice(0, 30)
-    const card = mkCard("SCATTER", `${rptHeaders[xi]} vs ${rptHeaders[yi]}`, 180)
-    sec.appendChild(card)
-    
-    try {
-      const inst = new Chart(card.querySelector("canvas"), {
-        type: "scatter",
-        data: { datasets: [{ data: rows.map(r=>({ x:parseFloat(r[xi])||0, y:parseFloat(r[yi])||0 })),
-          backgroundColor: BI_COLORS[3]+"88", borderColor: BI_COLORS[3], pointRadius: 5 }] },
-        options: biOpts(false, BI_COLORS[3])
-      })
-      biCharts.push(inst)
-    } catch(e) {
-      console.error("Error creating scatter chart:", e)
-    }
-  }
-}
- 
- 
-/* ── Row 3: Table + Chart ── */
-function buildRow3(){
-  const sec = document.getElementById("biRow3")
-  sec.innerHTML = ""
- 
-  // Mini data table
-  const card1 = document.createElement("div")
-  card1.className = "bi-card"
-  const cols  = rptHeaders.slice(0, 5)
-  const rows  = rptDataset.slice(0, 10)
-  
-  if(cols.length === 0 || rows.length === 0) {
-    card1.innerHTML = '<div class="bi-empty-state"><div class="bi-empty-state-icon">📋</div><div class="bi-empty-state-text">No data to preview</div></div>'
-    sec.appendChild(card1)
-    return
-  }
-  
-  card1.innerHTML = `
-    <div class="bi-card-header">
-      <span class="bi-card-title">Data Preview</span>
-      <span class="bi-card-badge">TABLE</span>
-    </div>
-    <table class="bi-table">
-      <thead><tr>${cols.map(h=>`<th>${h}</th>`).join("")}</tr></thead>
-      <tbody>${rows.map(r=>`<tr>${cols.map((_,i)=>`<td>${r[i]??""}</td>`).join("")}</tr>`).join("")}</tbody>
-    </table>`
-  sec.appendChild(card1)
- 
-  // Stacked / area chart
-  const nums = numCols()
-  const cats = catCols()
-  if(nums.length > 0 && cats.length > 0){
-    const xi = cats[0], yi = nums[0]
-    const rows2 = rptDataset.slice(0, 20)
-    const card2 = mkCard("AREA", `${rptHeaders[yi]} Area Chart`, 260)
-    sec.appendChild(card2)
-    
-    try {
-      const inst = new Chart(card2.querySelector("canvas"), {
-        type: "line",
-        data: { labels: rows2.map(r=>String(r[xi]??"")),
-          datasets: [{ data: rows2.map(r=>parseFloat(r[yi])||0),
-            borderColor: BI_COLORS[4], backgroundColor: BI_COLORS[4]+"33",
-            fill: true, tension: 0.4, pointRadius: 3, borderWidth: 2 }] },
-        options: biOpts(false, BI_COLORS[4])
-      })
-      biCharts.push(inst)
-    } catch(e) {
-      console.error("Error creating area chart:", e)
-    }
-  }
-}
- 
- 
-/* ── Card factory ── */
-function mkCard(badge, title, canvasHeight){
-  const div = document.createElement("div")
-  div.className = "bi-card"
-  div.innerHTML = `
-    <div class="bi-card-header">
-      <span class="bi-card-title">${title}</span>
-      <span class="bi-card-badge">${badge}</span>
-    </div>
-    <canvas style="height:${canvasHeight}px"></canvas>`
-  return div
-}
- 
- 
-/* ── Common chart options ── */
-function biOpts(isCircular, color){
-  return {
-    responsive: true,
-    maintainAspectRatio: false,
-    animation: { duration: 600, easing: "easeInOutQuart" },
-    plugins: {
-      legend: { display: isCircular, labels: { color:"#555", font:{size:10}, padding:8, usePointStyle:true } },
-      tooltip: { backgroundColor:"rgba(5,8,15,0.95)", titleColor: color||"#ff8c00",
-        bodyColor:"#aaa", padding:10, cornerRadius:8 }
-    },
-    scales: isCircular ? {} : {
-      x: { ticks:{color:"#444",font:{size:9},maxRotation:35}, grid:{color:"rgba(255,255,255,0.03)"}, border:{color:"rgba(255,255,255,0.06)"} },
-      y: { ticks:{color:"#444",font:{size:9}}, grid:{color:"rgba(255,255,255,0.03)"}, border:{color:"rgba(255,255,255,0.06)"} }
-    }
-  }
-}
- 
- 
-/* ── Export ── */
-function exportPDF(){
-  window.print()
-}
- 
-function logout(){
-  // Notify backend to deactivate session token
-  try {
-    var email = window.Auth ? window.Auth.getEmail() : localStorage.getItem("userEmail")
-    var token = window.Auth ? window.Auth.getToken() : ""
-    if(email) fetch("http://127.0.0.1:5000/logout", {
-      method:"POST", headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({email:email, token:token})
-    }).catch(function(){})
-  } catch(e){}
-  // Always clear session regardless of Auth module
-  try { localStorage.removeItem("insightflow_session") } catch(e){}
-  try { localStorage.removeItem("userEmail") } catch(e){}
-  try { localStorage.removeItem("insightflow_dataset") } catch(e){}
-  if(window.Auth){
-    window.Auth.logout()
-  } else {
-    window.location.href = "index.html"
-  }
-}
- 
-/* ──────────────────────────────────────────────────────────
-   MODERN DASHBOARD LAYOUT (Power BI / Tableau Style)
-   ────────────────────────────────────────────────────────── */
- 
-function buildModernCharts(){
-  const grid = document.getElementById("biChartsGrid")
-  if(!grid) {
-    // Fallback to old layout if new dashboard not loaded
-    buildRow1()
-    buildRow2()
-    buildRow3()
-    return
-  }
-  
+
+
+/* ── Charts ── */
+function buildCharts(numIdx, catIdx){
+  const grid = document.getElementById("chartsGrid")
   grid.innerHTML = ""
-  const nums = numCols()
-  const cats = catCols()
- 
-  // Chart 1: Bar Chart (Wide)
-  if(nums.length > 0 && cats.length > 0) {
-    const xi = cats[0], yi = nums[0]
-    const rows = rptDataset.slice(0, 15)
-    const card = createModernCard(`${rptHeaders[xi]} vs ${rptHeaders[yi]}`, "BAR", true)
-    grid.appendChild(card)
-    
-    try {
-      const canvas = card.querySelector("canvas")
-      const inst = new Chart(canvas, {
-        type: "bar",
-        data: {
-          labels: rows.map(r => String(r[xi] ?? "").substring(0, 12)),
-          datasets: [{
-            data: rows.map(r => parseFloat(r[yi]) || 0),
-            backgroundColor: "rgba(255, 140, 0, 0.8)",
-            borderColor: "#ff8c00",
-            borderWidth: 1,
-            borderRadius: 6
-          }]
-        },
-        options: biOpts(false, "#ff8c00")
-      })
-      biCharts.push(inst)
-    } catch(e) {
-      console.error("Error creating bar chart:", e)
-    }
-  }
- 
-  // Chart 2: Pie Chart
-  if(cats.length > 0) {
-    const top = topN(cats[0], 8)
-    const card = createModernCard(`${rptHeaders[cats[0]]} Distribution`, "PIE")
-    grid.appendChild(card)
-    
-    try {
-      const canvas = card.querySelector("canvas")
-      const inst = new Chart(canvas, {
-        type: "doughnut",
-        data: {
-          labels: top.map(e => String(e[0]).substring(0, 10)),
-          datasets: [{
-            data: top.map(e => e[1]),
-            backgroundColor: ["#ff8c00", "#3b82f6", "#10b981", "#ec4899", "#8b5cf6", "#ef4444", "#f59e0b", "#06b6d4"],
-            borderColor: "#16213e",
-            borderWidth: 2
-          }]
-        },
-        options: { ...biOpts(true), cutout: "65%" }
-      })
-      biCharts.push(inst)
-    } catch(e) {
-      console.error("Error creating pie chart:", e)
-    }
-  }
- 
-  // Chart 3: Line Trend
-  if(nums.length > 0) {
-    const yi = nums[0]
-    const rows = rptDataset.slice(0, 30)
-    const card = createModernCard(`${rptHeaders[yi]} Trend`, "LINE")
-    grid.appendChild(card)
-    
-    try {
-      const canvas = card.querySelector("canvas")
-      const inst = new Chart(canvas, {
-        type: "line",
-        data: {
-          labels: rows.map((_, i) => `#${i + 1}`),
-          datasets: [{
-            data: rows.map(r => parseFloat(r[yi]) || 0),
-            borderColor: "#3b82f6",
-            backgroundColor: "rgba(59, 130, 246, 0.1)",
-            fill: true,
-            tension: 0.4,
-            pointRadius: 3,
-            pointBackgroundColor: "#3b82f6",
-            borderWidth: 2
-          }]
-        },
-        options: biOpts(false, "#3b82f6")
-      })
-      biCharts.push(inst)
-    } catch(e) {
-      console.error("Error creating line chart:", e)
-    }
-  }
- 
-  // Chart 4: Horizontal Bar (Top N)
-  if(cats.length > 0 && nums.length > 0) {
-    const xi = cats[0]
-    const yi = nums[nums.length > 1 ? 1 : 0]
-    const top = topN(xi, 8)
-    const card = createModernCard(`Top ${rptHeaders[xi]}`, "H-BAR")
-    grid.appendChild(card)
-    
-    try {
-      const canvas = card.querySelector("canvas")
-      const inst = new Chart(canvas, {
-        type: "bar",
-        data: {
-          labels: top.map(e => String(e[0]).substring(0, 15)),
-          datasets: [{
-            data: top.map(e => e[1]),
-            backgroundColor: "rgba(16, 185, 129, 0.8)",
-            borderColor: "#10b981",
-            borderWidth: 1,
-            borderRadius: 6
-          }]
-        },
-        options: { ...biOpts(false, "#10b981"), indexAxis: "y" }
-      })
-      biCharts.push(inst)
-    } catch(e) {
-      console.error("Error creating horizontal bar chart:", e)
-    }
-  }
- 
-  // Chart 5: Area Chart (Wide)
-  if(nums.length > 0 && cats.length > 0) {
-    const xi = cats[cats.length > 1 ? 1 : 0]
-    const yi = nums[0]
-    const rows = rptDataset.slice(0, 20)
-    const card = createModernCard(`${rptHeaders[yi]} Over ${rptHeaders[xi]}`, "AREA", true)
-    grid.appendChild(card)
-    
-    try {
-      const canvas = card.querySelector("canvas")
-      const inst = new Chart(canvas, {
-        type: "line",
-        data: {
-          labels: rows.map(r => String(r[xi] ?? "").substring(0, 12)),
-          datasets: [{
-            data: rows.map(r => parseFloat(r[yi]) || 0),
-            borderColor: "#ec4899",
-            backgroundColor: "rgba(236, 72, 153, 0.15)",
-            fill: true,
-            tension: 0.4,
-            pointRadius: 3,
-            pointBackgroundColor: "#ec4899",
-            borderWidth: 2
-          }]
-        },
-        options: biOpts(false, "#ec4899")
-      })
-      biCharts.push(inst)
-    } catch(e) {
-      console.error("Error creating area chart:", e)
-    }
-  }
- 
-  // Chart 6: Scatter (if 2+ numeric columns)
-  if(nums.length > 1) {
-    const xi = nums[0]
-    const yi = nums[1]
-    const rows = rptDataset.slice(0, 30)
-    const card = createModernCard(`${rptHeaders[xi]} vs ${rptHeaders[yi]}`, "SCATTER")
-    grid.appendChild(card)
-    
-    try {
-      const canvas = card.querySelector("canvas")
-      const inst = new Chart(canvas, {
-        type: "scatter",
-        data: {
-          datasets: [{
-            data: rows.map(r => ({
-              x: parseFloat(r[xi]) || 0,
-              y: parseFloat(r[yi]) || 0
-            })),
-            backgroundColor: "rgba(139, 92, 246, 0.6)",
-            borderColor: "#8b5cf6",
-            pointRadius: 5,
-            borderWidth: 1
-          }]
-        },
-        options: biOpts(false, "#8b5cf6")
-      })
-      biCharts.push(inst)
-    } catch(e) {
-      console.error("Error creating scatter chart:", e)
-    }
-  }
+
+  const charts = suggestCharts(numIdx, catIdx)
+
+  charts.forEach((cfg, idx) => {
+    const id  = `rptChart_${idx}`
+    const div = document.createElement("div")
+    div.className = "rpt-chart-card"
+    div.innerHTML = `
+      <div class="rpt-chart-header">
+        <span class="rpt-chart-title">${cfg.title}</span>
+        <span class="rpt-chart-type">${cfg.typeLabel}</span>
+      </div>
+      <canvas id="${id}"></canvas>
+    `
+    grid.appendChild(div)
+
+    setTimeout(() => {
+      const inst = renderChart(id, cfg)
+      if(inst) chartInsts.push(inst)
+    }, idx * 100)
+  })
 }
- 
-function createModernCard(title, badge, isWide = false) {
-  const card = document.createElement("div")
-  card.className = "chart-card" + (isWide ? " chart-wide" : "")
-  card.innerHTML = `
-    <div class="chart-header">
-      <span class="chart-title">${title}</span>
-      <span class="chart-badge">${badge}</span>
-    </div>
-    <div class="chart-body">
-      <canvas></canvas>
-    </div>
-  `
-  return card
+
+
+/* ── AI suggests best charts ── */
+function suggestCharts(numIdx, catIdx){
+  const charts = []
+  const rows   = rptDataset.slice(0, 20)
+  const max    = 20
+
+  // 1. Bar — first categorical vs first numeric
+  if(catIdx.length > 0 && numIdx.length > 0){
+    const xi = catIdx[0], yi = numIdx[0]
+    charts.push({
+      type: "bar", typeLabel: "Bar Chart",
+      title: `${rptHeaders[xi]} vs ${rptHeaders[yi]}`,
+      labels: rows.map(r => String(r[xi] ?? "")),
+      data:   rows.map(r => parseFloat(r[yi])||0),
+      color:  CHART_COLORS[0]
+    })
+  }
+
+  // 2. Line — second numeric over index
+  if(numIdx.length > 1){
+    const yi = numIdx[1]
+    charts.push({
+      type: "line", typeLabel: "Line Chart",
+      title: `${rptHeaders[yi]} Trend`,
+      labels: rows.map((_,i) => `#${i+1}`),
+      data:   rows.map(r => parseFloat(r[yi])||0),
+      color:  CHART_COLORS[1]
+    })
+  }
+
+  // 3. Pie — first categorical distribution
+  if(catIdx.length > 0){
+    const xi  = catIdx[0]
+    const vals = rptDataset.map(r => String(r[xi] ?? ""))
+    const counts = {}
+    vals.forEach(v => { counts[v] = (counts[v]||0)+1 })
+    const top = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,8)
+    charts.push({
+      type: "pie", typeLabel: "Pie Chart",
+      title: `${rptHeaders[xi]} Distribution`,
+      labels: top.map(e=>e[0]),
+      data:   top.map(e=>e[1]),
+      color:  CHART_COLORS
+    })
+  }
+
+  // 4. Doughnut — second categorical
+  if(catIdx.length > 1){
+    const xi  = catIdx[1]
+    const vals = rptDataset.map(r => String(r[xi] ?? ""))
+    const counts = {}
+    vals.forEach(v => { counts[v] = (counts[v]||0)+1 })
+    const top = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,6)
+    charts.push({
+      type: "doughnut", typeLabel: "Doughnut",
+      title: `${rptHeaders[xi]} Breakdown`,
+      labels: top.map(e=>e[0]),
+      data:   top.map(e=>e[1]),
+      color:  CHART_COLORS
+    })
+  }
+
+  // 5. Horizontal bar — third categorical vs second numeric
+  if(catIdx.length > 0 && numIdx.length > 1){
+    const xi = catIdx.length > 1 ? catIdx[1] : catIdx[0]
+    const yi = numIdx[1]
+    charts.push({
+      type: "horizontalBar", typeLabel: "Horizontal Bar",
+      title: `${rptHeaders[xi]} by ${rptHeaders[yi]}`,
+      labels: rows.map(r => String(r[xi] ?? "")),
+      data:   rows.map(r => parseFloat(r[yi])||0),
+      color:  CHART_COLORS[2]
+    })
+  }
+
+  // 6. Scatter — numeric vs numeric
+  if(numIdx.length >= 2){
+    const xi = numIdx[0], yi = numIdx[1]
+    charts.push({
+      type: "scatter", typeLabel: "Scatter Plot",
+      title: `${rptHeaders[xi]} vs ${rptHeaders[yi]}`,
+      scatterData: rows.map(r => ({
+        x: parseFloat(r[xi])||0,
+        y: parseFloat(r[yi])||0
+      })),
+      color: CHART_COLORS[3]
+    })
+  }
+
+  return charts
+}
+
+
+/* ── Render single chart ── */
+function renderChart(canvasId, cfg){
+  const ctx = document.getElementById(canvasId)
+  if(!ctx) return null
+
+  const isCircular = ["pie","doughnut","polarArea"].includes(cfg.type)
+  const isHBar     = cfg.type === "horizontalBar"
+  const isScatter  = cfg.type === "scatter"
+
+  let dataset = {}
+
+  if(isCircular){
+    dataset = {
+      data: cfg.data,
+      backgroundColor: cfg.color,
+      borderWidth: 2,
+      borderColor: "#0d1117"
+    }
+  } else if(isScatter){
+    dataset = {
+      data: cfg.scatterData,
+      backgroundColor: cfg.color + "99",
+      borderColor: cfg.color,
+      pointRadius: 5
+    }
+  } else {
+    const isLine = cfg.type === "line"
+    dataset = {
+      data: cfg.data,
+      backgroundColor: isLine ? cfg.color + "22" : cfg.color + "cc",
+      borderColor: cfg.color,
+      borderWidth: 2,
+      borderRadius: isLine ? 0 : 5,
+      fill: isLine,
+      tension: 0.4,
+      pointRadius: isLine ? 3 : 0
+    }
+  }
+
+  return new Chart(ctx, {
+    type: isHBar ? "bar" : isCircular ? cfg.type : isScatter ? "scatter" : cfg.type,
+    data: {
+      labels: cfg.labels || [],
+      datasets: [dataset]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      indexAxis: isHBar ? "y" : "x",
+      animation: { duration: 800, easing: "easeInOutQuart" },
+      plugins: {
+        legend: { display: isCircular, labels: { color:"#aaa", font:{size:11}, padding:10, usePointStyle:true } },
+        tooltip: {
+          backgroundColor: "rgba(10,10,20,0.9)",
+          titleColor: cfg.color.length > 7 ? "#ff8c00" : cfg.color,
+          bodyColor: "#fff", padding: 10, cornerRadius: 8
+        }
+      },
+      scales: isCircular ? {} : {
+        x: { ticks:{color:"#555",font:{size:10},maxRotation:40}, grid:{color:"rgba(255,255,255,0.04)"} },
+        y: { ticks:{color:"#555",font:{size:10}}, grid:{color:"rgba(255,255,255,0.04)"} }
+      }
+    }
+  })
+}
+
+
+/* ── AI Suggestion ── */
+function buildAISuggestion(numCols, catCols){
+  const tips = []
+  if(numCols.length > 0) tips.push(`${numCols.length} numeric column${numCols.length>1?'s':''} detected — showing trend and distribution charts`)
+  if(catCols.length > 0) tips.push(`${catCols.length} categorical column${catCols.length>1?'s':''} — pie and bar breakdowns generated`)
+  if(rptMeta.missing > 0) tips.push(`⚠️ ${rptMeta.missing} missing values detected`)
+  if(rptMeta.duplicates > 0) tips.push(`⚠️ ${rptMeta.duplicates} duplicate rows found`)
+
+  const el = document.getElementById("aiSuggestionText")
+  if(el) el.innerText = tips.join("  ·  ") || "Dashboard generated from your dataset"
+}
+
+
+/* ── Helpers ── */
+function isNumericCol(colIdx){
+  const vals = rptDataset.map(r => r[colIdx]).filter(v => v !== "" && v !== null && v !== undefined)
+  const nums = vals.map(v => parseFloat(v)).filter(v => !isNaN(v))
+  return nums.length > vals.length * 0.5
+}
+
+function regenerate(){
+  buildDashboard()
+}
+
+function exportDashboard(){
+  alert("To export: Right-click the page → Print → Save as PDF\n\nOr use Ctrl+P and select 'Save as PDF'")
+}
+
+function logout(){
+  try{
+    var email = getAuthEmail()
+    if(email) fetch("http://127.0.0.1:5000/logout",{
+      method:"POST", headers: authHeaders(),
+      body: JSON.stringify({email:email})
+    }).catch(function(){})
+  }catch(e){}
+  clearSession()
+  if(window.Auth) window.Auth.logout()
+  else window.location.href = "index.html"
 }

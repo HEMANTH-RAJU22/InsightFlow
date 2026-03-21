@@ -261,7 +261,7 @@ html,body{
         <div class="form-group">
           <label class="form-label">Password</label>
           <div class="form-input-wrap">
-            <input class="form-input" type="password" id="rPass" placeholder="At least 6 characters"
+            <input class="form-input" type="password" id="rPass" placeholder="At least 8 characters"
                    oninput="checkStrength(this.value);clearField('rPass')"
                    onkeydown="if(event.key==='Enter')doRegister()">
             <span class="pw-eye" onclick="toggleEye('rPass',this)">👁</span>
@@ -325,7 +325,7 @@ function submitReset() {
   var pw2   = document.getElementById('resetPw2') ? document.getElementById('resetPw2').value : ''
   var msg   = document.getElementById('resetMsg')
 
-  if (!pw1 || pw1.length < 6) { if(msg){msg.textContent='Password must be at least 6 characters';msg.className='val-msg show err'} return }
+  if (!pw1 || pw1.length < 8) { if(msg){msg.textContent='Password must be at least 8 characters';msg.className='val-msg show err'} return }
   if (pw1 !== pw2) { if(msg){msg.textContent='Passwords do not match';msg.className='val-msg show err'} return }
 
   fetch(API + '/reset-password', {
@@ -491,7 +491,7 @@ function doRegister() {
   var ok = true
   if (!name || name.length < 2) { setFieldState('rName','err','Name must be at least 2 characters'); ok = false }
   if (!email || !/^[^@]+@[^@]+\.[^@]+$/.test(email)) { setFieldState('rEmail','err','Enter a valid email'); ok = false }
-  if (!pass || pass.length < 6) { setFieldState('rPass','err','Password must be at least 6 characters'); ok = false }
+  if (!pass || pass.length < 6) { setFieldState('rPass','err','Password must be at least 8 characters'); ok = false }
   if (pass !== conf) { setFieldState('rConf','err','Passwords do not match'); ok = false }
   if (!ok) return
 
@@ -647,7 +647,7 @@ function submitNewPassword(email) {
   var msg = document.getElementById('newPwMsg')
 
   if (!pw1 || pw1.length < 6) {
-    if (msg) { msg.textContent = 'Password must be at least 6 characters'; msg.style.color = '#ef4444' }
+    if (msg) { msg.textContent = 'Password must be at least 8 characters'; msg.style.color = '#ef4444' }
     return
   }
   if (pw1 !== pw2) {

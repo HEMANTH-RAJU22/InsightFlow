@@ -247,69 +247,137 @@ async function exportPDF(){
   var btn=document.getElementById('pdfBtn')
   btn.textContent='⏳ Generating...'
   btn.disabled=true
+
   try{
-    var sidebar = document.querySelector('.r-sidebar')
-    var canvas  = document.getElementById('rCanvas')
-
-    // Save styles
-    var sSidebar = sidebar.getAttribute('style')||''
-    var sCanvas  = canvas.getAttribute('style')||''
-
-    // Hide sidebar, expand canvas
-    sidebar.style.display   = 'none'
-    sidebar.style.width     = '0'
-    sidebar.style.minWidth  = '0'
-    canvas.style.overflow   = 'visible'
-    canvas.style.height     = 'auto'
-    canvas.style.maxHeight  = 'none'
-    canvas.style.flex       = '1'
-    canvas.style.width      = '100%'
-
-    // Reflow
-    await new Promise(function(r){setTimeout(r,800)})
-
-    var W = canvas.scrollWidth
-    var H = canvas.scrollHeight
-
-    var snap = await html2canvas(canvas,{
-      backgroundColor: '#0b0f1a',
-      scale: 2,
-      useCORS: true,
-      allowTaint: true,
-      logging: false,
-      x: 0, y: 0,
-      scrollX: 0, scrollY: 0,
-      width: W,
-      height: H,
-      windowWidth: W,
-      windowHeight: H
-    })
-
-    // Restore
-    sidebar.setAttribute('style', sSidebar)
-    canvas.setAttribute('style', sCanvas)
-
     var{jsPDF}=window.jspdf
     var pdf=new jsPDF({orientation:'landscape',unit:'mm',format:'a3'})
     var pw=pdf.internal.pageSize.getWidth()
     var ph=pdf.internal.pageSize.getHeight()
-    var imgData=snap.toDataURL('image/jpeg',0.97)
-    var imgProps=pdf.getImageProperties(imgData)
 
-    // Fill full page width, proportional height
-    var imgW = pw
-    var imgH = (imgProps.height / imgProps.width) * pw
+    // Get all chart canvases and KPI data directly
+    var bgColor='#0b0f1a'
+    var cardColor='rgba(255,255,255,0.055)'
 
-    if(imgH > ph){
-      // Scale to fit height instead
-      imgH = ph
-      imgW = (imgProps.width / imgProps.height) * ph
+    // Build a standalone HTML string with all chart images embedded
+    var chartCanvases=document.querySelectorAll('#rCanvas canvas')
+    var chartImgs=[]
+    chartCanvases.forEach(function(c){
+      try{ chartImgs.push(c.toDataURL('image/png')) }catch(e){ chartImgs.push('') }
+    })
+
+    // Create offscreen iframe for clean render
+    var iframe=document.createElement('iframe')
+    iframe.style.cssText='position:fixed;top:-9999px;left:-9999px;width:1400px;height:1px;border:none;visibility:hidden;'
+    document.body.appendChild(iframe)
+    var doc=iframe.contentDocument||iframe.contentWindow.document
+
+    // Build clean HTML with embedded chart images
+    var kpiHTML=document.getElementById('rKpi').innerHTML
+    var gMainHTML=document.getElementById('rGMain').innerHTML
+    var gMidHTML=document.getElementById('rGMid').innerHTML
+    var gBotHTML=document.getElementById('rGBot').innerHTML
+    var gExtraHTML=document.getElementById('rGExtra').innerHTML
+    var gStatsHTML=document.getElementById('rGStats').innerHTML
+
+    // Replace canvas elements with image data
+    var ci=0
+    function replaceCanvases(html){
+      return html.replace(/<canvas[^>]*><\/canvas>/g,function(){
+        var img=chartImgs[ci]||''
+        ci++
+        return img?'<img src="'+img+'" style="width:100%;height:100%;display:block;">':''
+      })
     }
 
-    pdf.addImage(imgData,'JPEG', 0, 0, imgW, imgH)
+    var cleanHTML='<!DOCTYPE html><html><head><style>'+
+      '*{box-sizing:border-box;margin:0;padding:0}'+
+      'body{background:#0b0f1a;color:#e0e0e0;font-family:Arial,sans-serif;padding:12px;width:1400px}'+
+      '.r-kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:10px}'+
+      '.r-kpi{background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px 12px;position:relative;overflow:hidden}'+
+      '.r-kpi-val{font-size:22px;font-weight:bold;line-height:1;margin-bottom:4px}'+
+      '.r-kpi-lbl{font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#445;margin-bottom:3px}'+
+      '.r-kpi-tag{font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#445;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);padding:2px 7px;border-radius:20px}'+
+      '.r-kpi-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}'+
+      '.r-kpi-ico{font-size:18px}'+
+      '.r-kpi-meta{font-size:9px;color:#445;margin-bottom:8px}'+
+      '.r-kpi-tr{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px}'+
+      '.t-up{background:rgba(16,185,129,.1);color:#10b981}'+
+      '.t-dn{background:rgba(239,68,68,.1);color:#ef4444}'+
+      '.t-fl{background:rgba(136,153,170,.07);color:#778}'+
+      '.r-g-main{display:grid;grid-template-columns:2fr 1fr;gap:8px;margin-bottom:10px}'+
+      '.r-g-mid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px}'+
+      '.r-g-bot{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px}'+
+      '.r-g-extra{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}'+
+      '.r-g-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}'+
+      '.r-cc{background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column}'+
+      '.r-cc-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}'+
+      '.r-cc-ttl{font-size:12px;font-weight:700;color:#99a}'+
+      '.r-badge{font-size:10px;font-weight:700;letter-spacing:.8px;padding:3px 10px;border-radius:20px;text-transform:uppercase}'+
+      '.b-bar{background:rgba(255,140,0,.1);color:#ff8c00;border:1px solid rgba(255,140,0,.25)}'+
+      '.b-line{background:rgba(59,130,246,.1);color:#3b82f6;border:1px solid rgba(59,130,246,.25)}'+
+      '.b-pie{background:rgba(236,72,153,.1);color:#ec4899;border:1px solid rgba(236,72,153,.25)}'+
+      '.b-area{background:rgba(16,185,129,.1);color:#10b981;border:1px solid rgba(16,185,129,.25)}'+
+      '.b-scat{background:rgba(139,92,246,.1);color:#8b5cf6;border:1px solid rgba(139,92,246,.25)}'+
+      '.b-polar{background:rgba(245,158,11,.1);color:#f59e0b;border:1px solid rgba(245,158,11,.25)}'+
+      '.b-radar{background:rgba(168,85,247,.1);color:#a855f7;border:1px solid rgba(168,85,247,.25)}'+
+      '.b-hist{background:rgba(6,182,212,.1);color:#06b6d4;border:1px solid rgba(6,182,212,.25)}'+
+      '.b-stack{background:rgba(251,146,60,.1);color:#fb923c;border:1px solid rgba(251,146,60,.25)}'+
+      '.b-multi{background:rgba(52,211,153,.1);color:#34d399;border:1px solid rgba(52,211,153,.25)}'+
+      '.b-stat{background:rgba(99,102,241,.1);color:#6366f1;border:1px solid rgba(99,102,241,.25)}'+
+      '.r-cvw{position:relative;flex-shrink:0}'+
+      '.r-cvw img{display:block;width:100%;height:100%}'+
+      '.r-stat-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:18px 20px;display:flex;flex-direction:column;gap:6px}'+
+      '.r-stat-card-lbl{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#445}'+
+      '.r-stat-card-val{font-size:30px;font-weight:800;line-height:1;letter-spacing:-1.5px}'+
+      '.r-stat-card-sub{font-size:10px;color:#556}'+
+      '</style></head><body>'+
+      '<div class="r-kpi-row">'+replaceCanvases(kpiHTML)+'</div>'+
+      '<div class="r-g-main">'+replaceCanvases(gMainHTML)+'</div>'+
+      '<div class="r-g-mid">'+replaceCanvases(gMidHTML)+'</div>'+
+      '<div class="r-g-bot">'+replaceCanvases(gBotHTML)+'</div>'+
+      '<div class="r-g-extra">'+replaceCanvases(gExtraHTML)+'</div>'+
+      '<div class="r-g-stats">'+replaceCanvases(gStatsHTML)+'</div>'+
+      '</body></html>'
+
+    doc.open()
+    doc.write(cleanHTML)
+    doc.close()
+
+    // Set iframe height to content height
+    var docH=doc.body.scrollHeight
+    iframe.style.height=docH+'px'
+    iframe.style.visibility='visible'
+    iframe.style.top='0'
+    iframe.style.left='0'
+
+    await new Promise(r=>setTimeout(r,500))
+
+    var snap=await html2canvas(doc.body,{
+      backgroundColor:'#0b0f1a',
+      scale:2,
+      useCORS:true,
+      allowTaint:true,
+      logging:false,
+      x:0,y:0,
+      scrollX:0,scrollY:0,
+      width:1400,
+      height:docH,
+      windowWidth:1400,
+      windowHeight:docH
+    })
+
+    document.body.removeChild(iframe)
+
+    var imgData=snap.toDataURL('image/jpeg',0.97)
+    var imgProps=pdf.getImageProperties(imgData)
+    var ratio=Math.min(pw/imgProps.width,ph/imgProps.height)
+    pdf.addImage(imgData,'JPEG',0,0,imgProps.width*ratio,imgProps.height*ratio)
     pdf.save((fileName||'InsightFlow')+'_Dashboard.pdf')
 
-  }catch(e){alert('PDF export failed: '+e.message);console.error(e)}
+  }catch(e){
+    alert('PDF export failed: '+e.message)
+    console.error(e)
+  }
   btn.textContent='↓ Export PDF'
   btn.disabled=false
 }
