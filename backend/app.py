@@ -105,7 +105,7 @@ def health():
 
 
 # ─────────────────────────────────────────
-# REGISTER
+# REGISTER — bcrypt only, no plain_password stored
 # ─────────────────────────────────────────
 
 @app.route("/register", methods=["POST"])
@@ -133,12 +133,11 @@ def register():
         if cursor.fetchone():
             return jsonify({"status": "error", "message": "Email already registered"})
 
+        # Store only bcrypt hash — plain password never saved
         hashed = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
-
-        # Store plain password for retrieval feature
         cursor.execute(
-            "INSERT INTO users(name, email, password, plain_password) VALUES(%s, %s, %s, %s)",
-            (name, email, hashed, password)
+            "INSERT INTO users(name, email, password) VALUES(%s, %s, %s)",
+            (name, email, hashed)
         )
         db.commit()
         cursor.execute(
@@ -218,13 +217,16 @@ def login():
 
 
 # ─────────────────────────────────────────
-# FORGOT PASSWORD — retrieve plain password from DB by email
+# FORGOT PASSWORD — verify email exists, no password returned
 #
-# REQUIRED: Add plain_password column to your users table (run once):
+# Flow:
+#   1. User enters email → POST /forgot-password
+#   2. Backend verifies email exists → returns success
+#   3. Frontend shows "Set New Password" form
+#   4. User sets new password → POST /reset-password-direct
+#   5. Backend stores only bcrypt hash
 #
-#   ALTER TABLE users ADD COLUMN plain_password VARCHAR(255) DEFAULT NULL;
-#
-# The register route now saves the plain password into this column.
+# DB stores ONLY bcrypt hash. Plain password is never stored or shown.
 # ─────────────────────────────────────────
 
 @app.route("/forgot-password", methods=["POST"])
@@ -240,33 +242,63 @@ def forgot_password():
         return jsonify({"status": "error", "message": "Database unavailable"}), 500
 
     try:
-        cursor.execute("SELECT name, plain_password FROM users WHERE email=%s", (email,))
+        cursor.execute("SELECT id, name FROM users WHERE email=%s", (email,))
         user = cursor.fetchone()
 
         if not user:
-            return jsonify({
-                "status":  "error",
-                "message": "No account found with that email address."
-            })
+            return jsonify({"status": "error", "message": "No account found with that email."})
 
-        plain = user.get("plain_password") or ""
-
-        if not plain:
-            return jsonify({
-                "status":  "error",
-                "message": "Password could not be retrieved for this account."
-            })
-
-        log.info("Password retrieved for: %s", email)
-        return jsonify({
-            "status":   "success",
-            "name":     user["name"],
-            "password": plain
-        })
+        # Email verified — frontend will show new password form directly
+        log.info("Password reset requested for: %s", email)
+        return jsonify({"status": "success", "name": user["name"], "email": email})
 
     except Exception as e:
         log.error("Forgot password error: %s", e)
         return jsonify({"status": "error", "message": "Request failed"}), 500
+    finally:
+        cursor.close()
+        db.close()
+
+
+# ─────────────────────────────────────────
+# RESET PASSWORD DIRECT — bcrypt only, no plain password stored
+# ─────────────────────────────────────────
+
+@app.route("/reset-password-direct", methods=["POST"])
+def reset_password_direct():
+    data     = request.json or {}
+    email    = data.get("email", "").strip().lower()
+    password = data.get("password", "")
+
+    if not email or not password:
+        return jsonify({"status": "error", "message": "Email and password required"}), 400
+    if len(password) < 6:
+        return jsonify({"status": "error", "message": "Password must be at least 6 characters"}), 400
+
+    db, cursor = get_db()
+    if not db:
+        return jsonify({"status": "error", "message": "Database unavailable"}), 500
+
+    try:
+        cursor.execute("SELECT id FROM users WHERE email=%s", (email,))
+        user = cursor.fetchone()
+        if not user:
+            return jsonify({"status": "error", "message": "User not found"}), 404
+
+        # Store only bcrypt hash — plain password never saved
+        hashed = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+        cursor.execute("UPDATE users SET password=%s WHERE email=%s", (hashed, email))
+        cursor.execute(
+            "INSERT INTO activity_log(user_id, action, detail, ip_address) VALUES(%s,%s,%s,%s)",
+            (user["id"], "password_reset", email, request.remote_addr or "unknown")
+        )
+        db.commit()
+        log.info("Password reset (direct) for: %s", email)
+        return jsonify({"status": "success", "message": "Password updated successfully"})
+
+    except Exception as e:
+        log.error("Direct reset error: %s", e)
+        return jsonify({"status": "error", "message": "Reset failed"}), 500
     finally:
         cursor.close()
         db.close()
@@ -314,7 +346,7 @@ def verify_reset_token():
 
 
 # ─────────────────────────────────────────
-# RESET PASSWORD
+# RESET PASSWORD (token-based, kept for compatibility)
 # ─────────────────────────────────────────
 
 @app.route("/reset-password", methods=["POST"])
@@ -345,16 +377,12 @@ def reset_password():
         if datetime.now() > row["expires_at"]:
             cursor.execute("DELETE FROM password_resets WHERE token=%s", (token,))
             db.commit()
-            return jsonify({"status": "expired", "message": "Reset link has expired. Please request a new one."})
+            return jsonify({"status": "expired", "message": "Reset link has expired."})
 
         email  = row["email"]
+        # Store only bcrypt hash — plain password never saved
         hashed = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
-
-        # Update both hashed and plain password
-        cursor.execute(
-            "UPDATE users SET password=%s, plain_password=%s WHERE email=%s",
-            (hashed, password, email)
-        )
+        cursor.execute("UPDATE users SET password=%s WHERE email=%s", (hashed, email))
         cursor.execute("DELETE FROM password_resets WHERE token=%s", (token,))
 
         cursor.execute("SELECT id FROM users WHERE email=%s", (email,))
@@ -401,7 +429,7 @@ def get_account(email):
 
 
 # ─────────────────────────────────────────
-# ACCOUNT — UPDATE (name / password)
+# ACCOUNT — UPDATE (name / password) — bcrypt only
 # ─────────────────────────────────────────
 
 @app.route("/account/update", methods=["POST"])
@@ -423,12 +451,9 @@ def update_account():
         if new_pass:
             if len(new_pass) < 6:
                 return jsonify({"status": "error", "message": "Password must be at least 6 characters"})
+            # Store only bcrypt hash — plain password never saved
             hashed = bcrypt.hashpw(new_pass.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
-            # Update both hashed and plain password
-            cursor.execute(
-                "UPDATE users SET password=%s, plain_password=%s WHERE email=%s",
-                (hashed, new_pass, email)
-            )
+            cursor.execute("UPDATE users SET password=%s WHERE email=%s", (hashed, email))
 
         db.commit()
         log.info("Account updated: %s", email)
