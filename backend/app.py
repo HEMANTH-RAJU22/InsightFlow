@@ -15,13 +15,20 @@ from groq import Groq
 from dotenv import load_dotenv
 import bcrypt
 import jwt as pyjwt
+from functools import wraps
 
 load_dotenv()
 warnings.filterwarnings("ignore")
 
-# ── JWT Secret ──
-JWT_SECRET  = os.environ.get("JWT_SECRET", "insightflow-secret-change-in-production")
-JWT_EXPIRY  = 8  # hours
+# ── JWT Secret — MUST be set in .env, no weak default ──
+JWT_SECRET = os.environ.get("JWT_SECRET")
+if not JWT_SECRET:
+    raise EnvironmentError(
+        "JWT_SECRET is not set.\n"
+        "Add a strong random secret to your .env file:\n"
+        "  JWT_SECRET=your-long-random-secret-here"
+    )
+JWT_EXPIRY = 8  # hours
 
 # ── Logging ──
 logging.basicConfig(
@@ -39,14 +46,30 @@ if not GROQ_API_KEY:
         "  GROQ_API_KEY=gsk_your_key_here"
     )
 
-# ── Groq client (singleton — not recreated per request) ──
+# ── Groq client ──
 groq_client = Groq(api_key=GROQ_API_KEY)
 
 # ── Flask app ──
 app = Flask(__name__)
-# ── CORS — restrict to your domain in production ──
 ALLOWED_ORIGINS = os.environ.get("ALLOWED_ORIGINS", "*").split(",")
-CORS(app, resources={r"/*": {"origins": ALLOWED_ORIGINS}}, supports_credentials=False)
+CORS(app, resources={r"/*": {
+    "origins":           ALLOWED_ORIGINS,
+    "allow_headers":     ["Content-Type", "Authorization", "X-User-Email"],
+    "expose_headers":    ["Content-Type"],
+    "methods":           ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    "supports_credentials": False
+}})
+
+# ── Handle OPTIONS preflight globally ──
+@app.before_request
+def handle_preflight():
+    if request.method == "OPTIONS":
+        from flask import make_response
+        resp = make_response()
+        resp.headers["Access-Control-Allow-Origin"]  = "*"
+        resp.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-User-Email"
+        resp.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+        return resp
 
 # ── Rate Limiter ──
 limiter = Limiter(
@@ -73,13 +96,16 @@ mail = Mail(app)
 def too_large(e):
     return jsonify({"error": "File too large. Maximum size is 15 MB."}), 413
 
+@app.errorhandler(429)
+def rate_limit_exceeded(e):
+    return jsonify({"status": "error", "message": "Too many requests. Please slow down and try again later."}), 429
+
 
 # ─────────────────────────────────────────
-# DATABASE — per-request connection (thread-safe)
+# DATABASE
 # ─────────────────────────────────────────
 
 def get_db():
-    """Return a fresh (connection, cursor) pair. Caller must close both."""
     try:
         import mysql.connector
         db = mysql.connector.connect(
@@ -97,26 +123,12 @@ def get_db():
 
 
 # ─────────────────────────────────────────
-# VERIFY TOKEN (frontend can call this to check if session is still valid)
-# ─────────────────────────────────────────
-
-@app.route("/verify-jwt", methods=["POST"])
-def verify_jwt_route():
-    data  = request.json or {}
-    token = data.get("token", "")
-    payload = verify_token(token)
-    if payload:
-        return jsonify({"valid": True, "email": payload["email"], "name": payload["name"]})
-    return jsonify({"valid": False}), 401
-
-
-# ─────────────────────────────────────────
 # JWT HELPERS
 # ─────────────────────────────────────────
 
 def create_token(user_id, email, name):
     payload = {
-        "sub":   user_id,
+        "sub":   str(user_id),   # PyJWT v2+ requires sub to be a string
         "email": email,
         "name":  name,
         "iat":   datetime.utcnow(),
@@ -128,36 +140,70 @@ def create_token(user_id, email, name):
 def verify_token(token):
     """Returns payload dict or None if invalid/expired."""
     try:
-        return pyjwt.decode(token, JWT_SECRET, algorithms=["HS256"])
+        return pyjwt.decode(token, JWT_SECRET, algorithms=["HS256"],
+                            options={"verify_sub": False})
     except pyjwt.ExpiredSignatureError:
+        log.warning("verify_token: Token EXPIRED")
         return None
-    except pyjwt.InvalidTokenError:
+    except pyjwt.InvalidSignatureError:
+        log.warning("verify_token: Invalid SIGNATURE — JWT_SECRET mismatch?")
         return None
-
-
-def require_auth(f):
-    """Decorator — returns 401 if no valid JWT."""
-    from functools import wraps
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        user = get_current_user()
-        if not user:
-            # Fallback: allow X-User-Email header for backward compat
-            email = request.headers.get("X-User-Email", "")
-            if not email:
-                return jsonify({"error": "Authentication required"}), 401
-        return f(*args, **kwargs)
-    return decorated
+    except pyjwt.DecodeError as e:
+        log.warning("verify_token: Decode error — %s", e)
+        return None
+    except pyjwt.InvalidTokenError as e:
+        log.warning("verify_token: Invalid token — %s", e)
+        return None
 
 
 def get_current_user():
-    """Extract verified user from Authorization header or X-User-Email fallback."""
+    """
+    Extract verified user from:
+    1. Authorization: Bearer <jwt> header (standard)
+    2. Request body field "_token" (fallback for file:// CORS restrictions)
+    """
+    # 1. Try Authorization header first
     auth = request.headers.get("Authorization", "")
     if auth.startswith("Bearer "):
-        payload = verify_token(auth[7:])
-        if payload:
-            return payload
+        token = auth[7:].strip()
+        if token:
+            payload = verify_token(token)
+            if payload:
+                log.debug("get_current_user: Authenticated via header: %s", payload.get("email"))
+                return payload
+            log.warning("get_current_user: Header token invalid/expired")
+
+    # 2. Fallback: token in JSON body (for file:// → localhost requests)
+    try:
+        if request.is_json:
+            body_token = (request.get_json(silent=True) or {}).get("_token", "")
+            if body_token:
+                payload = verify_token(body_token)
+                if payload:
+                    log.debug("get_current_user: Authenticated via body token: %s", payload.get("email"))
+                    return payload
+    except Exception:
+        pass
+
+    log.debug("get_current_user: No valid token found. Auth header: %s", auth[:30] if auth else "MISSING")
     return None
+
+
+def require_auth(f):
+    """
+    Decorator — returns 401 if no valid JWT.
+    OPTIONS requests are always allowed through (CORS preflight).
+    """
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        # Always allow CORS preflight requests through
+        if request.method == "OPTIONS":
+            return "", 200
+        user = get_current_user()
+        if not user:
+            return jsonify({"error": "Authentication required"}), 401
+        return f(*args, **kwargs)
+    return decorated
 
 
 # ─────────────────────────────────────────
@@ -186,16 +232,29 @@ def health():
 
 
 # ─────────────────────────────────────────
-# REGISTER — bcrypt only, no plain_password stored
+# VERIFY JWT
+# ─────────────────────────────────────────
+
+@app.route("/verify-jwt", methods=["POST"])
+def verify_jwt_route():
+    data    = request.json or {}
+    token   = data.get("token", "")
+    payload = verify_token(token)
+    if payload:
+        return jsonify({"valid": True, "email": payload["email"], "name": payload["name"]})
+    return jsonify({"valid": False}), 401
+
+
+# ─────────────────────────────────────────
+# REGISTER
 # ─────────────────────────────────────────
 
 @app.route("/register", methods=["POST"])
-@limiter.limit("5 per hour")   # Max 5 registrations per hour per IP
+@limiter.limit("5 per hour")
 def register():
     db, cursor = get_db()
     if not db:
         return jsonify({"status": "error", "message": "Database unavailable"}), 500
-
     try:
         data     = request.json or {}
         name     = data.get("name", "").strip()
@@ -219,7 +278,6 @@ def register():
         if cursor.fetchone():
             return jsonify({"status": "error", "message": "Email already registered"})
 
-        # Store only bcrypt hash — plain password never saved
         hashed = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
         cursor.execute(
             "INSERT INTO users(name, email, password) VALUES(%s, %s, %s)",
@@ -233,7 +291,6 @@ def register():
         db.commit()
         log.info("New user registered: %s", email)
         return jsonify({"status": "success", "message": "User registered successfully"})
-
     except Exception as e:
         log.error("Register error: %s", e)
         return jsonify({"status": "error", "message": "Registration failed"}), 500
@@ -247,12 +304,11 @@ def register():
 # ─────────────────────────────────────────
 
 @app.route("/login", methods=["POST"])
-@limiter.limit("10 per minute")   # Max 10 login attempts per minute per IP
+@limiter.limit("10 per minute")
 def login():
     db, cursor = get_db()
     if not db:
         return jsonify({"status": "error", "message": "Database unavailable"}), 500
-
     try:
         data     = request.json or {}
         email    = data.get("email", "").strip().lower()
@@ -263,13 +319,12 @@ def login():
 
         cursor.execute("SELECT * FROM users WHERE email=%s", (email,))
         user = cursor.fetchone()
-
-        ip = request.remote_addr or "unknown"
+        ip   = request.remote_addr or "unknown"
 
         if user and user.get("is_active", 1) == 0:
             return jsonify({"status": "error", "message": "Account is disabled. Contact support."})
 
-        # ── Account lockout — check failed attempts in last 15 minutes ──
+        # Account lockout
         if user:
             cursor.execute(
                 """SELECT COUNT(*) as cnt FROM activity_log
@@ -285,19 +340,15 @@ def login():
                 })
 
         if user and bcrypt.checkpw(password.encode("utf-8"), user["password"].encode("utf-8")):
-            cursor.execute("UPDATE users SET last_login=NOW() WHERE id=%s", (user["id"],))
+            # Update last_login if column exists
+            try:
+                cursor.execute("UPDATE users SET last_login=NOW() WHERE id=%s", (user["id"],))
+            except Exception:
+                pass  # Column may not exist — non-fatal
             cursor.execute(
                 "INSERT INTO activity_log(user_id, action, detail, ip_address) VALUES(%s,%s,%s,%s)",
                 (user["id"], "login", email, ip)
             )
-            token      = data.get("token", "")
-            user_agent = request.headers.get("User-Agent", "")[:255]
-            if token:
-                cursor.execute(
-                    """INSERT INTO sessions(user_id, token, ip_address, user_agent, expires_at, is_active)
-                       VALUES(%s,%s,%s,%s,DATE_ADD(NOW(), INTERVAL 8 HOUR),1)""",
-                    (user["id"], token, ip, user_agent)
-                )
             db.commit()
             token = create_token(user["id"], user["email"], user["name"])
             log.info("Login OK: %s from %s", email, ip)
@@ -316,7 +367,6 @@ def login():
             )
             db.commit()
             return jsonify({"status": "error", "message": "Invalid email or password"})
-
     except Exception as e:
         log.error("Login error: %s", e)
         return jsonify({"status": "error", "message": "Login failed"}), 500
@@ -326,42 +376,55 @@ def login():
 
 
 # ─────────────────────────────────────────
-# FORGOT PASSWORD — verify email exists, no password returned
-#
-# Flow:
-#   1. User enters email → POST /forgot-password
-#   2. Backend verifies email exists → returns success
-#   3. Frontend shows "Set New Password" form
-#   4. User sets new password → POST /reset-password-direct
-#   5. Backend stores only bcrypt hash
-#
-# DB stores ONLY bcrypt hash. Plain password is never stored or shown.
+# LOGOUT
+# ─────────────────────────────────────────
+
+@app.route("/logout", methods=["POST"])
+@require_auth
+def logout():
+    user  = get_current_user()
+    email = user["email"] if user else (request.json or {}).get("email", "").strip().lower()
+    if email:
+        db, cursor = get_db()
+        if db:
+            try:
+                cursor.execute("SELECT id FROM users WHERE email=%s", (email,))
+                u = cursor.fetchone()
+                if u:
+                    cursor.execute(
+                        "INSERT INTO activity_log(user_id, action, ip_address) VALUES(%s,%s,%s)",
+                        (u["id"], "logout", request.remote_addr or "unknown")
+                    )
+                    db.commit()
+            except Exception as e:
+                log.warning("Logout log error: %s", e)
+            finally:
+                cursor.close()
+                db.close()
+    return jsonify({"status": "ok"})
+
+
+# ─────────────────────────────────────────
+# FORGOT PASSWORD
 # ─────────────────────────────────────────
 
 @app.route("/forgot-password", methods=["POST"])
-@limiter.limit("5 per hour")   # Prevent email enumeration attacks
+@limiter.limit("5 per hour")
 def forgot_password():
     data  = request.json or {}
     email = data.get("email", "").strip().lower()
-
     if not email or not re.match(r"^[^@]+@[^@]+\.[^@]+$", email):
         return jsonify({"status": "error", "message": "Invalid email address"}), 400
-
     db, cursor = get_db()
     if not db:
         return jsonify({"status": "error", "message": "Database unavailable"}), 500
-
     try:
         cursor.execute("SELECT id, name FROM users WHERE email=%s", (email,))
         user = cursor.fetchone()
-
         if not user:
             return jsonify({"status": "error", "message": "No account found with that email."})
-
-        # Email verified — frontend will show new password form directly
         log.info("Password reset requested for: %s", email)
         return jsonify({"status": "success", "name": user["name"], "email": email})
-
     except Exception as e:
         log.error("Forgot password error: %s", e)
         return jsonify({"status": "error", "message": "Request failed"}), 500
@@ -371,7 +434,7 @@ def forgot_password():
 
 
 # ─────────────────────────────────────────
-# RESET PASSWORD DIRECT — bcrypt only, no plain password stored
+# RESET PASSWORD DIRECT
 # ─────────────────────────────────────────
 
 @app.route("/reset-password-direct", methods=["POST"])
@@ -379,23 +442,18 @@ def reset_password_direct():
     data     = request.json or {}
     email    = data.get("email", "").strip().lower()
     password = data.get("password", "")
-
     if not email or not password:
         return jsonify({"status": "error", "message": "Email and password required"}), 400
     if len(password) < 6:
         return jsonify({"status": "error", "message": "Password must be at least 6 characters"}), 400
-
     db, cursor = get_db()
     if not db:
         return jsonify({"status": "error", "message": "Database unavailable"}), 500
-
     try:
         cursor.execute("SELECT id FROM users WHERE email=%s", (email,))
         user = cursor.fetchone()
         if not user:
             return jsonify({"status": "error", "message": "User not found"}), 404
-
-        # Store only bcrypt hash — plain password never saved
         hashed = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
         cursor.execute("UPDATE users SET password=%s WHERE email=%s", (hashed, email))
         cursor.execute(
@@ -405,7 +463,6 @@ def reset_password_direct():
         db.commit()
         log.info("Password reset (direct) for: %s", email)
         return jsonify({"status": "success", "message": "Password updated successfully"})
-
     except Exception as e:
         log.error("Direct reset error: %s", e)
         return jsonify({"status": "error", "message": "Reset failed"}), 500
@@ -415,38 +472,28 @@ def reset_password_direct():
 
 
 # ─────────────────────────────────────────
-# VERIFY RESET TOKEN
+# RESET PASSWORD (token-based)
 # ─────────────────────────────────────────
 
 @app.route("/verify-reset-token", methods=["POST"])
 def verify_reset_token():
     data  = request.json or {}
     token = data.get("token", "").strip()
-
     if not token:
         return jsonify({"valid": False})
-
     db, cursor = get_db()
     if not db:
         return jsonify({"valid": False})
-
     try:
-        cursor.execute(
-            "SELECT email, expires_at FROM password_resets WHERE token=%s",
-            (token,)
-        )
+        cursor.execute("SELECT email, expires_at FROM password_resets WHERE token=%s", (token,))
         row = cursor.fetchone()
-
         if not row:
             return jsonify({"valid": False})
-
         if datetime.now() > row["expires_at"]:
             cursor.execute("DELETE FROM password_resets WHERE token=%s", (token,))
             db.commit()
             return jsonify({"valid": False, "reason": "expired"})
-
         return jsonify({"valid": True})
-
     except Exception as e:
         log.error("Verify token error: %s", e)
         return jsonify({"valid": False})
@@ -455,46 +502,31 @@ def verify_reset_token():
         db.close()
 
 
-# ─────────────────────────────────────────
-# RESET PASSWORD (token-based, kept for compatibility)
-# ─────────────────────────────────────────
-
 @app.route("/reset-password", methods=["POST"])
 def reset_password():
     data     = request.json or {}
     token    = data.get("token", "").strip()
     password = data.get("password", "")
-
     if not token or not password:
         return jsonify({"status": "error", "message": "Token and password are required"}), 400
     if len(password) < 6:
         return jsonify({"status": "error", "message": "Password must be at least 6 characters"}), 400
-
     db, cursor = get_db()
     if not db:
         return jsonify({"status": "error", "message": "Database unavailable"}), 500
-
     try:
-        cursor.execute(
-            "SELECT email, expires_at FROM password_resets WHERE token=%s",
-            (token,)
-        )
+        cursor.execute("SELECT email, expires_at FROM password_resets WHERE token=%s", (token,))
         row = cursor.fetchone()
-
         if not row:
             return jsonify({"status": "error", "message": "Invalid reset link"})
-
         if datetime.now() > row["expires_at"]:
             cursor.execute("DELETE FROM password_resets WHERE token=%s", (token,))
             db.commit()
             return jsonify({"status": "expired", "message": "Reset link has expired."})
-
         email  = row["email"]
-        # Store only bcrypt hash — plain password never saved
         hashed = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
         cursor.execute("UPDATE users SET password=%s WHERE email=%s", (hashed, email))
         cursor.execute("DELETE FROM password_resets WHERE token=%s", (token,))
-
         cursor.execute("SELECT id FROM users WHERE email=%s", (email,))
         u = cursor.fetchone()
         if u:
@@ -502,11 +534,9 @@ def reset_password():
                 "INSERT INTO activity_log(user_id, action, detail, ip_address) VALUES(%s,%s,%s,%s)",
                 (u["id"], "password_reset", email, request.remote_addr or "unknown")
             )
-
         db.commit()
         log.info("Password reset successful for: %s", email)
         return jsonify({"status": "success", "message": "Password updated successfully"})
-
     except Exception as e:
         log.error("Reset password error: %s", e)
         return jsonify({"status": "error", "message": "Reset failed"}), 500
@@ -516,19 +546,32 @@ def reset_password():
 
 
 # ─────────────────────────────────────────
-# ACCOUNT — GET
+# ACCOUNT — GET  🔒 JWT required
 # ─────────────────────────────────────────
 
 @app.route("/account/<email>")
+@require_auth
 def get_account(email):
+    user = get_current_user()
+    # Users can only access their own account
+    if user["email"] != email:
+        return jsonify({"error": "Forbidden"}), 403
     db, cursor = get_db()
     if not db:
         return jsonify({"error": "Database unavailable"}), 500
     try:
-        cursor.execute("SELECT name, email, created_at, last_login FROM users WHERE email=%s", (email,))
-        user = cursor.fetchone()
-        if user:
-            return jsonify(user)
+        cursor.execute("SELECT name, email FROM users WHERE email=%s", (email,))
+        row = cursor.fetchone()
+        # Fetch optional columns safely
+        try:
+            cursor.execute("SELECT created_at, last_login FROM users WHERE email=%s", (email,))
+            extra = cursor.fetchone()
+            if extra and row:
+                row.update({k: str(v) if v else None for k, v in extra.items()})
+        except Exception:
+            pass  # columns may not exist yet
+        if row:
+            return jsonify(row)
         return jsonify({"error": "User not found"}), 404
     except Exception as e:
         log.error("Account fetch error: %s", e)
@@ -539,11 +582,13 @@ def get_account(email):
 
 
 # ─────────────────────────────────────────
-# ACCOUNT — UPDATE (name / password) — bcrypt only
+# ACCOUNT — UPDATE  🔒 JWT required
 # ─────────────────────────────────────────
 
 @app.route("/account/update", methods=["POST"])
+@require_auth
 def update_account():
+    user = get_current_user()
     db, cursor = get_db()
     if not db:
         return jsonify({"status": "error", "message": "Database unavailable"}), 500
@@ -553,18 +598,17 @@ def update_account():
         new_name = data.get("name", "").strip()
         new_pass = data.get("password", "")
 
-        if not email:
-            return jsonify({"status": "error", "message": "Email required"})
+        # Users can only update their own account
+        if user["email"] != email:
+            return jsonify({"status": "error", "message": "Forbidden"}), 403
 
         if new_name:
             cursor.execute("UPDATE users SET name=%s WHERE email=%s", (new_name, email))
         if new_pass:
             if len(new_pass) < 6:
                 return jsonify({"status": "error", "message": "Password must be at least 6 characters"})
-            # Store only bcrypt hash — plain password never saved
             hashed = bcrypt.hashpw(new_pass.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
             cursor.execute("UPDATE users SET password=%s WHERE email=%s", (hashed, email))
-
         db.commit()
         log.info("Account updated: %s", email)
         return jsonify({"status": "success", "message": "Account updated"})
@@ -577,19 +621,18 @@ def update_account():
 
 
 # ─────────────────────────────────────────
-# DATASET UPLOAD
+# UPLOAD  🔒 JWT required
 # ─────────────────────────────────────────
 
 ALLOWED_EXT = {".csv", ".txt", ".xlsx", ".xls", ".sql", ".json"}
 
 @app.route("/upload", methods=["POST", "OPTIONS"])
+@require_auth
 def upload():
-    if request.method == "OPTIONS":
-        return "", 200
+    user = get_current_user()
 
     if "file" not in request.files:
         return jsonify({"error": "No file uploaded"}), 400
-
     file = request.files["file"]
     if not file.filename:
         return jsonify({"error": "No file selected"}), 400
@@ -605,7 +648,6 @@ def upload():
 
         df = df.dropna(how="all")
         df.columns = [str(c).strip() for c in df.columns]
-
         if df.empty:
             return jsonify({"error": "Dataset is empty after cleaning"}), 400
 
@@ -616,8 +658,7 @@ def upload():
         duplicates    = int(df.duplicated().sum())
         numeric_cols  = list(df.select_dtypes(include="number").columns)
         cat_cols      = list(df.select_dtypes(exclude="number").columns)
-
-        preview = df.head(500).fillna("").values.tolist()
+        preview       = df.head(500).fillna("").values.tolist()
 
         result = {
             "rows":         total_rows,
@@ -634,40 +675,39 @@ def upload():
             "fileName":     file.filename
         }
 
+        # Save metadata to DB using verified JWT user
         try:
             db2, cur2 = get_db()
             if db2:
-                email_hdr = request.headers.get("X-User-Email", "")
-                if email_hdr:
-                    cur2.execute("SELECT id FROM users WHERE email=%s", (email_hdr,))
-                    u = cur2.fetchone()
-                    if u:
-                        try:
-                            file.seek(0, 2); fsize = file.tell(); file.seek(0)
-                        except Exception:
-                            fsize = 0
-                        cur2.execute(
-                            """INSERT INTO datasets
-                               (user_id, file_name, file_size, file_type,
-                                total_rows, total_cols, numeric_cols, cat_cols,
-                                missing_vals, duplicates, headers)
-                               VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
-                            (
-                                u["id"], file.filename, fsize, ext.lstrip("."),
-                                total_rows, total_columns,
-                                len(numeric_cols), len(cat_cols),
-                                missing, duplicates, str(list(df.columns))
-                            )
+                cur2.execute("SELECT id FROM users WHERE email=%s", (user["email"],))
+                u = cur2.fetchone()
+                if u:
+                    try:
+                        file.seek(0, 2); fsize = file.tell(); file.seek(0)
+                    except Exception:
+                        fsize = 0
+                    cur2.execute(
+                        """INSERT INTO datasets
+                           (user_id, file_name, file_size, file_type,
+                            total_rows, total_cols, numeric_cols, cat_cols,
+                            missing_vals, duplicates, headers)
+                           VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
+                        (
+                            u["id"], file.filename, fsize, ext.lstrip("."),
+                            total_rows, total_columns,
+                            len(numeric_cols), len(cat_cols),
+                            missing, duplicates, str(list(df.columns))
                         )
-                        cur2.execute(
-                            "INSERT INTO activity_log(user_id, action, detail, ip_address) VALUES(%s,%s,%s,%s)",
-                            (u["id"], "upload", file.filename, request.remote_addr or "unknown")
-                        )
-                        db2.commit()
+                    )
+                    cur2.execute(
+                        "INSERT INTO activity_log(user_id, action, detail, ip_address) VALUES(%s,%s,%s,%s)",
+                        (u["id"], "upload", file.filename, request.remote_addr or "unknown")
+                    )
+                    db2.commit()
                 cur2.close()
                 db2.close()
         except Exception as db_err:
-            log.warning("Could not save dataset metadata to DB: %s", db_err)
+            log.warning("Could not save dataset metadata: %s", db_err)
 
         log.info("Upload OK: %s | %d rows x %d cols", file.filename, total_rows, total_columns)
         return jsonify(result)
@@ -686,26 +726,20 @@ def _read_file(file, ext):
         except Exception:
             file.seek(0)
             return pd.read_csv(file, sep=None, engine="python", low_memory=False)
-
     elif ext in (".xlsx", ".xls"):
         try:
             return pd.read_excel(file, engine="openpyxl")
         except Exception as e:
             err = str(e).lower()
             if any(k in err for k in ("encrypt", "password", "zip")):
-                raise ValueError(
-                    "This Excel file is password-protected. "
-                    "Remove the password in Excel (File → Info → Protect Workbook) and re-upload."
-                )
+                raise ValueError("This Excel file is password-protected. Remove the password and re-upload.")
             file.seek(0)
             try:
                 return pd.read_excel(file, engine="xlrd")
             except Exception:
                 return None
-
     elif ext == ".json":
         return pd.read_json(file)
-
     elif ext == ".sql":
         text = file.read().decode("utf-8", errors="ignore")
         rows = re.findall(r'\(([^()]+)\)', text)
@@ -716,135 +750,21 @@ def _read_file(file, ext):
         headers  = [f"Column_{i+1}" for i in range(max_cols)]
         padded   = [r + [""] * (max_cols - len(r)) for r in parsed]
         return pd.DataFrame(padded, columns=headers)
-
     return None
 
 
 # ─────────────────────────────────────────
-# LOGOUT
-# ─────────────────────────────────────────
-
-@app.route("/logout", methods=["POST"])
-def logout():
-    data  = request.json or {}
-    email = data.get("email", "").strip().lower()
-    token = data.get("token", "")
-    if email:
-        db, cursor = get_db()
-        if db:
-            try:
-                cursor.execute("SELECT id FROM users WHERE email=%s", (email,))
-                u = cursor.fetchone()
-                if u:
-                    cursor.execute(
-                        "INSERT INTO activity_log(user_id, action, ip_address) VALUES(%s,%s,%s)",
-                        (u["id"], "logout", request.remote_addr or "unknown")
-                    )
-                    if token:
-                        cursor.execute(
-                            "UPDATE sessions SET is_active=0 WHERE token=%s",
-                            (token,)
-                        )
-                    db.commit()
-            except Exception as e:
-                log.warning("Logout log error: %s", e)
-            finally:
-                cursor.close()
-                db.close()
-    return jsonify({"status": "ok"})
-
-
-# ─────────────────────────────────────────
-# ANALYZE
-# ─────────────────────────────────────────
-
-@app.route("/analyze", methods=["POST"])
-def analyze():
-    data    = request.json or {}
-    headers = data.get("headers", [])
-    rows    = data.get("dataset", data.get("preview", []))
-
-    if not headers or not rows:
-        return jsonify({"error": "No dataset provided"}), 400
-
-    try:
-        df = pd.DataFrame(rows, columns=headers)
-        col_stats = {}
-
-        for col in df.columns:
-            series       = df[col]
-            numeric_vals = pd.to_numeric(series, errors="coerce").dropna()
-            is_num       = len(numeric_vals) > len(series) * 0.5
-
-            if is_num:
-                v  = numeric_vals
-                q1 = float(v.quantile(0.25))
-                q3 = float(v.quantile(0.75))
-                iq = q3 - q1
-                col_stats[col] = {
-                    "type":     "numeric",
-                    "count":    int(v.count()),
-                    "missing":  int(series.isnull().sum()),
-                    "min":      _safe_float(v.min()),
-                    "max":      _safe_float(v.max()),
-                    "mean":     _safe_float(v.mean()),
-                    "median":   _safe_float(v.median()),
-                    "std":      _safe_float(v.std()) if len(v) > 1 else 0.0,
-                    "variance": _safe_float(v.var()) if len(v) > 1 else 0.0,
-                    "q1":       round(q1, 4),
-                    "q3":       round(q3, 4),
-                    "iqr":      round(iq, 4),
-                    "outliers": int(((v < q1 - 1.5*iq) | (v > q3 + 1.5*iq)).sum()),
-                    "sum":      _safe_float(v.sum()),
-                    "skew":     round(float(v.skew()), 4) if len(v) > 2 else 0.0,
-                }
-            else:
-                vc = series.dropna().astype(str).value_counts()
-                col_stats[col] = {
-                    "type":      "categorical",
-                    "count":     int(series.count()),
-                    "missing":   int(series.isnull().sum()),
-                    "unique":    int(series.nunique()),
-                    "top_value": str(vc.index[0]) if len(vc) else "",
-                    "top_count": int(vc.iloc[0]) if len(vc) else 0,
-                    "top_10":    {str(k): int(v) for k, v in vc.head(10).items()},
-                }
-
-        summary = {
-            "total_rows":    len(df),
-            "total_cols":    len(df.columns),
-            "total_missing": int(df.isnull().sum().sum()),
-            "total_dupes":   int(df.duplicated().sum()),
-            "numeric_cols":  [c for c in df.columns if col_stats[c]["type"] == "numeric"],
-            "cat_cols":      [c for c in df.columns if col_stats[c]["type"] == "categorical"],
-        }
-
-        return jsonify({"summary": summary, "columns": col_stats})
-
-    except Exception as e:
-        log.error("Analyze error: %s", e)
-        return jsonify({"error": "Analysis failed", "details": str(e)}), 500
-
-
-def _safe_float(val):
-    try:
-        f = float(val)
-        return 0.0 if (math.isnan(f) or math.isinf(f)) else round(f, 4)
-    except Exception:
-        return 0.0
-
-
-# ─────────────────────────────────────────
-# AI CHAT
+# AI CHAT  🔒 JWT required
 # ─────────────────────────────────────────
 
 @app.route("/chat", methods=["POST"])
+@require_auth
 def chat():
+    user         = get_current_user()
     data         = request.json or {}
     user_message = data.get("message", "").strip()
     history      = data.get("history", [])
     dataset_ctx  = data.get("dataset_context", "No dataset uploaded yet.")
-    user_email   = request.headers.get("X-User-Email", "").strip().lower()
     dataset_id   = data.get("dataset_id", None)
 
     if not user_message:
@@ -852,7 +772,6 @@ def chat():
 
     recent = history[-10:]
     ctx    = "\n".join(dataset_ctx.split("\n")[:50])
-
     system_prompt = (
         "You are InsightFlow's expert data analyst AI. "
         "Analyze data clearly and concisely. Use bullet points. Max 200 words. "
@@ -872,62 +791,59 @@ def chat():
         reply = response.choices[0].message.content
         log.info("Chat reply: %d chars", len(reply))
 
-        if user_email:
-            try:
-                db2, cur2 = get_db()
-                if db2:
-                    cur2.execute("SELECT id FROM users WHERE email=%s", (user_email,))
-                    u = cur2.fetchone()
-                    if u:
-                        uid = u["id"]
-                        if not dataset_id:
-                            cur2.execute(
-                                "SELECT id FROM datasets WHERE user_id=%s ORDER BY uploaded_at DESC LIMIT 1",
-                                (uid,)
-                            )
-                            ds = cur2.fetchone()
-                            if ds: dataset_id = ds["id"]
+        # Save to DB using verified JWT user
+        try:
+            db2, cur2 = get_db()
+            if db2:
+                cur2.execute("SELECT id FROM users WHERE email=%s", (user["email"],))
+                u = cur2.fetchone()
+                if u:
+                    uid = u["id"]
+                    if not dataset_id:
                         cur2.execute(
-                            "INSERT INTO chat_history(user_id, dataset_id, role, message) VALUES(%s,%s,%s,%s)",
-                            (uid, dataset_id, "user", user_message)
+                            "SELECT id FROM datasets WHERE user_id=%s ORDER BY uploaded_at DESC LIMIT 1",
+                            (uid,)
                         )
-                        cur2.execute(
-                            "INSERT INTO chat_history(user_id, dataset_id, role, message) VALUES(%s,%s,%s,%s)",
-                            (uid, dataset_id, "assistant", reply)
-                        )
-                        db2.commit()
-                    cur2.close()
-                    db2.close()
-            except Exception as db_err:
-                log.warning("Chat DB save error: %s", db_err)
+                        ds = cur2.fetchone()
+                        if ds: dataset_id = ds["id"]
+                    cur2.execute(
+                        "INSERT INTO chat_history(user_id, dataset_id, role, message) VALUES(%s,%s,%s,%s)",
+                        (uid, dataset_id, "user", user_message)
+                    )
+                    cur2.execute(
+                        "INSERT INTO chat_history(user_id, dataset_id, role, message) VALUES(%s,%s,%s,%s)",
+                        (uid, dataset_id, "assistant", reply)
+                    )
+                    db2.commit()
+                cur2.close()
+                db2.close()
+        except Exception as db_err:
+            log.warning("Chat DB save error: %s", db_err)
 
         return jsonify({"reply": reply})
-
     except Exception as e:
         log.error("Chat error: %s", e)
         return jsonify({"error": str(e)}), 500
 
 
 # ─────────────────────────────────────────
-# AI AUTO-SUMMARY
+# AI SUMMARY  🔒 JWT required
 # ─────────────────────────────────────────
 
 @app.route("/summary", methods=["POST"])
+@require_auth
 def summary():
     data    = request.json or {}
     headers = data.get("headers", [])
     rows    = data.get("dataset", data.get("preview", []))
     fname   = data.get("fileName", "dataset")
-
     if not headers or not rows:
         return jsonify({"error": "No dataset provided"}), 400
-
     try:
         df       = pd.DataFrame(rows[:100], columns=headers)
         preview  = df.head(5).to_string(index=False)
         num_cols = list(df.select_dtypes(include="number").columns)
         cat_cols = list(df.select_dtypes(exclude="number").columns)
-
         prompt = (
             f"Dataset: '{fname}' — {len(rows)} rows × {len(headers)} columns.\n"
             f"Numeric columns: {', '.join(num_cols) or 'None'}.\n"
@@ -936,7 +852,6 @@ def summary():
             "Give a 3-bullet insight summary. Mention key patterns, "
             "potential use cases, and any data quality notes. Max 120 words."
         )
-
         response = groq_client.chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=[
@@ -947,26 +862,24 @@ def summary():
             temperature=0.5
         )
         return jsonify({"summary": response.choices[0].message.content})
-
     except Exception as e:
         log.error("Summary error: %s", e)
         return jsonify({"error": str(e)}), 500
 
 
 # ─────────────────────────────────────────
-# AI COLUMN INSIGHT
+# AI COLUMN INSIGHT  🔒 JWT required
 # ─────────────────────────────────────────
 
 @app.route("/column-insight", methods=["POST"])
+@require_auth
 def column_insight():
     data     = request.json or {}
     col      = data.get("column", "")
     values   = data.get("values", [])
     col_type = data.get("type", "unknown")
-
     if not col or not values:
         return jsonify({"error": "column and values required"}), 400
-
     try:
         prompt = (
             f"Column: '{col}' (type: {col_type})\n"
@@ -984,18 +897,87 @@ def column_insight():
             temperature=0.5
         )
         return jsonify({"insight": response.choices[0].message.content})
-
     except Exception as e:
         log.error("Column insight error: %s", e)
         return jsonify({"error": str(e)}), 500
 
 
 # ─────────────────────────────────────────
-# DATASET HISTORY
+# ANALYZE  🔒 JWT required
+# ─────────────────────────────────────────
+
+@app.route("/analyze", methods=["POST"])
+@require_auth
+def analyze():
+    data    = request.json or {}
+    headers = data.get("headers", [])
+    rows    = data.get("dataset", data.get("preview", []))
+    if not headers or not rows:
+        return jsonify({"error": "No dataset provided"}), 400
+    try:
+        df = pd.DataFrame(rows, columns=headers)
+        col_stats = {}
+        for col in df.columns:
+            series       = df[col]
+            numeric_vals = pd.to_numeric(series, errors="coerce").dropna()
+            is_num       = len(numeric_vals) > len(series) * 0.5
+            if is_num:
+                v  = numeric_vals
+                q1 = float(v.quantile(0.25))
+                q3 = float(v.quantile(0.75))
+                iq = q3 - q1
+                col_stats[col] = {
+                    "type": "numeric", "count": int(v.count()),
+                    "missing": int(series.isnull().sum()),
+                    "min": _safe_float(v.min()), "max": _safe_float(v.max()),
+                    "mean": _safe_float(v.mean()), "median": _safe_float(v.median()),
+                    "std": _safe_float(v.std()) if len(v) > 1 else 0.0,
+                    "variance": _safe_float(v.var()) if len(v) > 1 else 0.0,
+                    "q1": round(q1, 4), "q3": round(q3, 4), "iqr": round(iq, 4),
+                    "outliers": int(((v < q1 - 1.5*iq) | (v > q3 + 1.5*iq)).sum()),
+                    "sum": _safe_float(v.sum()),
+                    "skew": round(float(v.skew()), 4) if len(v) > 2 else 0.0,
+                }
+            else:
+                vc = series.dropna().astype(str).value_counts()
+                col_stats[col] = {
+                    "type": "categorical", "count": int(series.count()),
+                    "missing": int(series.isnull().sum()), "unique": int(series.nunique()),
+                    "top_value": str(vc.index[0]) if len(vc) else "",
+                    "top_count": int(vc.iloc[0]) if len(vc) else 0,
+                    "top_10": {str(k): int(v) for k, v in vc.head(10).items()},
+                }
+        summary = {
+            "total_rows":    len(df), "total_cols": len(df.columns),
+            "total_missing": int(df.isnull().sum().sum()),
+            "total_dupes":   int(df.duplicated().sum()),
+            "numeric_cols":  [c for c in df.columns if col_stats[c]["type"] == "numeric"],
+            "cat_cols":      [c for c in df.columns if col_stats[c]["type"] == "categorical"],
+        }
+        return jsonify({"summary": summary, "columns": col_stats})
+    except Exception as e:
+        log.error("Analyze error: %s", e)
+        return jsonify({"error": "Analysis failed", "details": str(e)}), 500
+
+
+def _safe_float(val):
+    try:
+        f = float(val)
+        return 0.0 if (math.isnan(f) or math.isinf(f)) else round(f, 4)
+    except Exception:
+        return 0.0
+
+
+# ─────────────────────────────────────────
+# DATASET HISTORY  🔒 JWT required
 # ─────────────────────────────────────────
 
 @app.route("/datasets/<email>")
+@require_auth
 def dataset_history(email):
+    user = get_current_user()
+    if user["email"] != email:
+        return jsonify({"error": "Forbidden"}), 403
     db, cursor = get_db()
     if not db:
         return jsonify({"error": "Database unavailable"}), 500
@@ -1025,11 +1007,15 @@ def dataset_history(email):
 
 
 # ─────────────────────────────────────────
-# ACTIVITY LOG
+# ACTIVITY LOG  🔒 JWT required
 # ─────────────────────────────────────────
 
 @app.route("/activity/<email>")
+@require_auth
 def activity(email):
+    user = get_current_user()
+    if user["email"] != email:
+        return jsonify({"error": "Forbidden"}), 403
     db, cursor = get_db()
     if not db:
         return jsonify({"error": "Database unavailable"}), 500
@@ -1058,26 +1044,23 @@ def activity(email):
 
 
 # ─────────────────────────────────────────
-# SAVED CHARTS
+# SAVED CHARTS  🔒 JWT required
 # ─────────────────────────────────────────
 
 @app.route("/charts/save", methods=["POST"])
+@require_auth
 def save_chart():
+    user       = get_current_user()
     data       = request.json or {}
-    user_email = request.headers.get("X-User-Email", "").strip().lower()
-    if not user_email:
-        return jsonify({"error": "Not authenticated"}), 401
-
     chart_name = data.get("chart_name", "Untitled Chart")[:255]
     chart_type = data.get("chart_type", "bar")[:50]
     config     = str(data.get("config", "{}"))
     thumbnail  = data.get("thumbnail", None)
-
     db, cursor = get_db()
     if not db:
         return jsonify({"error": "Database unavailable"}), 500
     try:
-        cursor.execute("SELECT id FROM users WHERE email=%s", (user_email,))
+        cursor.execute("SELECT id FROM users WHERE email=%s", (user["email"],))
         u = cursor.fetchone()
         if not u:
             return jsonify({"error": "User not found"}), 404
@@ -1088,7 +1071,7 @@ def save_chart():
         )
         chart_id = cursor.lastrowid
         db.commit()
-        log.info("Chart saved: %s for %s", chart_name, user_email)
+        log.info("Chart saved: %s for %s", chart_name, user["email"])
         return jsonify({"status": "success", "chart_id": chart_id})
     except Exception as e:
         log.error("Save chart error: %s", e)
@@ -1099,7 +1082,11 @@ def save_chart():
 
 
 @app.route("/charts/<email>")
+@require_auth
 def get_charts(email):
+    user = get_current_user()
+    if user["email"] != email:
+        return jsonify({"error": "Forbidden"}), 403
     db, cursor = get_db()
     if not db:
         return jsonify({"error": "Database unavailable"}), 500
@@ -1128,15 +1115,14 @@ def get_charts(email):
 
 
 @app.route("/charts/delete/<int:chart_id>", methods=["DELETE"])
+@require_auth
 def delete_chart(chart_id):
-    user_email = request.headers.get("X-User-Email", "").strip().lower()
-    if not user_email:
-        return jsonify({"error": "Not authenticated"}), 401
+    user = get_current_user()
     db, cursor = get_db()
     if not db:
         return jsonify({"error": "Database unavailable"}), 500
     try:
-        cursor.execute("SELECT id FROM users WHERE email=%s", (user_email,))
+        cursor.execute("SELECT id FROM users WHERE email=%s", (user["email"],))
         u = cursor.fetchone()
         if not u:
             return jsonify({"error": "User not found"}), 404
@@ -1155,11 +1141,15 @@ def delete_chart(chart_id):
 
 
 # ─────────────────────────────────────────
-# CHAT HISTORY
+# CHAT HISTORY  🔒 JWT required
 # ─────────────────────────────────────────
 
 @app.route("/chat/history/<email>")
+@require_auth
 def chat_history_get(email):
+    user = get_current_user()
+    if user["email"] != email:
+        return jsonify({"error": "Forbidden"}), 403
     db, cursor = get_db()
     if not db:
         return jsonify({"error": "Database unavailable"}), 500
@@ -1187,20 +1177,15 @@ def chat_history_get(email):
         db.close()
 
 
-# ─────────────────────────────────────────
-# CLEAR CHAT HISTORY
-# ─────────────────────────────────────────
-
 @app.route("/chat/history/clear", methods=["DELETE"])
+@require_auth
 def clear_chat_history():
-    user_email = request.headers.get("X-User-Email", "").strip().lower()
-    if not user_email:
-        return jsonify({"error": "Not authenticated"}), 401
+    user = get_current_user()
     db, cursor = get_db()
     if not db:
         return jsonify({"error": "Database unavailable"}), 500
     try:
-        cursor.execute("SELECT id FROM users WHERE email=%s", (user_email,))
+        cursor.execute("SELECT id FROM users WHERE email=%s", (user["email"],))
         u = cursor.fetchone()
         if not u:
             return jsonify({"error": "User not found"}), 404
@@ -1216,19 +1201,18 @@ def clear_chat_history():
 
 
 # ─────────────────────────────────────────
-# CLEAR ACTIVITY LOG
+# CLEAR ACTIVITY LOG  🔒 JWT required
 # ─────────────────────────────────────────
 
 @app.route("/activity/clear", methods=["DELETE"])
+@require_auth
 def clear_activity():
-    user_email = request.headers.get("X-User-Email", "").strip().lower()
-    if not user_email:
-        return jsonify({"error": "Not authenticated"}), 401
+    user = get_current_user()
     db, cursor = get_db()
     if not db:
         return jsonify({"error": "Database unavailable"}), 500
     try:
-        cursor.execute("SELECT id FROM users WHERE email=%s", (user_email,))
+        cursor.execute("SELECT id FROM users WHERE email=%s", (user["email"],))
         u = cursor.fetchone()
         if not u:
             return jsonify({"error": "User not found"}), 404
@@ -1243,18 +1227,56 @@ def clear_activity():
         db.close()
 
 
+
+# ─────────────────────────────────────────
+# ACCOUNT — DELETE  🔒 JWT required
+# ─────────────────────────────────────────
+
+@app.route("/account/delete", methods=["DELETE"])
+@require_auth
+def delete_account():
+    user = get_current_user()
+    data  = request.json or {}
+    email = data.get("email", "").strip().lower()
+
+    # Must match JWT email
+    if user["email"] != email:
+        return jsonify({"status": "error", "message": "Forbidden"}), 403
+
+    db, cursor = get_db()
+    if not db:
+        return jsonify({"status": "error", "message": "Database unavailable"}), 500
+    try:
+        cursor.execute("SELECT id FROM users WHERE email=%s", (email,))
+        u = cursor.fetchone()
+        if not u:
+            return jsonify({"status": "error", "message": "User not found"}), 404
+
+        uid = u["id"]
+        # Delete all user data in order (FK constraints)
+        cursor.execute("DELETE FROM chat_history   WHERE user_id=%s", (uid,))
+        cursor.execute("DELETE FROM activity_log   WHERE user_id=%s", (uid,))
+        cursor.execute("DELETE FROM saved_charts   WHERE user_id=%s", (uid,))
+        cursor.execute("DELETE FROM datasets       WHERE user_id=%s", (uid,))
+        try:
+            cursor.execute("DELETE FROM sessions   WHERE user_id=%s", (uid,))
+        except Exception:
+            pass  # sessions table may not exist
+        cursor.execute("DELETE FROM users          WHERE id=%s",      (uid,))
+        db.commit()
+        log.info("Account deleted: %s", email)
+        return jsonify({"status": "success", "message": "Account deleted"})
+
+    except Exception as e:
+        log.error("Delete account error: %s", e)
+        return jsonify({"status": "error", "message": "Delete failed"}), 500
+    finally:
+        cursor.close()
+        db.close()
+
 # ─────────────────────────────────────────
 # RUN
 # ─────────────────────────────────────────
-
-# ── Rate limit exceeded handler ──
-@app.errorhandler(429)
-def rate_limit_exceeded(e):
-    return jsonify({
-        "status": "error",
-        "message": "Too many requests. Please slow down and try again later."
-    }), 429
-
 
 if __name__ == "__main__":
     log.info("Starting InsightFlow backend on port 5000")
