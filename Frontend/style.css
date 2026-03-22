@@ -1907,11 +1907,7 @@ body:not(.chatbot-body) {
   text-transform: uppercase;
 }
 
-.viz-divider {
-  height: 1px;
-  background: rgba(255,255,255,0.06);
-  margin: 2px 0;
-}
+.viz-divider { height:1px; background:rgba(255,255,255,0.08); margin:10px 0; border:none; flex-shrink:0; }
 
 /* Chart type grid */
 .chart-type-btns {
@@ -2906,9 +2902,7 @@ body:not(.chatbot-body) { overflow-y: auto !important; overflow-x: hidden !impor
   gap: 5px !important;
 }
 
-.viz-divider {
-  margin: 2px 0 !important;
-}
+.viz-divider { height:1px; background:rgba(255,255,255,0.08); margin:10px 0; border:none; flex-shrink:0; }
 
 .ctrl-label {
   font-size: 9px !important;
@@ -2961,12 +2955,7 @@ body:not(.chatbot-body) { overflow-y: auto !important; overflow-x: hidden !impor
 
 
 /* ── Better dividers inside left box ── */
-.viz-divider {
-  height: 1px !important;
-  background: rgba(255,255,255,0.08) !important;
-  margin: 4px 0 !important;
-  border-radius: 1px !important;
-}
+.viz-divider { height:1px; background:rgba(255,255,255,0.08); margin:10px 0; border:none; flex-shrink:0; }
 
 
 
@@ -3025,7 +3014,7 @@ body.light-mode .toggle-label { color: #999 !important; }
 
 body.light-mode 
 
-body.light-mode .viz-divider { background: rgba(0,0,0,0.08) !important; }
+body.light-mode .viz-divider { height:1px; background:rgba(255,255,255,0.08); margin:10px 0; border:none; flex-shrink:0; }
 
 body.light-mode .viz-stats h2 { color: #111 !important; }
 
@@ -3534,9 +3523,8 @@ body { min-height:100vh; }
 .viz-page { width:98%; max-width:1400px; margin:0 auto; padding:90px 10px 60px; box-sizing:border-box; }
 .viz-header { margin-bottom:16px; }
 .chart-builder { display:grid; grid-template-columns:300px 1fr; gap:16px; align-items:start; }
-.viz-controls { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:16px; padding:14px; display:flex; flex-direction:column; gap:8px; box-sizing:border-box; height:560px; overflow-y:auto; }
-.viz-controls::-webkit-scrollbar { width:3px; }
-.viz-controls::-webkit-scrollbar-thumb { background:rgba(255,140,0,0.3); border-radius:4px; }
+.viz-controls { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:16px; padding:14px; display:flex; flex-direction:column; gap:0; box-sizing:border-box; overflow-y:auto; scrollbar-width:none; -ms-overflow-style:none; }
+.viz-controls::-webkit-scrollbar { display:none; }
 .chart-column { display:flex; flex-direction:column; }
 .chart-area { background:#0a0f1a; border:1px solid rgba(255,255,255,0.07); border-radius:16px; padding:16px; box-sizing:border-box; overflow:hidden; height:560px; }
 .chart-placeholder { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; height:100%; }

@@ -9,7 +9,7 @@
  *                → JWT stored in localStorage as 'insightflow_jwt'
  *
  *  Every page  : auth.js decodes JWT payload, checks exp,
- *                redirects to index.html if invalid/expired
+ *                redirects to login.html if invalid/expired
  *
  *  Every API   : use Auth.headers() for fetch() calls
  *                → sends  Authorization: Bearer <token>
@@ -27,7 +27,7 @@
   /* ── Config ── */
   var JWT_KEY    = 'insightflow_jwt'       // localStorage key for JWT
   var LEGACY_KEY = 'userEmail'             // kept for backward compat
-  var LOGIN_PAGE = 'index.html'
+  var LOGIN_PAGE = 'login.html'
   var API_BASE   = 'http://127.0.0.1:5000'
   var WARN_MS    = 15 * 60 * 1000         // warn 15 min before expiry
 
@@ -115,6 +115,8 @@
     },
 
     logout: function () {
+      // Clear redirect so next login always starts from dashboard
+      try { sessionStorage.removeItem('insightflow_redirect') } catch(e) {}
       var email = window.Auth.getEmail()
       if (email) {
         fetch(API_BASE + '/logout', {
@@ -152,7 +154,9 @@
   ══════════════════════════════════════ */
 
   var thisScript   = document.currentScript
-  var isPublicPage = thisScript && thisScript.hasAttribute('data-public')
+  // isPublicPage ONLY if the script tag has data-public attribute
+  // Do NOT use pathname fallback — it breaks when served from root ('/')
+  var isPublicPage = !!(thisScript && thisScript.hasAttribute('data-public'))
 
   if (!isPublicPage) {
 
@@ -179,7 +183,12 @@
 
   } else {
 
-    if (isValid()) {
+    // Public page: only auto-redirect on login.html, not index.html
+    // index.html is a landing page — always show it regardless of login state
+    var _currentPage = window.location.pathname.split('/').pop() || ''
+    var _isLoginPage = _currentPage === 'login.html'
+
+    if (_isLoginPage && isValid()) {
       var dest = 'dashboard.html'
       try { dest = sessionStorage.getItem('insightflow_redirect') || dest } catch(e) {}
       try { sessionStorage.removeItem('insightflow_redirect') } catch(e) {}

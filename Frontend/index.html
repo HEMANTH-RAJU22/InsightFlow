@@ -1,32 +1,530 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 <script src="auth.js" data-public></script>
 <meta charset="UTF-8">
-<title>InsightFlow</title>
-<link rel="stylesheet" href="style.css">
-</head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InsightFlow — AI Data Analytics</title>
+<style>
+/* ── SYSTEM FONTS only — works fully offline ── */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#02040a;
+  --card:rgba(255,255,255,.035);
+  --border:rgba(255,255,255,.08);
+  --o:#ff8c00;--o2:#ff4400;--gold:#ffcc44;
+  --text:#eef2ff;--muted:rgba(238,242,255,.45);--faint:rgba(238,242,255,.16);
+  --font:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--font);overflow-x:hidden;min-height:100vh}
 
+/* ── CANVAS BG ── */
+#bg{position:fixed;inset:0;z-index:0;pointer-events:none}
+
+/* ── NOISE ── */
+body::before{content:'';position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.18;
+  background:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.06'/%3E%3C/svg%3E")}
+
+/* ════════ NAV ════════ */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 56px;height:70px;
+  background:rgba(2,4,10,.85);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(255,140,0,.08);
+  transition:background .3s;
+}
+nav.solid{background:rgba(2,4,10,.96)}
+.logo{display:flex;align-items:center;gap:11px}
+.logo-box{
+  width:36px;height:36px;border-radius:10px;
+  background:linear-gradient(145deg,#ff8c00,#ff2200);
+  display:grid;place-items:center;
+  box-shadow:0 0 0 1px rgba(255,140,0,.35),0 4px 20px rgba(255,140,0,.4);
+  position:relative;overflow:hidden;flex-shrink:0;
+}
+.logo-box::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.22),transparent 55%)}
+.logo-box svg{width:18px;height:18px;fill:white;position:relative;z-index:1}
+.logo-name{font-size:16px;font-weight:800;letter-spacing:2.5px;color:white}
+.nav-links{display:flex;gap:4px;align-items:center}
+.nlink{font-size:13.5px;font-weight:500;color:var(--muted);padding:8px 15px;border-radius:9px;border:none;background:transparent;cursor:pointer;transition:.2s;font-family:var(--font)}
+.nlink:hover{color:var(--text);background:rgba(255,255,255,.06)}
+.nbtn{
+  margin-left:10px;font-size:13px;font-weight:700;letter-spacing:.5px;
+  padding:10px 26px;border-radius:12px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,#ff8c00,#ff3300);color:white;
+  box-shadow:0 0 0 1px rgba(255,140,0,.3),0 4px 20px rgba(255,140,0,.4);
+  transition:.22s;font-family:var(--font);position:relative;overflow:hidden;
+}
+.nbtn::before{content:'';position:absolute;top:0;left:-80%;width:50%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent);transition:left .5s}
+.nbtn:hover{transform:translateY(-2px);box-shadow:0 0 0 1px rgba(255,140,0,.5),0 8px 30px rgba(255,140,0,.5)}
+.nbtn:hover::before{left:130%}
+
+/* ════════ HERO ════════ */
+.hero{
+  position:relative;z-index:10;min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:130px 32px 90px;text-align:center;overflow:hidden;
+}
+/* aurora blobs */
+.ab{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none;animation:abFloat 14s ease-in-out infinite}
+.ab1{width:700px;height:500px;top:-150px;left:calc(50% - 350px);background:radial-gradient(circle,rgba(255,130,0,.1),transparent 65%);animation-delay:0s}
+.ab2{width:400px;height:400px;top:20%;right:-100px;background:radial-gradient(circle,rgba(255,60,0,.07),transparent 65%);animation-delay:-5s}
+.ab3{width:500px;height:400px;bottom:-100px;left:-80px;background:radial-gradient(circle,rgba(200,80,0,.07),transparent 65%);animation-delay:-9s}
+@keyframes abFloat{0%,100%{transform:translate(0,0)}33%{transform:translate(30px,-25px)}66%{transform:translate(-20px,30px)}}
+
+/* grid lines */
+.hgrid{
+  position:absolute;inset:0;pointer-events:none;
+  background-image:linear-gradient(rgba(255,140,0,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,140,0,.03) 1px,transparent 1px);
+  background-size:64px 64px;
+  -webkit-mask-image:radial-gradient(ellipse 88% 68% at 50% 0%,black,transparent);
+  mask-image:radial-gradient(ellipse 88% 68% at 50% 0%,black,transparent);
+}
+
+/* eyebrow */
+.eyebrow{
+  position:relative;z-index:1;
+  display:inline-flex;align-items:center;gap:10px;
+  font-size:11px;font-weight:700;letter-spacing:2.2px;text-transform:uppercase;
+  color:#ff8c00;padding:7px 8px 7px 18px;border-radius:100px;
+  background:rgba(255,140,0,.07);border:1px solid rgba(255,140,0,.2);
+  margin-bottom:44px;
+  animation:fadeUp .6s .05s ease both;
+}
+.ebadge{background:linear-gradient(135deg,#ff8c00,#ff4400);color:white;font-size:9px;font-weight:800;padding:4px 11px;border-radius:100px;letter-spacing:1px}
+.edot{width:6px;height:6px;border-radius:50%;background:#ff8c00;animation:pulse 1.8s infinite;box-shadow:0 0 0 0 rgba(255,140,0,.5)}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,140,0,.5)}70%{box-shadow:0 0 0 8px rgba(255,140,0,0)}100%{box-shadow:0 0 0 0 rgba(255,140,0,0)}}
+
+/* headline */
+.hero-title{
+  position:relative;z-index:1;
+  font-size:clamp(56px,9vw,110px);font-weight:900;
+  line-height:.88;letter-spacing:-4px;margin-bottom:32px;
+  animation:fadeUp .8s .1s ease both;
+}
+.ht1{display:block;color:white}
+.ht2{
+  display:block;
+  background:linear-gradient(90deg,#ff8c00 0%,#ffdd55 30%,#ff8c00 55%,#ff4400 80%,#ff8c00 100%);
+  background-size:300% auto;
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+  animation:gradShift 5s linear infinite;
+}
+@keyframes gradShift{0%{background-position:0%}100%{background-position:300%}}
+
+/* sub */
+.hero-sub{
+  position:relative;z-index:1;
+  font-size:17px;font-weight:400;color:var(--muted);line-height:1.82;
+  max-width:500px;margin:0 auto 50px;
+  animation:fadeUp .7s .2s ease both;
+}
+.hero-sub b{color:rgba(255,210,80,.8);font-weight:600}
+
+/* buttons */
+.hero-btns{
+  position:relative;z-index:1;display:flex;gap:14px;flex-wrap:wrap;justify-content:center;
+  margin-bottom:72px;animation:fadeUp .7s .3s ease both;
+}
+.btn-go{
+  font-size:15px;font-weight:700;letter-spacing:.3px;
+  padding:17px 50px;border-radius:14px;border:none;cursor:pointer;color:white;
+  background:linear-gradient(135deg,#ff8c00,#ff3300);font-family:var(--font);
+  box-shadow:0 0 0 1px rgba(255,140,0,.4),0 8px 40px rgba(255,100,0,.4),inset 0 1px 0 rgba(255,255,255,.2);
+  transition:.25s;position:relative;overflow:hidden;
+}
+.btn-go::after{content:'';position:absolute;top:0;left:-80%;width:50%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent);transition:left .5s}
+.btn-go:hover{transform:translateY(-3px) scale(1.02);box-shadow:0 0 0 1px rgba(255,140,0,.6),0 14px 50px rgba(255,100,0,.55),inset 0 1px 0 rgba(255,255,255,.25)}
+.btn-go:hover::after{left:130%}
+.btn-more{
+  font-size:15px;font-weight:600;letter-spacing:.2px;
+  padding:17px 38px;border-radius:14px;border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.05);color:rgba(255,255,255,.65);cursor:pointer;
+  backdrop-filter:blur(10px);transition:.22s;font-family:var(--font);
+}
+.btn-more:hover{background:rgba(255,255,255,.09);color:white;border-color:rgba(255,255,255,.22);transform:translateY(-2px)}
+
+/* stat strip */
+.stats-strip{
+  position:relative;z-index:1;display:flex;
+  background:rgba(255,255,255,.025);border:1px solid rgba(255,140,0,.12);
+  border-radius:18px;overflow:hidden;backdrop-filter:blur(16px);
+  animation:fadeUp .7s .4s ease both;
+}
+.stat{padding:22px 42px;display:flex;flex-direction:column;align-items:center;gap:5px;border-right:1px solid rgba(255,140,0,.08);position:relative}
+.stat::before{content:'';position:absolute;top:0;left:25%;right:25%;height:1px;background:linear-gradient(90deg,transparent,rgba(255,140,0,.3),transparent)}
+.stat:last-child{border-right:none}
+.stat-v{font-size:32px;font-weight:900;letter-spacing:-1px;line-height:1;background:linear-gradient(135deg,#ffdd55,#ff8c00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.stat-l{font-size:10px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--faint)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+
+/* ════════ TICKER ════════ */
+.ticker{
+  position:relative;z-index:10;padding:18px 0;overflow:hidden;
+  border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+}
+.ticker::before,.ticker::after{content:'';position:absolute;top:0;bottom:0;width:120px;z-index:2;pointer-events:none}
+.ticker::before{left:0;background:linear-gradient(to right,var(--bg),transparent)}
+.ticker::after{right:0;background:linear-gradient(to left,var(--bg),transparent)}
+.ticker-t{display:flex;animation:tickScroll 28s linear infinite;width:max-content}
+.ti{display:flex;align-items:center;gap:0;white-space:nowrap}
+.titem{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--faint);padding:0 32px;display:flex;align-items:center;gap:10px}
+.titem svg{width:13px;height:13px;fill:rgba(255,140,0,.4);flex-shrink:0}
+.tsep{width:3px;height:3px;border-radius:50%;background:rgba(255,140,0,.3)}
+@keyframes tickScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* ════════ SECTION COMMON ════════ */
+.section{position:relative;z-index:10;padding:120px 56px;max-width:1220px;margin:0 auto}
+.eyebrow-row{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.erow-line{width:36px;height:1px;background:linear-gradient(90deg,#ff8c00,transparent)}
+.erow-txt{font-size:10.5px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:#ff8c00}
+.sec-title{font-size:clamp(34px,4.5vw,56px);font-weight:900;color:white;letter-spacing:-2px;line-height:1.02;max-width:580px;margin-bottom:72px}
+.sec-title em{font-style:normal;background:linear-gradient(90deg,#ff8c00,#ffcc44);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+/* ════════ BENTO GRID ════════ */
+.bento{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
+.card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:22px;padding:34px;display:flex;flex-direction:column;gap:18px;
+  position:relative;overflow:hidden;
+  transition:transform .35s ease,border-color .35s ease;
+}
+.card::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 25% 15%,rgba(255,140,0,.07),transparent 60%);opacity:0;transition:.35s}
+.card::after{content:'';position:absolute;top:0;left:12%;right:12%;height:1px;background:linear-gradient(90deg,transparent,rgba(255,140,0,.45),transparent);opacity:0;transition:.3s}
+.card:hover{transform:translateY(-6px);border-color:rgba(255,140,0,.25)}
+.card:hover::before,.card:hover::after{opacity:1}
+.c1{grid-column:span 7}.c2{grid-column:span 5}
+.c3{grid-column:span 4}.c4{grid-column:span 4}.c5{grid-column:span 4}
+.card-ico{width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,rgba(255,140,0,.18),rgba(255,60,0,.06));border:1px solid rgba(255,140,0,.22);display:grid;place-items:center;font-size:22px;flex-shrink:0}
+.card-h{font-size:19px;font-weight:800;color:white;letter-spacing:-.4px}
+.card-p{font-size:13.5px;color:var(--muted);line-height:1.78}
+.ftags{display:flex;gap:6px;flex-wrap:wrap}
+.ftag{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;padding:3px 10px;border-radius:100px;background:rgba(255,140,0,.07);color:rgba(255,180,60,.8);border:1px solid rgba(255,140,0,.15)}
+
+/* animated mini chart */
+.chart-box{
+  margin-top:auto;padding:16px 18px;border-radius:14px;
+  background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.05);
+  display:flex;flex-direction:column;gap:12px;
+}
+.cb-top{display:flex;justify-content:space-between;align-items:center}
+.cb-lbl{font-size:9.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--faint);font-family:monospace}
+.cb-live{width:6px;height:6px;border-radius:50%;background:#10b981;box-shadow:0 0 7px #10b981;animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.bars-row{display:flex;align-items:flex-end;gap:5px;height:86px}
+.bar{flex:1;border-radius:4px 4px 0 0;position:relative;transform:scaleY(0);transform-origin:bottom;animation:barUp 1s cubic-bezier(.34,1.56,.64,1) both}
+.bar::after{content:'';position:absolute;top:0;inset-inline:0;height:2px;background:rgba(255,255,255,.28);border-radius:2px}
+@keyframes barUp{to{transform:scaleY(1)}}
+
+/* wave box */
+.wave-box{height:62px;border-radius:12px;background:rgba(0,0,0,.3);overflow:hidden;position:relative;margin-top:auto}
+.wave-box svg{position:absolute;inset:0;width:100%;height:100%}
+
+/* ════════ PROCESS ════════ */
+.process{position:relative;z-index:10;padding:120px 56px;background:radial-gradient(ellipse 80% 50% at 50% 100%,rgba(255,100,0,.04),transparent)}
+.process-inner{max-width:1100px;margin:0 auto}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,140,0,.08);border-radius:28px;overflow:hidden;border:1px solid rgba(255,140,0,.1);margin-top:72px}
+.step{background:var(--bg);padding:52px 42px;display:flex;flex-direction:column;gap:20px;position:relative;transition:.3s}
+.step::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,140,0,.04),transparent);opacity:0;transition:.3s}
+.step:hover::before{opacity:1}
+.step-no{font-size:80px;font-weight:900;line-height:1;letter-spacing:-5px;background:linear-gradient(135deg,rgba(255,140,0,.14),rgba(255,140,0,.03));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;position:absolute;top:24px;right:24px}
+.step-em{font-size:30px;position:relative;z-index:1}
+.step-h{font-size:21px;font-weight:800;color:white;letter-spacing:-.4px;position:relative;z-index:1}
+.step-p{font-size:14px;color:var(--muted);line-height:1.75;position:relative;z-index:1}
+.step-badge{align-self:flex-start;position:relative;z-index:1;margin-top:auto;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:5px 14px;border-radius:100px;background:rgba(255,140,0,.1);color:#ff8c00;border:1px solid rgba(255,140,0,.22)}
+
+/* ════════ NUMBERS ════════ */
+.numbers{position:relative;z-index:10;padding:80px 56px;max-width:1220px;margin:0 auto}
+.nums-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(255,140,0,.08);border-radius:26px;overflow:hidden;border:1px solid rgba(255,140,0,.1)}
+.num{background:var(--bg);padding:52px 34px;text-align:center;display:flex;flex-direction:column;gap:8px;align-items:center;position:relative;transition:.3s}
+.num::before{content:'';position:absolute;top:0;left:22%;right:22%;height:1px;background:linear-gradient(90deg,transparent,rgba(255,140,0,.35),transparent)}
+.num:hover{background:rgba(255,140,0,.02)}
+.num-v{font-size:56px;font-weight:900;letter-spacing:-3px;line-height:1;background:linear-gradient(135deg,#ffdd55,#ff8c00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.num-l{font-size:12px;color:var(--muted);font-weight:500}
+
+/* ════════ CTA ════════ */
+.cta-sec{position:relative;z-index:10;padding:80px 56px 130px}
+.cta-box{
+  max-width:960px;margin:0 auto;text-align:center;
+  background:linear-gradient(135deg,rgba(255,255,255,.035),rgba(255,255,255,.01));
+  border:1px solid rgba(255,140,0,.18);border-radius:34px;
+  padding:96px 64px;position:relative;overflow:hidden;
+}
+.cta-box::before{content:'';position:absolute;inset:-1px;border-radius:34px;z-index:-1;background:linear-gradient(135deg,rgba(255,140,0,.35),rgba(255,60,0,.2),rgba(255,200,0,.25),rgba(255,140,0,.35));background-size:300% 300%;animation:borderFlow 4s ease infinite}
+.cta-box::after{content:'';position:absolute;inset:1px;background:var(--bg);border-radius:33px;z-index:-1}
+@keyframes borderFlow{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+.cta-blob1{position:absolute;top:-80px;left:5%;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(255,140,0,.13),transparent 65%);filter:blur(50px);animation:blobA 10s ease-in-out infinite}
+.cta-blob2{position:absolute;bottom:-80px;right:5%;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(255,80,0,.1),transparent 65%);filter:blur(40px);animation:blobA 13s ease-in-out infinite reverse 2s}
+@keyframes blobA{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(18px,-18px) scale(1.08)}}
+.cta-tag{display:flex;align-items:center;justify-content:center;gap:9px;margin-bottom:28px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#ff8c00;position:relative;z-index:1}
+.cta-h{font-size:clamp(34px,5vw,64px);font-weight:900;color:white;letter-spacing:-2.5px;line-height:.95;margin-bottom:20px;position:relative;z-index:1}
+.cta-p{font-size:16px;color:var(--muted);line-height:1.78;max-width:440px;margin:0 auto 50px;position:relative;z-index:1}
+
+/* ════════ FOOTER ════════ */
+footer{position:relative;z-index:10;border-top:1px solid var(--border);padding:26px 56px;display:flex;align-items:center;justify-content:space-between;background:rgba(0,0,0,.45)}
+.flogo{font-size:15px;font-weight:800;letter-spacing:2.5px;background:linear-gradient(90deg,#ff8c00,#ffcc44);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.fcopy{font-size:12px;color:var(--faint)}
+.flinks{display:flex;gap:20px}
+.flink{font-size:12px;color:var(--muted);cursor:pointer;transition:.2s;border:none;background:none;font-family:var(--font)}
+.flink:hover{color:var(--text)}
+
+/* ════════ SCROLL REVEAL ════════ */
+.sr{opacity:0;transform:translateY(32px);transition:opacity .75s ease,transform .75s ease}
+.sr.d1{transition-delay:.07s}.sr.d2{transition-delay:.15s}.sr.d3{transition-delay:.23s}
+.sr.vis{opacity:1;transform:none}
+</style>
+</head>
 <body>
 
-<!-- Background Logo -->
-<div class="home">
+<canvas id="bg"></canvas>
 
-<div class="text-section">
+<!-- NAV -->
+<nav id="nav">
+  <div class="logo">
+    <div class="logo-box">
+      <svg viewBox="0 0 24 24"><rect x="4" y="13" width="3.5" height="7" rx="1"/><rect x="10.3" y="8" width="3.5" height="12" rx="1"/><rect x="16.5" y="4" width="3.5" height="16" rx="1"/></svg>
+    </div>
+    <span class="logo-name">INSIGHTFLOW</span>
+  </div>
+  <div class="nav-links">
+    <button class="nlink" onclick="document.querySelector('.bento').scrollIntoView({behavior:'smooth'})">Features</button>
+    <button class="nlink" onclick="document.querySelector('.process').scrollIntoView({behavior:'smooth'})">Process</button>
+    <button class="nlink" onclick="document.querySelector('.numbers').scrollIntoView({behavior:'smooth'})">Why Us</button>
+    <button class="nbtn" onclick="window.location.href='login.html'">Get Started →</button>
+  </div>
+</nav>
 
-<h1 class="title">INSIGHTFLOW</h1>
+<!-- HERO -->
+<section class="hero">
+  <div class="ab ab1"></div><div class="ab ab2"></div><div class="ab ab3"></div>
+  <div class="hgrid"></div>
 
-<p class="tagline">INSIGHTS FOR DATA</p>
-<button class="start-btn" onclick="goDashboard()">
-Login
-</button>
+  <div class="eyebrow">
+    AI Analytics Platform
+    <div class="ebadge">NEW</div>
+    <span class="edot"></span>
+  </div>
 
+  <h1 class="hero-title">
+    <span class="ht1">Raw Data.</span>
+    <span class="ht2">Real Clarity.</span>
+  </h1>
+
+  <p class="hero-sub">
+    Upload any dataset and unlock <b>AI-generated insights</b>, interactive charts, and full dashboards instantly — no code, no setup.
+  </p>
+
+  <div class="hero-btns">
+    <button class="btn-go" onclick="window.location.href='login.html'">Start Analyzing Free →</button>
+    <button class="btn-more" onclick="document.querySelector('.bento').scrollIntoView({behavior:'smooth'})">Explore Platform</button>
+  </div>
+
+  <div class="stats-strip">
+    <div class="stat"><span class="stat-v">6+</span><span class="stat-l">Formats</span></div>
+    <div class="stat"><span class="stat-v">11</span><span class="stat-l">Chart Types</span></div>
+    <div class="stat"><span class="stat-v">AI</span><span class="stat-l">Analyst</span></div>
+    <div class="stat"><span class="stat-v">0</span><span class="stat-l">Code Needed</span></div>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-t">
+    <div class="ti">
+      <span class="titem"><svg viewBox="0 0 24 24"><path d="M9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>Data Visualization</span><span class="tsep"></span>
+      <span class="titem"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>AI Chat Analysis</span><span class="tsep"></span>
+      <span class="titem"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg>CSV · Excel · JSON · SQL</span><span class="tsep"></span>
+      <span class="titem"><svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5z"/></svg>JWT Secured</span><span class="tsep"></span>
+      <span class="titem"><svg viewBox="0 0 24 24"><path d="M3 3h18v2H3zm0 4h12v2H3zm0 4h18v2H3zm0 4h12v2H3zm0 4h18v2H3z"/></svg>Auto KPI Dashboard</span><span class="tsep"></span>
+      <span class="titem"><svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>Export & Save Charts</span><span class="tsep"></span>
+    </div>
+    <div class="ti">
+      <span class="titem"><svg viewBox="0 0 24 24"><path d="M9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>Data Visualization</span><span class="tsep"></span>
+      <span class="titem"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>AI Chat Analysis</span><span class="tsep"></span>
+      <span class="titem"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg>CSV · Excel · JSON · SQL</span><span class="tsep"></span>
+      <span class="titem"><svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5z"/></svg>JWT Secured</span><span class="tsep"></span>
+      <span class="titem"><svg viewBox="0 0 24 24"><path d="M3 3h18v2H3zm0 4h12v2H3zm0 4h18v2H3zm0 4h12v2H3zm0 4h18v2H3z"/></svg>Auto KPI Dashboard</span><span class="tsep"></span>
+      <span class="titem"><svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>Export & Save Charts</span><span class="tsep"></span>
+    </div>
+  </div>
 </div>
 
+<!-- FEATURES -->
+<div class="section">
+  <div class="eyebrow-row sr"><div class="erow-line"></div><span class="erow-txt">Features</span></div>
+  <div class="sec-title sr d1">The platform that <em>thinks</em> with you</div>
+  <div class="bento">
+    <div class="card c1 sr d1">
+      <div class="card-ico">📊</div>
+      <div class="card-h">Interactive Visualizations</div>
+      <div class="card-p">11 chart types — bar, line, scatter, pie, radar, bubble, doughnut and more. Full color themes, multi-color mode, data range slider, PNG/JPG download, save to account.</div>
+      <div class="ftags"><span class="ftag">11 Charts</span><span class="ftag">Themes</span><span class="ftag">Export</span><span class="ftag">Save</span></div>
+      <div class="chart-box">
+        <div class="cb-top"><span class="cb-lbl">Revenue · 2026</span><span class="cb-live"></span></div>
+        <div class="bars-row" id="chartbars"></div>
+      </div>
+    </div>
+    <div class="card c2 sr d2">
+      <div class="card-ico">🤖</div>
+      <div class="card-h">AI Data Analyst</div>
+      <div class="card-p">Chat with your dataset in plain English. Get anomalies, patterns, ML recommendations and data quality insights — all on demand using LLaMA 70B.</div>
+      <div class="ftags"><span class="ftag">LLaMA 70B</span><span class="ftag">NL Queries</span></div>
+      <div class="wave-box" id="wavebox">
+        <svg id="wsvg" viewBox="0 0 400 62" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%">
+          <defs>
+            <linearGradient id="wg" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" style="stop-color:#ff8c00;stop-opacity:.8"/>
+              <stop offset="100%" style="stop-color:#ffcc44;stop-opacity:.8"/>
+            </linearGradient>
+            <linearGradient id="wf" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" style="stop-color:#ff8c00;stop-opacity:.14"/>
+              <stop offset="100%" style="stop-color:#ff8c00;stop-opacity:0"/>
+            </linearGradient>
+          </defs>
+          <path id="wfill" fill="url(#wf)"/>
+          <path id="wline" fill="none" stroke="url(#wg)" stroke-width="1.5"/>
+        </svg>
+      </div>
+    </div>
+    <div class="card c3 sr d1">
+      <div class="card-ico">⚡</div>
+      <div class="card-h">Instant Upload</div>
+      <div class="card-p">CSV, Excel, JSON, SQL — drop any file up to 15MB. Full statistics appear in seconds.</div>
+      <div class="ftags"><span class="ftag">6 Formats</span><span class="ftag">Auto Parse</span></div>
+    </div>
+    <div class="card c4 sr d2">
+      <div class="card-ico">📋</div>
+      <div class="card-h">Auto Dashboard</div>
+      <div class="card-p">One click generates KPI cards and trend charts perfectly matched to your data type.</div>
+      <div class="ftags"><span class="ftag">Auto KPIs</span><span class="ftag">1-Click</span></div>
+    </div>
+    <div class="card c5 sr d3">
+      <div class="card-ico">🔒</div>
+      <div class="card-h">Secure & Private</div>
+      <div class="card-p">JWT auth with per-account data isolation. Your datasets are never shared.</div>
+      <div class="ftags"><span class="ftag">JWT</span><span class="ftag">Isolated</span></div>
+    </div>
+  </div>
 </div>
 
-<script src="script.js"></script>
+<!-- PROCESS -->
+<section class="process">
+  <div class="process-inner">
+    <div class="eyebrow-row sr"><div class="erow-line"></div><span class="erow-txt">How It Works</span></div>
+    <div class="sec-title sr d1" style="max-width:100%">Three steps to <em>total clarity</em></div>
+    <div class="steps">
+      <div class="step sr d1"><div class="step-no">01</div><div class="step-em">📁</div><div class="step-h">Upload Dataset</div><div class="step-p">Drop any CSV, Excel, JSON or SQL file. We instantly compute rows, columns, missing values and full column statistics.</div><span class="step-badge">Any Format</span></div>
+      <div class="step sr d2"><div class="step-no">02</div><div class="step-em">🔍</div><div class="step-h">Analyze & Visualize</div><div class="step-p">Pick axes, choose from 11 chart types, adjust colors — or let AI auto-generate the best dashboard for your dataset.</div><span class="step-badge">AI-Assisted</span></div>
+      <div class="step sr d3"><div class="step-no">03</div><div class="step-em">💡</div><div class="step-h">Get Deep Insights</div><div class="step-p">Chat with the AI analyst, save charts to your account, export logs as CSV and review your upload history.</div><span class="step-badge">Actionable</span></div>
+    </div>
+  </div>
+</section>
 
+<!-- NUMBERS -->
+<div class="numbers sr">
+  <div class="nums-grid">
+    <div class="num"><div class="num-v" data-n="6">0</div><div class="num-l">File formats supported</div></div>
+    <div class="num"><div class="num-v" data-n="11">0</div><div class="num-l">Interactive chart types</div></div>
+    <div class="num"><div class="num-v">∞</div><div class="num-l">Insights per dataset</div></div>
+    <div class="num"><div class="num-v" data-n="0">0</div><div class="num-l">Lines of code needed</div></div>
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="cta-sec">
+  <div class="cta-box sr">
+    <div class="cta-blob1"></div><div class="cta-blob2"></div>
+    <div class="cta-tag"><span class="edot"></span>Start today — it's free</div>
+    <h2 class="cta-h">Turn your data into<br>your biggest asset</h2>
+    <p class="cta-p">No setup. No credit card. No complexity. Upload your first dataset in seconds.</p>
+    <button class="btn-go" style="font-size:16px;padding:20px 62px" onclick="window.location.href='login.html'">Start Analyzing Free →</button>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <span class="flogo">INSIGHTFLOW</span>
+  <span class="fcopy">© 2026 InsightFlow · AI Data Analytics</span>
+  <div class="flinks">
+    <button class="flink" onclick="window.location.href='login.html'">Login</button>
+    <button class="flink" onclick="document.querySelector('.bento').scrollIntoView({behavior:'smooth'})">Features</button>
+  </div>
+</footer>
+
+<script src="script.js" async></script>
+<script>
+/* ── PARTICLE CANVAS ── */
+(function(){
+  var cv=document.getElementById('bg'),cx=cv.getContext('2d'),W,H,pts=[],mouse={x:600,y:300},f=0
+  function sz(){W=cv.width=window.innerWidth;H=cv.height=window.innerHeight}
+  sz();window.addEventListener('resize',sz)
+  window.addEventListener('mousemove',function(e){mouse.x=e.clientX;mouse.y=e.clientY})
+  for(var i=0;i<70;i++) pts.push({x:Math.random()*1800,y:Math.random()*1200,vx:(Math.random()-.5)*.18,vy:(Math.random()-.5)*.18,r:Math.random()*1.2+.3,p:Math.random()*6.28,ps:.008+Math.random()*.014})
+  function draw(){
+    f++;cx.clearRect(0,0,W,H)
+    cx.fillStyle='#02040a';cx.fillRect(0,0,W,H)
+    var g=cx.createRadialGradient(W/2,-50,0,W/2,-50,Math.min(W*.7,800))
+    g.addColorStop(0,'rgba(255,130,0,.09)');g.addColorStop(.5,'rgba(255,60,0,.025)');g.addColorStop(1,'transparent')
+    cx.fillStyle=g;cx.fillRect(0,0,W,H)
+    var gm=cx.createRadialGradient(mouse.x,mouse.y,0,mouse.x,mouse.y,220)
+    gm.addColorStop(0,'rgba(255,140,0,.05)');gm.addColorStop(1,'transparent')
+    cx.fillStyle=gm;cx.fillRect(0,0,W,H)
+    pts.forEach(function(p){
+      p.x+=p.vx;p.y+=p.vy;p.p+=p.ps
+      if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0
+      var a=(.12+.1*Math.sin(p.p)),r2=p.r*(1+.25*Math.sin(p.p*.7))
+      cx.beginPath();cx.arc(p.x,p.y,r2,0,Math.PI*2)
+      cx.fillStyle='rgba(255,'+(110+70*Math.sin(p.p))+',0,'+a+')';cx.fill()
+    })
+    for(var i=0;i<pts.length;i++) for(var j=i+1;j<pts.length;j++){
+      var dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.sqrt(dx*dx+dy*dy)
+      if(d<120){var a2=.065*(1-d/120)*(.5+.5*Math.sin(f*.018+i*.1));cx.beginPath();cx.moveTo(pts[i].x,pts[i].y);cx.lineTo(pts[j].x,pts[j].y);cx.strokeStyle='rgba(255,140,0,'+a2+')';cx.lineWidth=.6;cx.stroke()}
+    }
+    requestAnimationFrame(draw)
+  }
+  draw()
+})()
+
+/* ── NAV ── */
+window.addEventListener('scroll',function(){document.getElementById('nav').classList.toggle('solid',window.scrollY>30)})
+
+/* ── SCROLL REVEAL ── */
+var sio=new IntersectionObserver(function(e){e.forEach(function(en){if(en.isIntersecting)en.target.classList.add('vis')})},{threshold:.07})
+document.querySelectorAll('.sr').forEach(function(el){sio.observe(el)})
+
+/* ── BAR CHART ── */
+var bh=[38,62,51,85,59,96,44,78,55,88,70,100]
+var bc=document.getElementById('chartbars')
+bh.forEach(function(h,i){
+  var w=document.createElement('div');w.className='bar-w';w.style.cssText='flex:1;height:100%;display:flex;align-items:flex-end'
+  var b=document.createElement('div');b.className='bar'
+  var g='rgba(255,'+(80+i*10)+',0,'+(0.7+i*.02)+')'
+  b.style.cssText='height:'+h+'%;width:100%;background:'+g+';animation-delay:'+(i*.07)+'s;animation-play-state:paused'
+  w.appendChild(b);bc.appendChild(w)
+})
+new IntersectionObserver(function(e){e.forEach(function(en){if(en.isIntersecting)en.target.querySelectorAll('.bar').forEach(function(b){b.style.animationPlayState='running'})})},{threshold:.3}).observe(document.querySelector('.chart-box'))
+
+/* ── WAVE ── */
+var wt=0
+function wave(){
+  wt+=.018
+  var p=[],N=60,W2=400,H2=62
+  for(var i=0;i<=N;i++){var x=i*(W2/N),y=H2/2+Math.sin(i*.22+wt)*13+Math.sin(i*.11-wt*1.3)*7+Math.sin(i*.38+wt*.6)*4;p.push(x+','+y)}
+  var d='M'+p.join(' L')
+  document.getElementById('wline').setAttribute('d',d)
+  document.getElementById('wfill').setAttribute('d',d+' L400,62 L0,62 Z')
+  requestAnimationFrame(wave)
+}
+wave()
+
+/* ── COUNT UP ── */
+var counted=false
+new IntersectionObserver(function(e){e.forEach(function(en){if(en.isIntersecting&&!counted){counted=true;document.querySelectorAll('.num-v[data-n]').forEach(function(el){var end=parseInt(el.getAttribute('data-n')),cur=0,steps=55,inc=end/steps;var t=setInterval(function(){cur=Math.min(cur+inc,end);el.textContent=Math.round(cur);if(cur>=end)clearInterval(t)},1400/steps)})}})},{threshold:.4}).observe(document.querySelector('.nums-grid'))
+</script>
 </body>
 </html>

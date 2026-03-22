@@ -6,6 +6,41 @@
 <title>Visualize - InsightFlow</title>
 <link rel="stylesheet" href="style.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+/* ── Controls panel: hide scrollbar, auto height ── */
+.viz-controls {
+  overflow-y: auto !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+  height: auto !important;
+  max-height: calc(100vh - 80px) !important;
+}
+.viz-controls::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+}
+
+/* ── Divider lines ── */
+.viz-divider {
+  height: 1px !important;
+  background: rgba(255,255,255,0.09) !important;
+  margin: 10px 0 !important;
+  border: none !important;
+  flex-shrink: 0 !important;
+}
+
+/* ── Control group spacing ── */
+.control-group {
+  padding: 2px 0 !important;
+}
+
+/* ── Save chart button hover ── */
+#saveChartBtn:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 24px rgba(255,140,0,0.5) !important;
+  opacity: 0.95;
+}
+</style>
 </head>
 <body>
 
@@ -162,6 +197,17 @@
           <button class="viz-action-btn" onclick="downloadChart('png')">↓ PNG</button>
           <button class="viz-action-btn" onclick="downloadChart('jpg')">↓ JPG</button>
         </div>
+      </div>
+
+      <div class="viz-divider"></div>
+
+      <!-- Save Chart -->
+      <div class="control-group">
+        <label class="ctrl-label">SAVE TO ACCOUNT</label>
+        <button id="saveChartBtn" onclick="saveChart()"
+          style="width:100%;background:linear-gradient(135deg,#ff8c00,#ff5500);color:white;border:none;font-weight:700;letter-spacing:.5px;padding:11px 0;border-radius:10px;cursor:pointer;font-size:13px;transition:all .2s;box-shadow:0 4px 16px rgba(255,140,0,.35)">
+          &#128190; Save Chart
+        </button>
       </div>
 
     </div>

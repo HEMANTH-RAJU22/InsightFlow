@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script src="auth.js" data-public></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>InsightFlow — Login</title>
@@ -468,7 +469,12 @@ function doLogin() {
       } else {
         localStorage.removeItem('insightflow_remember')
       }
-      localStorage.setItem('userEmail', data.email)
+      // Save JWT via Auth module — this is what makes protected pages work
+      if (window.Auth && data.token) {
+        window.Auth.setSession(data.token)
+      } else {
+        localStorage.setItem('userEmail', data.email)
+      }
       showOk('Login successful! Redirecting...')
       var dest = 'dashboard.html'
       try { dest = sessionStorage.getItem('insightflow_redirect') || 'dashboard.html' } catch(e) {}

@@ -611,7 +611,7 @@ window.addEventListener('DOMContentLoaded', function() {
   userEmail = (window.Auth && window.Auth.getEmail())
             ? window.Auth.getEmail()
             : (localStorage.getItem('userEmail') || '')
-  if (!userEmail) { window.location.href = 'index.html'; return }
+  if (!userEmail) { window.location.href = 'login.html'; return }
 
   // Clock
   setInterval(function() {
@@ -651,8 +651,7 @@ window.addEventListener('DOMContentLoaded', function() {
   var overlay = document.getElementById('confirmModal')
   if (overlay) overlay.addEventListener('click', function(e) { if (e.target === this) closeModal() })
 
-  // Reset avatar so no previous account photo bleeds in, then load this account's
-  resetAvatar()
+  // Load saved avatar
   var savedAvatar = localStorage.getItem('insightflow_avatar_' + userEmail)
   if (savedAvatar) applyAvatar(savedAvatar)
 })
@@ -771,9 +770,10 @@ function doLogout() {
   // Notify backend (fire and forget)
   try {
     var email = window.Auth ? window.Auth.getEmail() : localStorage.getItem('userEmail')
+    var token = window.Auth ? window.Auth.getToken() : ''
     if (email) fetch('http://127.0.0.1:5000/logout', {
-      method:'POST', headers: window.Auth.headers(),
-      body: JSON.stringify({email:email})
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({email:email, token:token})
     }).catch(function(){})
   } catch(e){}
   // Wipe all session data
@@ -781,7 +781,7 @@ function doLogout() {
   try { localStorage.removeItem('userEmail') } catch(e){}
   try { localStorage.removeItem('insightflow_dataset') } catch(e){}
   // Redirect to login
-  window.location.replace('index.html')
+  window.location.replace('login.html')
 }
 
 /* ── Avatar upload ── */
@@ -797,15 +797,6 @@ function handleAvatarUpload(input) {
   }
   reader.readAsDataURL(file)
   input.value = ''
-}
-function resetAvatar() {
-  // Clears photo so a fresh account shows its initial letter, not a leftover photo
-  var av  = document.getElementById('acAvatar')
-  var txt = document.getElementById('acAvatarText')
-  var sb  = document.getElementById('sbAvatar')
-  if (av) { var img = av.querySelector('img'); if (img) img.remove() }
-  if (txt) { txt.style.display = ''; txt.textContent = '' }
-  if (sb)  { sb.textContent = ''; sb.style.backgroundImage = ''; sb.style.backgroundSize = ''; sb.style.backgroundPosition = '' }
 }
 function applyAvatar(dataUrl) {
   var av  = document.getElementById('acAvatar')
@@ -852,39 +843,33 @@ function extendSession() {
 
 /* ══ PROFILE ══ */
 function loadProfile() {
-  // Per-account cache key — prevents name from one account showing on another
-  var nameKey = 'insightflow_name_' + userEmail
-
-  // ── Instant render: use per-account cached name, else email prefix ──
+  // ── Instant render — try Auth name, then session JSON, then email prefix ──
   var instant = ''
-  try {
-    var cachedName = localStorage.getItem(nameKey)
-    if (cachedName) instant = cachedName
-  } catch(e) {}
-  if (!instant) instant = userEmail.split('@')[0]
+  if (window.Auth && window.Auth.getName()) {
+    instant = window.Auth.getName()
+  } else {
+    try {
+      var raw = localStorage.getItem('insightflow_session')
+      if (raw) { var parsed = JSON.parse(raw); if (parsed && parsed.name) instant = parsed.name }
+    } catch(e) {}
+  }
+  if (!instant || instant === userEmail) instant = userEmail.split('@')[0]
   setName(instant)
   document.getElementById('acEmail').textContent = userEmail
   document.getElementById('inputName').value     = instant
 
-  // ── Always fetch from DB — DB is the source of truth ──
+  // ── Then update from DB ──
   fetch(API + '/account/' + encodeURIComponent(userEmail))
     .then(function(r){ return r.json() })
     .then(function(d) {
-      var name = (d && d.name) ? d.name : userEmail.split('@')[0]
+      var name = (d && d.name) ? d.name : instant
       setName(name)
-      // Cache under this account's key so next instant render is correct
-      try { localStorage.setItem(nameKey, name) } catch(e) {}
-      // Sync into session too
-      try {
-        var raw2 = localStorage.getItem('insightflow_session')
-        if (raw2) { var s2 = JSON.parse(raw2); s2.name = name; localStorage.setItem('insightflow_session', JSON.stringify(s2)) }
-      } catch(e) {}
       document.getElementById('acEmail').textContent = (d && d.email) ? d.email : userEmail
       document.getElementById('inputName').value     = name
     })
     .catch(function() {})  // keep instant values on network failure
 
-  fetch(API + '/datasets/' + encodeURIComponent(userEmail))
+  fetch(API + '/datasets/' + encodeURIComponent(userEmail), { headers: window.Auth ? window.Auth.headers() : {} })
     .then(function(r){ return r.json() })
     .then(function(d) {
       var ds = d.datasets || []
@@ -916,15 +901,13 @@ function saveName() {
   var name = document.getElementById('inputName').value.trim()
   if (!name || name.length < 2) { toast('Name must be at least 2 characters.', 'err'); return }
   fetch(API + '/account/update', {
-    method:'POST', headers: window.Auth.headers(),
+    method:'POST', headers:{'Content-Type':'application/json'},
     body: JSON.stringify({email:userEmail, name:name})
   })
   .then(function(r){ return r.json() })
   .then(function(d) {
     if (d.status === 'success') {
       setName(name)
-      // Cache under this account's key
-      try { localStorage.setItem('insightflow_name_' + userEmail, name) } catch(e) {}
       if (window.Auth) {
         var s = window.Auth.getSession()
         if (s) { s.name = name; try{ localStorage.setItem('insightflow_session', JSON.stringify(s)) }catch(e){} }
@@ -976,14 +959,14 @@ function changePassword() {
   if (nw !== conf)        { toast('New passwords do not match.', 'err'); return }
 
   fetch(API + '/login', {
-    method:'POST', headers: window.Auth.headers(),
+    method:'POST', headers:{'Content-Type':'application/json'},
     body: JSON.stringify({email:userEmail, password:curr})
   })
   .then(function(r){ return r.json() })
   .then(function(d) {
     if (d.status !== 'success') { toast('Current password is incorrect.', 'err'); return }
     return fetch(API + '/account/update', {
-      method:'POST', headers: window.Auth.headers(),
+      method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({email:userEmail, password:nw})
     })
     .then(function(r){ return r.json() })
@@ -1004,7 +987,7 @@ function changePassword() {
 
 /* ══ UPLOAD HISTORY ══ */
 function loadHistory() {
-  fetch(API + '/datasets/' + encodeURIComponent(userEmail))
+  fetch(API + '/datasets/' + encodeURIComponent(userEmail), { headers: window.Auth ? window.Auth.headers() : {} })
     .then(function(r){ return r.json() })
     .then(function(d) {
       var ds = d.datasets || []
@@ -1050,7 +1033,7 @@ function reloadDataset(idx) {
 
 /* ══ ACTIVITY LOG ══ */
 function loadActivity() {
-  fetch(API + '/activity/' + encodeURIComponent(userEmail))
+  fetch(API + '/activity/' + encodeURIComponent(userEmail), { headers: window.Auth ? window.Auth.headers() : {} })
     .then(function(r){ return r.json() })
     .then(function(d) {
       activityData = d.activity || []
@@ -1167,7 +1150,7 @@ function deleteChartById(id, btn) {
   if (!confirm('Delete this chart?')) return
   fetch('http://127.0.0.1:5000/charts/delete/' + id, {
     method: 'DELETE',
-    headers: window.Auth.headers()
+    headers: window.Auth ? window.Auth.headers() : {'Content-Type':'application/json'}
   })
   .then(function(r){ return r.json() })
   .then(function(d) {
@@ -1185,7 +1168,7 @@ function clearChatHistory() {
   if (!confirm('Clear all chat history? This cannot be undone.')) return
   fetch('http://127.0.0.1:5000/chat/history/clear', {
     method: 'DELETE',
-    headers: window.Auth.headers()
+    headers: window.Auth ? window.Auth.headers() : {'Content-Type':'application/json'}
   })
   .then(function(r){ return r.json() })
   .then(function(d) {
@@ -1202,7 +1185,7 @@ function clearActivityLog() {
   if (!confirm('Clear all activity log? This cannot be undone.')) return
   fetch('http://127.0.0.1:5000/activity/clear', {
     method: 'DELETE',
-    headers: window.Auth.headers()
+    headers: window.Auth ? window.Auth.headers() : {'Content-Type':'application/json'}
   })
   .then(function(r){ return r.json() })
   .then(function(d) {
