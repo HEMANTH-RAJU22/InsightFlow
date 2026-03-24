@@ -348,18 +348,19 @@ function prevPage(){ if(currentPage > 1){ currentPage--; renderTable() } }
 function goDashboard(){ window.location.href = "login.html" }
 function goAccount(){   window.location.href = "account.html" }
 function goToChatbot(){ window.location.href = "chatbot.html" }
-function logout(){
-  try{ sessionStorage.removeItem('insightflow_redirect') }catch(e){}
-  try{
+function logout() {
+  try { sessionStorage.removeItem('insightflow_redirect') } catch(e) {}
+  try {
     var email = getAuthEmail()
-    if(email) fetch("http://127.0.0.1:5000/logout",{
-      method:"POST", headers: authHeaders(),
-      body: JSON.stringify(withToken({email:email}))
-    }).catch(function(){})
-  }catch(e){}
+    if (email) fetch("http://127.0.0.1:5000/logout", {
+      method: "POST", headers: authHeaders(),
+      body: JSON.stringify(withToken({ email: email }))
+    }).catch(function () {})
+  } catch(e) {}
   clearSession()
-  if(window.Auth) window.Auth.logout()
-  else window.location.href = "login.html"
+  // Wipe JWT directly — do NOT call Auth.logout() as it causes double redirect
+  try { localStorage.removeItem('insightflow_jwt') } catch(e) {}
+  window.location.href = "login.html"  // ← always lands on login, then dashboard after login
 }
 
 
@@ -1028,15 +1029,19 @@ window.addEventListener("DOMContentLoaded", () => {
 })
 
 function goAccount(){ window.location.href = "account.html" }
-function logout(){
-  try{ sessionStorage.removeItem('insightflow_redirect') }catch(e){}
-  try{
+function logout() {
+  try { sessionStorage.removeItem('insightflow_redirect') } catch(e) {}
+  try {
     var email = getAuthEmail()
-    if(email) fetch("http://127.0.0.1:5000/logout",{ method:"POST", headers: authHeaders(), body: JSON.stringify(withToken({email:email})) }).catch(function(){})
-  }catch(e){}
+    if (email) fetch("http://127.0.0.1:5000/logout", {
+      method: "POST", headers: authHeaders(),
+      body: JSON.stringify(withToken({ email: email }))
+    }).catch(function () {})
+  } catch(e) {}
   clearSession()
-  if(window.Auth) window.Auth.logout()
-  else window.location.href = "login.html"
+  // Wipe JWT directly — do NOT call Auth.logout() as it causes double redirect
+  try { localStorage.removeItem('insightflow_jwt') } catch(e) {}
+  window.location.href = "login.html"  // ← always lands on login, then dashboard after login
 }
 
 /* ============================================================
@@ -1146,13 +1151,17 @@ function exportDashboard(){
   alert("To export: Right-click the page → Print → Save as PDF\n\nOr use Ctrl+P and select 'Save as PDF'")
 }
 
-function logout(){
-  try{ sessionStorage.removeItem('insightflow_redirect') }catch(e){}
-  try{
+function logout() {
+  try { sessionStorage.removeItem('insightflow_redirect') } catch(e) {}
+  try {
     var email = getAuthEmail()
-    if(email) fetch("http://127.0.0.1:5000/logout",{ method:"POST", headers: authHeaders(), body: JSON.stringify(withToken({email:email})) }).catch(function(){})
-  }catch(e){}
+    if (email) fetch("http://127.0.0.1:5000/logout", {
+      method: "POST", headers: authHeaders(),
+      body: JSON.stringify(withToken({ email: email }))
+    }).catch(function () {})
+  } catch(e) {}
   clearSession()
-  if(window.Auth) window.Auth.logout()
-  else window.location.href = "login.html"
+  // Wipe JWT directly — do NOT call Auth.logout() as it causes double redirect
+  try { localStorage.removeItem('insightflow_jwt') } catch(e) {}
+  window.location.href = "login.html"  // ← always lands on login, then dashboard after login
 }
