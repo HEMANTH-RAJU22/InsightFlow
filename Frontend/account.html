@@ -6,303 +6,360 @@
 <title>Account — InsightFlow</title>
 <script src="auth.js"></script>
 <link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-html{margin:0!important;padding:0!important;height:100%!important;overflow:hidden!important}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
 body.account-body{
-  display:flex!important;flex-direction:column!important;
-  position:fixed!important;top:0!important;left:0!important;right:0!important;bottom:0!important;
-  width:100%!important;height:100%!important;overflow:hidden!important;
-  background:linear-gradient(135deg,#0f172a,#1f2a40,#0f172a)!important;background-size:400% 400%!important;animation:bgMove 12s infinite!important;
-  margin:0!important;padding:0!important;font-family:Arial,Helvetica,sans-serif!important;
+  display:flex;flex-direction:column;
+  width:100%;height:100%;
+  background:#080c14;
+  font-family:'DM Sans',sans-serif;
+  color:#e2e8f0;
 }
-body.account-body::before{display:none!important}body.account-body::after{display:none!important}
-body.account-body .container{display:contents!important}
-body.account-body button{padding:unset!important;border:unset!important;background:unset!important;color:unset!important;border-radius:unset!important;cursor:pointer}
-body.account-body .ac-btn{padding:12px 26px!important;border-radius:11px!important;font-size:13px!important;font-weight:700!important;letter-spacing:.5px!important;cursor:pointer!important;transition:all .22s!important;border:none!important;font-family:Arial,sans-serif!important;width:fit-content!important;display:inline-block!important}
-body.account-body .ac-btn-primary{background:linear-gradient(135deg,#ff8c00,#ff5500)!important;color:white!important;box-shadow:0 4px 18px rgba(255,140,0,.4)!important}
-body.account-body .ac-btn-primary:hover{transform:translateY(-2px)!important;box-shadow:0 8px 26px rgba(255,140,0,.55)!important}
-body.account-body .ac-btn-outline{background:rgba(255,255,255,.05)!important;color:rgba(255,255,255,.6)!important;border:1px solid rgba(255,255,255,.1)!important}
-body.account-body .ac-btn-outline:hover{background:rgba(255,255,255,.09)!important;color:white!important}
-body.account-body .ac-btn-danger{background:rgba(239,68,68,.08)!important;color:#ef4444!important;border:1px solid rgba(239,68,68,.2)!important}
-body.account-body .ac-btn-danger:hover{background:rgba(239,68,68,.16)!important}
-body.account-body .ac-table .load-btn{background:rgba(255,140,0,.1)!important;color:#ff8c00!important;border:1px solid rgba(255,140,0,.25)!important;padding:4px 12px!important;border-radius:20px!important;font-size:11px!important;font-weight:700!important}
-body.account-body .ac-table .load-btn:hover{background:rgba(255,140,0,.2)!important}
 
-/* TOPBAR */
-.r-topbar{height:60px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 50px;background:rgba(31,42,64,.97);border-bottom:1px solid rgba(255,255,255,.07);z-index:100;box-sizing:border-box;width:100%}
-.r-logo{font-size:24px;font-weight:bold;letter-spacing:2px;background:linear-gradient(90deg,#ff8c00,#ffb347,#ff8c00);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:logoGlow 6s linear infinite;cursor:pointer}
-.r-nav{display:flex;gap:25px;align-items:center}
-.r-nav span{font-size:16px;cursor:pointer;letter-spacing:1px;padding:5px 10px;background:linear-gradient(90deg,#ff8c00,#ffb347,#ff8c00);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;transition:.3s;font-family:Arial,Helvetica,sans-serif}
-.r-nav span:hover{animation:logoGlow 4s linear infinite;transform:scale(1.05)}
-@keyframes logoGlow{0%{background-position:0% center}100%{background-position:200% center}}
+/* ── TOPBAR ── */
+.ac-topbar{
+  height:56px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 28px;
+  background:rgba(8,12,20,0.95);
+  border-bottom:1px solid rgba(255,255,255,0.06);
+  backdrop-filter:blur(12px);
+  z-index:100;
+}
+.ac-logo{
+  font-family:'DM Mono',monospace;
+  font-size:15px;font-weight:500;letter-spacing:3px;
+  background:linear-gradient(90deg,#ff8c00,#ffb347);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  cursor:pointer;
+}
+.ac-topnav{display:flex;align-items:center;gap:6px}
+.ac-topnav-btn{
+  font-size:12px;font-weight:500;letter-spacing:0.3px;
+  padding:6px 14px;border-radius:8px;cursor:pointer;
+  color:rgba(255,255,255,0.45);border:1px solid transparent;
+  background:transparent;font-family:'DM Sans',sans-serif;
+  transition:all 0.18s;text-decoration:none;
+  display:inline-flex;align-items:center;gap:6px;
+}
+.ac-topnav-btn:hover{color:rgba(255,255,255,0.8);background:rgba(255,255,255,0.06);border-color:rgba(255,255,255,0.08)}
+.ac-topnav-btn.danger:hover{color:#ff6b6b;background:rgba(255,80,80,0.07)}
 
-/* LAYOUT */
-.r-body{flex:1;display:flex;overflow:hidden;min-height:0;width:100%}
+/* ── LAYOUT ── */
+.ac-layout{display:flex;flex:1;overflow:hidden;min-height:0}
 
-/* SIDEBAR */
-.r-sidebar{width:220px;flex-shrink:0;background:rgba(7,12,23,.85);border-right:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;overflow:hidden;position:relative}
-.r-sidebar::-webkit-scrollbar{display:none}
-.r-sidebar{scrollbar-width:none}
+/* ══ SIDEBAR ══ */
+.ac-sidebar{
+  width:240px;flex-shrink:0;
+  display:flex;flex-direction:column;
+  background:linear-gradient(180deg,#0c1220 0%,#0a0f1a 100%);
+  border-right:1px solid rgba(255,255,255,0.055);
+  position:relative;overflow:hidden;
+}
+.ac-sidebar::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,140,0,0.6),transparent);
+}
+.sb-user{
+  padding:20px 18px 16px;border-bottom:1px solid rgba(255,255,255,0.05);
+  display:flex;align-items:center;gap:13px;
+}
+.sb-avatar{
+  width:40px;height:40px;border-radius:12px;flex-shrink:0;
+  background:linear-gradient(135deg,#ff8c00,#e05500);
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;font-weight:700;color:white;
+  cursor:pointer;overflow:hidden;transition:all 0.2s;
+  box-shadow:0 4px 12px rgba(255,140,0,0.3);
+}
+.sb-avatar:hover{transform:scale(1.05);box-shadow:0 6px 18px rgba(255,140,0,0.45)}
+.sb-avatar img{width:100%;height:100%;object-fit:cover;border-radius:12px}
+.sb-user-info{flex:1;min-width:0}
+.sb-user-name{font-size:13px;font-weight:600;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:0.1px}
+.sb-user-role{font-size:10px;color:rgba(255,255,255,0.28);margin-top:2px;letter-spacing:0.5px}
+.sb-nav{flex:1;padding:12px 10px;display:flex;flex-direction:column;gap:2px;overflow-y:auto;overflow-x:hidden}
+.sb-nav::-webkit-scrollbar{display:none}
+.sb-section-label{
+  font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;
+  color:rgba(255,255,255,0.18);padding:10px 10px 4px;
+  display:flex;align-items:center;gap:8px;
+}
+.sb-section-label::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.05)}
+.sb-item{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 10px;border-radius:10px;
+  font-size:12.5px;font-weight:500;color:rgba(255,255,255,0.35);
+  cursor:pointer;transition:all 0.15s;position:relative;user-select:none;
+}
+.sb-item:hover{background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.72)}
+.sb-item.active{background:rgba(255,140,0,0.1);color:#ffb347}
+.sb-item.active .sb-icon-bg{background:rgba(255,140,0,0.18);border-color:rgba(255,140,0,0.3)}
+.sb-item.active::before{
+  content:'';position:absolute;left:0;top:20%;bottom:20%;
+  width:2px;border-radius:0 2px 2px 0;background:#ff8c00;
+}
+.sb-icon-bg{
+  width:28px;height:28px;border-radius:8px;flex-shrink:0;
+  background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);
+  display:flex;align-items:center;justify-content:center;transition:all 0.15s;
+}
+.sb-item:hover .sb-icon-bg{background:rgba(255,255,255,0.07);border-color:rgba(255,255,255,0.09)}
+.sb-icon{width:13px;height:13px;stroke:currentColor;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-width:2}
+.sb-item.danger{color:rgba(239,68,68,0.5)}
+.sb-item.danger:hover{background:rgba(239,68,68,0.07);color:#f87171}
+.sb-item.danger:hover .sb-icon-bg{background:rgba(239,68,68,0.08);border-color:rgba(239,68,68,0.12)}
+.sb-divider{height:1px;background:rgba(255,255,255,0.05);margin:6px 10px}
+.sb-footer{
+  padding:12px 14px;border-top:1px solid rgba(255,255,255,0.05);
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(16,185,129,0.02);
+}
+.sb-live{display:flex;align-items:center;gap:7px;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#10b981}
+.sb-live-dot{width:6px;height:6px;border-radius:50%;background:#10b981;box-shadow:0 0 8px #10b981;animation:pulse 2s infinite}
+.sb-clock{font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,0.2)}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 8px #10b981}50%{opacity:0.3;box-shadow:none}}
 
-/* top accent bar */
-.r-sidebar::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#ff8c00 0%,#ff5500 60%,transparent 100%);z-index:2}
+/* ══ CANVAS ══ */
+.ac-canvas{
+  flex:1;overflow-y:auto;overflow-x:hidden;
+  padding:28px 36px 40px;
+  display:flex;flex-direction:column;gap:22px;
+  min-width:0;
+}
+.ac-canvas::-webkit-scrollbar{width:3px}
+.ac-canvas::-webkit-scrollbar-thumb{background:rgba(255,140,0,0.25);border-radius:3px}
 
-/* user card */
-.r-sb-brand{padding:22px 16px 18px;display:flex;align-items:center;gap:13px;border-bottom:1px solid rgba(255,255,255,.05)}
-.r-sb-avatar-wrap{position:relative;flex-shrink:0}
-.r-sb-brand-icon{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#ff8c00,#ff5500);display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800;color:white;cursor:pointer;transition:all .2s;box-shadow:0 0 0 2px rgba(255,140,0,.25);overflow:hidden}
-.r-sb-brand-icon:hover{box-shadow:0 0 0 3px rgba(255,140,0,.5);transform:scale(1.05)}
+.pg-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.pg-head-left{display:flex;align-items:center;gap:14px}
+.pg-head-icon{
+  width:44px;height:44px;border-radius:13px;
+  background:linear-gradient(135deg,rgba(255,140,0,0.15),rgba(255,60,0,0.08));
+  border:1px solid rgba(255,140,0,0.2);
+  display:flex;align-items:center;justify-content:center;font-size:18px;
+}
+.pg-head-title{font-size:20px;font-weight:700;color:#f8fafc;letter-spacing:-0.3px}
+.pg-head-sub{font-size:12px;color:rgba(255,255,255,0.3);margin-top:2px}
+.session-pill{
+  font-family:'DM Mono',monospace;font-size:11px;padding:5px 13px;border-radius:20px;
+  background:rgba(16,185,129,0.07);color:#10b981;border:1px solid rgba(16,185,129,0.18);
+}
 
-.r-sb-brand-title{font-size:14px;font-weight:700;color:white;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px}
-.r-sb-brand-role{font-size:10px;color:rgba(255,255,255,.25);margin-top:2px;letter-spacing:.3px}
-.r-sb-div{height:1px;background:rgba(255,255,255,.04);margin:8px 14px}
+.ac-sec{display:none;flex-direction:column;gap:18px}
+.ac-sec.active{display:flex}
 
-/* ── removed old chip classes — replaced by sb-* below ── */
+.ac-card{
+  background:rgba(255,255,255,0.036);border:1px solid rgba(255,255,255,0.075);
+  border-radius:16px;padding:26px 28px;
+  display:flex;flex-direction:column;gap:20px;
+  box-shadow:0 4px 24px rgba(0,0,0,0.25);
+}
+.card-head{display:flex;align-items:center;gap:10px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,0.055)}
+.card-head h2{font-size:14px;font-weight:600;color:#f1f5f9;margin:0}
+.card-ico{
+  width:30px;height:30px;border-radius:9px;
+  background:rgba(255,140,0,0.1);border:1px solid rgba(255,140,0,0.18);
+  display:flex;align-items:center;justify-content:center;font-size:14px;
+}
+.card-head-right{margin-left:auto;display:flex;align-items:center;gap:8px}
 
-/* SIDEBAR NAV */
-.sb-group-label{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.18);padding:14px 14px 5px;display:flex;align-items:center;gap:8px}
-.sb-group-label::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.05)}
-.sb-item{display:flex;align-items:center;gap:11px;padding:10px 14px;border-radius:10px;font-size:12.5px;font-weight:600;color:rgba(255,255,255,.32);cursor:pointer;transition:all .15s;position:relative;user-select:none;margin:0 6px}
-.sb-item:hover{background:rgba(255,255,255,.05);color:rgba(255,255,255,.75)}
-.sb-item.on{background:rgba(255,140,0,.1);color:#ff8c00}
-.sb-item.on .sb-icon-wrap{background:rgba(255,140,0,.18);border-color:rgba(255,140,0,.3)}
-.sb-item.on::after{content:'';position:absolute;left:0;top:25%;bottom:25%;width:2.5px;border-radius:0 2px 2px 0;background:#ff8c00}
-.sb-icon-wrap{width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
-.sb-item:hover .sb-icon-wrap{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.09)}
-.sb-icon{width:14px;height:14px;flex-shrink:0;stroke:currentColor;fill:none}
-.sb-badge{margin-left:auto;width:7px;height:7px;border-radius:50%;background:#10b981;box-shadow:0 0 6px #10b981;animation:rBlink 2s infinite;flex-shrink:0}
-.sb-divider{height:1px;background:rgba(255,255,255,.05);margin:8px 14px}
-.sb-item-danger{color:rgba(239,68,68,.45)!important}
-.sb-item-danger:hover{background:rgba(239,68,68,.08)!important;color:#ef4444!important}
-.sb-item-danger:hover .sb-icon-wrap{background:rgba(239,68,68,.1)!important;border-color:rgba(239,68,68,.15)!important}
-.r-sb-live{margin-top:auto;padding:13px 16px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(255,255,255,.05);background:rgba(16,185,129,.025)}
-.r-sb-live-left{display:flex;align-items:center;gap:8px;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#10b981}
-.r-ldot{width:7px;height:7px;border-radius:50%;background:#10b981;box-shadow:0 0 8px #10b981;animation:rBlink 2s infinite;flex-shrink:0}
-.r-sb-live-time{font-size:10px;color:rgba(255,255,255,.2);font-weight:500}
-@keyframes rBlink{0%,100%{opacity:1;box-shadow:0 0 10px #10b981}50%{opacity:.25;box-shadow:none}}
+.profile-hero{
+  display:flex;align-items:center;gap:20px;padding:18px 22px;border-radius:12px;
+  background:linear-gradient(135deg,rgba(255,140,0,0.06),rgba(255,60,0,0.02));
+  border:1px solid rgba(255,140,0,0.1);
+}
+.profile-avatar{
+  width:68px;height:68px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,#ff8c00,#e05500);
+  display:flex;align-items:center;justify-content:center;
+  font-size:26px;font-weight:700;color:white;
+  box-shadow:0 6px 24px rgba(255,140,0,0.4),0 0 0 3px rgba(255,140,0,0.12);
+  overflow:hidden;position:relative;cursor:pointer;
+}
+.profile-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.avatar-overlay{
+  position:absolute;inset:0;background:rgba(0,0,0,0.55);
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;opacity:0;transition:opacity 0.2s;border-radius:50%;
+}
+.profile-avatar:hover .avatar-overlay{opacity:1}
+.profile-info{flex:1;min-width:0}
+.profile-name{font-size:20px;font-weight:700;color:#f8fafc;letter-spacing:-0.3px}
+.profile-email{font-size:12px;color:rgba(255,255,255,0.35);margin-top:3px}
+.profile-badges{display:flex;gap:7px;margin-top:8px}
+.badge{font-size:9px;font-weight:700;letter-spacing:1px;padding:3px 9px;border-radius:20px;text-transform:uppercase}
+.badge-green{background:rgba(16,185,129,0.1);color:#10b981;border:1px solid rgba(16,185,129,0.22)}
+.badge-orange{background:rgba(255,140,0,0.1);color:#ff8c00;border:1px solid rgba(255,140,0,0.22)}
 
-/* CANVAS */
-.r-canvas{flex:1;overflow-y:auto;overflow-x:hidden;padding:24px 32px 32px;display:flex;flex-direction:column;gap:20px;background:transparent;min-width:0}
-.r-canvas::-webkit-scrollbar{width:4px}
-.r-canvas::-webkit-scrollbar-thumb{background:rgba(255,140,0,.3);border-radius:4px}
+.stats-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.stat-card{
+  background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.065);
+  border-radius:12px;padding:16px;text-align:center;transition:all 0.2s;position:relative;overflow:hidden;
+}
+.stat-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#ff8c00,transparent);opacity:0.3}
+.stat-card:hover{border-color:rgba(255,140,0,0.18);transform:translateY(-2px)}
+.stat-val{font-size:24px;font-weight:700;color:#ff8c00;letter-spacing:-1px;line-height:1;font-family:'DM Mono',monospace}
+.stat-lbl{font-size:9px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,0.22);margin-top:5px}
 
-/* PAGE HEADER */
-.pg-header{display:flex;align-items:center;justify-content:space-between;flex-shrink:0;width:100%}
-.pg-header-left{display:flex;align-items:center;gap:14px}
-.pg-header-icon{width:46px;height:46px;border-radius:13px;background:linear-gradient(135deg,rgba(255,140,0,.2),rgba(255,80,0,.1));border:1px solid rgba(255,140,0,.25);display:flex;align-items:center;justify-content:center;font-size:20px}
-.pg-header-title{font-size:22px;font-weight:700;color:white;letter-spacing:.2px}
-.pg-header-sub{font-size:12px;color:rgba(255,255,255,.3);margin-top:2px}
-.pg-header-right{display:flex;align-items:center;gap:10px}
-.pg-session-badge{font-size:11px;font-weight:600;padding:6px 14px;border-radius:20px;background:rgba(16,185,129,.08);color:#10b981;border:1px solid rgba(16,185,129,.2);letter-spacing:.3px;cursor:default}
+.session-info{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 18px;border-radius:11px;
+  background:rgba(16,185,129,0.05);border:1px solid rgba(16,185,129,0.14);
+}
+.session-left{display:flex;align-items:center;gap:10px}
+.session-dot{width:7px;height:7px;border-radius:50%;background:#10b981;box-shadow:0 0 8px #10b981;animation:pulse 2s infinite;flex-shrink:0}
+.session-label{font-size:13px;color:#10b981;font-weight:600}
+.session-detail{font-size:11px;color:rgba(255,255,255,0.3);margin-top:2px}
+.session-timer{font-family:'DM Mono',monospace;font-size:18px;font-weight:500;color:#10b981}
+.session-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.session-box{background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:13px}
+.session-box-lbl{font-size:9px;color:rgba(255,255,255,0.25);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;font-weight:600}
+.session-box-val{font-size:12px;color:#f1f5f9;font-weight:600}
 
-/* SECTIONS */
-.ac-section{display:none;flex-direction:column;gap:20px;width:100%}
-.ac-section.active{display:flex}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:9px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:rgba(255,255,255,0.28)}
+.field-wrap{position:relative}
+.field input{
+  width:100%;padding:11px 15px;
+  background:rgba(255,255,255,0.055);border:1px solid rgba(255,255,255,0.09);
+  border-radius:10px;color:#f1f5f9;font-size:13px;font-family:'DM Sans',sans-serif;
+  outline:none;transition:all 0.2s;
+}
+.field input:focus{border-color:rgba(255,140,0,0.45);background:rgba(255,140,0,0.04)}
+.field input::placeholder{color:rgba(255,255,255,0.18)}
+.pw-eye{position:absolute;right:13px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:14px;opacity:0.35;transition:opacity 0.2s;user-select:none}
+.pw-eye:hover{opacity:0.75}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 
-/* CARD */
-.ac-card{background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:28px 32px;display:flex;flex-direction:column;gap:22px;box-shadow:0 8px 32px rgba(0,0,0,.3);width:100%;box-sizing:border-box}
-.ac-card-header{display:flex;align-items:center;gap:10px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,.06)}
-.ac-card-header h2{font-size:16px;font-weight:700;color:white;margin:0;letter-spacing:.2px}
-.hico{width:32px;height:32px;border-radius:9px;background:rgba(255,140,0,.12);border:1px solid rgba(255,140,0,.2);display:flex;align-items:center;justify-content:center;font-size:15px}
+.pw-bar-wrap{height:4px;border-radius:4px;background:rgba(255,255,255,0.07);overflow:hidden}
+.pw-bar-fill{height:100%;border-radius:4px;transition:width 0.3s,background 0.3s;width:0}
+.pw-bar-lbl{font-size:11px;color:rgba(255,255,255,0.3);font-weight:500;margin-top:5px}
 
-/* PROFILE HERO */
-.ac-profile-hero{display:flex;align-items:center;gap:22px;padding:20px 24px;border-radius:13px;background:linear-gradient(135deg,rgba(255,140,0,.07),rgba(255,80,0,.03));border:1px solid rgba(255,140,0,.12)}
-.ac-avatar{width:74px;height:74px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,#ff8c00,#ff5500);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:white;box-shadow:0 6px 24px rgba(255,140,0,.45),0 0 0 3px rgba(255,140,0,.15);overflow:hidden;position:relative}
-.ac-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
-.ac-avatar-upload{position:absolute;bottom:0;left:0;right:0;height:34px;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;opacity:0;transition:opacity .2s;border-radius:0 0 50% 50%}
-.ac-avatar:hover .ac-avatar-upload{opacity:1}
-.ac-profile-info{flex:1;display:flex;flex-direction:column;gap:5px}
-.ac-profile-name{font-size:22px;font-weight:700;color:white;letter-spacing:.2px}
-.ac-profile-email{font-size:13px;color:rgba(255,255,255,.4)}
-.ac-profile-badges{display:flex;gap:8px;margin-top:4px;flex-wrap:wrap}
-.ac-badge{font-size:10px;font-weight:700;letter-spacing:.8px;padding:3px 10px;border-radius:20px;text-transform:uppercase}
-.badge-active{background:rgba(16,185,129,.1);color:#10b981;border:1px solid rgba(16,185,129,.25)}
+.btn{
+  padding:10px 22px;border-radius:10px;font-size:12.5px;font-weight:600;letter-spacing:0.4px;
+  cursor:pointer;transition:all 0.2s;border:none;font-family:'DM Sans',sans-serif;
+  width:fit-content;display:inline-flex;align-items:center;gap:7px;
+}
+.btn-primary{background:linear-gradient(135deg,#ff8c00,#e05500);color:white;box-shadow:0 3px 14px rgba(255,140,0,0.35)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 7px 22px rgba(255,140,0,0.5)}
+.btn-primary:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+.btn-ghost{background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.55);border:1px solid rgba(255,255,255,0.09)}
+.btn-ghost:hover{background:rgba(255,255,255,0.09);color:rgba(255,255,255,0.85)}
+.btn-danger{background:rgba(239,68,68,0.08);color:#f87171;border:1px solid rgba(239,68,68,0.2)}
+.btn-danger:hover{background:rgba(239,68,68,0.15);transform:translateY(-1px)}
+.btn-sm{padding:6px 14px;font-size:11.5px;border-radius:8px}
+.btn-row{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
 
-/* DATASET STATS STRIP */
-.ac-stats-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.ac-stat{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:16px;text-align:center;transition:all .2s;position:relative;overflow:hidden}
-.ac-stat::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#ff8c00,transparent);opacity:.35}
-.ac-stat:hover{border-color:rgba(255,140,0,.2);transform:translateY(-2px)}
-.ac-stat-val{font-size:26px;font-weight:800;color:#ff8c00;letter-spacing:-1px;line-height:1}
-.ac-stat-lbl{font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,.22);margin-top:5px}
+.ac-msg{font-size:12.5px;font-weight:600;padding:10px 14px;border-radius:9px;display:none}
+.ac-msg.ok{background:rgba(16,185,129,0.09);color:#10b981;border:1px solid rgba(16,185,129,0.18)}
+.ac-msg.err{background:rgba(239,68,68,0.09);color:#f87171;border:1px solid rgba(239,68,68,0.18)}
 
-/* SESSION INFO */
-.ac-session-info{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-radius:11px;background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.15)}
-.ac-session-left{display:flex;align-items:center;gap:10px}
-.ac-session-dot{width:8px;height:8px;border-radius:50%;background:#10b981;box-shadow:0 0 8px #10b981;animation:rBlink 2s infinite;flex-shrink:0}
-.ac-session-text{font-size:13px;color:#10b981;font-weight:600}
-.ac-session-detail{font-size:11px;color:rgba(255,255,255,.3);margin-top:2px}
-.ac-session-time{font-size:20px;font-weight:800;color:#10b981;letter-spacing:-1px}
-
-/* FORM */
-.ac-field{display:flex;flex-direction:column;gap:7px}
-.ac-field label{font-size:10px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:rgba(255,255,255,.28)}
-.ac-field-wrap{position:relative}
-.ac-field input{width:100%;padding:12px 16px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:11px;color:white;font-size:14px;font-family:Arial,sans-serif;transition:border-color .2s,background .2s;outline:none;box-sizing:border-box}
-.ac-field input:focus{border-color:rgba(255,140,0,.5);background:rgba(255,140,0,.04)}
-.ac-field input::placeholder{color:rgba(255,255,255,.2)}
-.pw-toggle{position:absolute;right:14px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:16px;opacity:.4;transition:opacity .2s;user-select:none}
-.pw-toggle:hover{opacity:.8}
-.ac-field-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-
-/* BUTTONS */
-.ac-btn{padding:12px 26px;border-radius:11px;font-size:13px;font-weight:700;letter-spacing:.5px;cursor:pointer;transition:all .22s;border:none;font-family:Arial,sans-serif;width:fit-content}
-.ac-btn-primary{background:linear-gradient(135deg,#ff8c00,#ff5500);color:white;box-shadow:0 4px 18px rgba(255,140,0,.4)}
-.ac-btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 26px rgba(255,140,0,.55)}
-.ac-btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
-.ac-btn-outline{background:rgba(255,255,255,.05);color:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.1)!important}
-.ac-btn-outline:hover{background:rgba(255,255,255,.09);color:white}
-.ac-btn-danger{background:rgba(239,68,68,.08);color:#ef4444;border:1px solid rgba(239,68,68,.2)!important}
-.ac-btn-danger:hover{background:rgba(239,68,68,.16);transform:translateY(-1px)}
-.ac-btn-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-
-/* FEEDBACK MESSAGES */
-.ac-msg{font-size:13px;font-weight:600;padding:11px 16px;border-radius:9px;display:none}
-.ac-msg.ok{background:rgba(16,185,129,.1);color:#10b981;border:1px solid rgba(16,185,129,.2)}
-.ac-msg.err{background:rgba(239,68,68,.1);color:#ef4444;border:1px solid rgba(239,68,68,.2)}
-
-/* TOAST */
-.ac-toast{
-  position:fixed;bottom:28px;right:28px;z-index:9999;
-  padding:13px 20px;border-radius:12px;font-size:13px;font-weight:600;
-  display:flex;align-items:center;gap:10px;min-width:240px;
-  box-shadow:0 8px 32px rgba(0,0,0,.5);
+.toast{
+  position:fixed;bottom:24px;right:24px;z-index:9999;
+  padding:12px 18px;border-radius:12px;font-size:12.5px;font-weight:600;
+  display:flex;align-items:center;gap:9px;min-width:220px;
+  box-shadow:0 8px 32px rgba(0,0,0,0.5);
   transform:translateY(80px);opacity:0;
-  transition:transform .3s cubic-bezier(.34,1.56,.64,1),opacity .3s;pointer-events:none;
+  transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);pointer-events:none;
 }
-.ac-toast.show{transform:translateY(0);opacity:1}
-.ac-toast.ok{background:#0d1f17;border:1px solid rgba(16,185,129,.3);color:#10b981}
-.ac-toast.err{background:#1f0d0d;border:1px solid rgba(239,68,68,.3);color:#ef4444}
-.ac-toast.info{background:#0d1626;border:1px solid rgba(255,140,0,.3);color:#ff8c00}
-.ac-toast-ico{font-size:16px}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.ok{background:#0d1f17;border:1px solid rgba(16,185,129,0.3);color:#10b981}
+.toast.err{background:#1f0d0d;border:1px solid rgba(239,68,68,0.3);color:#f87171}
+.toast.info{background:#0d1626;border:1px solid rgba(255,140,0,0.3);color:#ffb347}
 
-/* PASSWORD STRENGTH */
-.pw-strength{display:flex;flex-direction:column;gap:6px}
-.pw-strength-bar{height:5px;border-radius:5px;background:rgba(255,255,255,.08);overflow:hidden}
-.pw-strength-fill{height:100%;border-radius:5px;transition:width .3s,background .3s;width:0}
-.pw-strength-lbl{font-size:11px;color:rgba(255,255,255,.3);font-weight:600}
-
-/* TABLE */
-.ac-table-wrap{overflow-x:auto;border-radius:11px;border:1px solid rgba(255,255,255,.07)}
-.ac-table{width:100%;border-collapse:collapse;font-size:13px}
-.ac-table thead tr{background:rgba(255,255,255,.04)}
-.ac-table th{padding:12px 18px;text-align:left;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.25);border-bottom:1px solid rgba(255,255,255,.07);white-space:nowrap}
-.ac-table td{padding:13px 18px;color:rgba(255,255,255,.72);border-bottom:1px solid rgba(255,255,255,.04)}
+.table-wrap{overflow-x:auto;border-radius:11px;border:1px solid rgba(255,255,255,0.07)}
+.ac-table{width:100%;border-collapse:collapse;font-size:12.5px}
+.ac-table thead tr{background:rgba(255,255,255,0.035)}
+.ac-table th{padding:11px 16px;text-align:left;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.25);border-bottom:1px solid rgba(255,255,255,0.07);white-space:nowrap}
+.ac-table td{padding:12px 16px;color:rgba(255,255,255,0.68);border-bottom:1px solid rgba(255,255,255,0.04)}
 .ac-table tbody tr:last-child td{border-bottom:none}
-.ac-table tbody tr:hover{background:rgba(255,255,255,.03)}
-.ac-table td strong{color:white;font-weight:600}
-.ac-table .load-btn{font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;cursor:pointer;background:rgba(255,140,0,.1);color:#ff8c00;border:1px solid rgba(255,140,0,.25);transition:all .2s;font-family:Arial,sans-serif}
-.ac-table .load-btn:hover{background:rgba(255,140,0,.2);transform:translateY(-1px)}
+.ac-table tbody tr:hover{background:rgba(255,255,255,0.025)}
+.ac-table td strong{color:#f1f5f9;font-weight:600}
+.load-btn{font-size:11px;font-weight:700;padding:4px 11px;border-radius:18px;cursor:pointer;background:rgba(255,140,0,0.1);color:#ff8c00;border:1px solid rgba(255,140,0,0.22);transition:all 0.18s;font-family:'DM Sans',sans-serif}
+.load-btn:hover{background:rgba(255,140,0,0.2);transform:translateY(-1px)}
 
-/* FILE TYPE BADGES */
-.ft-badge{font-size:9px;font-weight:700;letter-spacing:.8px;padding:3px 9px;border-radius:20px;text-transform:uppercase;display:inline-block}
-.ft-csv{background:rgba(16,185,129,.12);color:#10b981;border:1px solid rgba(16,185,129,.25)}
-.ft-xlsx,.ft-xls{background:rgba(59,130,246,.12);color:#3b82f6;border:1px solid rgba(59,130,246,.25)}
-.ft-json{background:rgba(245,158,11,.12);color:#f59e0b;border:1px solid rgba(245,158,11,.25)}
-.ft-sql{background:rgba(139,92,246,.12);color:#8b5cf6;border:1px solid rgba(139,92,246,.25)}
-.ft-txt{background:rgba(6,182,212,.12);color:#06b6d4;border:1px solid rgba(6,182,212,.25)}
-.ft-other{background:rgba(255,255,255,.07);color:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.1)}
+.ft{font-size:9px;font-weight:700;letter-spacing:0.8px;padding:3px 8px;border-radius:16px;text-transform:uppercase;display:inline-block}
+.ft-csv{background:rgba(16,185,129,0.1);color:#10b981;border:1px solid rgba(16,185,129,0.22)}
+.ft-xlsx,.ft-xls{background:rgba(59,130,246,0.1);color:#60a5fa;border:1px solid rgba(59,130,246,0.22)}
+.ft-json{background:rgba(245,158,11,0.1);color:#fbbf24;border:1px solid rgba(245,158,11,0.22)}
+.ft-sql{background:rgba(139,92,246,0.1);color:#a78bfa;border:1px solid rgba(139,92,246,0.22)}
+.ft-txt{background:rgba(6,182,212,0.1);color:#22d3ee;border:1px solid rgba(6,182,212,0.22)}
+.ft-other{background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.4);border:1px solid rgba(255,255,255,0.09)}
 
-/* ACTIVITY */
-.ac-activity-list{display:flex;flex-direction:column;gap:8px}
-.ac-act-item{display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);transition:background .15s}
-.ac-act-item:hover{background:rgba(255,255,255,.05)}
-.ac-act-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
-.ac-act-label{font-size:13px;color:white;font-weight:600;flex:1;min-width:0}
-.ac-act-detail{font-size:11px;color:rgba(255,255,255,.3);font-weight:400;margin-left:6px}
-.ac-act-ip{font-size:11px;color:rgba(255,255,255,.2);font-weight:400;margin-left:6px}
-.ac-act-time{font-size:11px;color:rgba(255,255,255,.22);white-space:nowrap;flex-shrink:0}
+.act-list{display:flex;flex-direction:column;gap:7px}
+.act-item{display:flex;align-items:center;gap:13px;padding:11px 14px;border-radius:10px;background:rgba(255,255,255,0.028);border:1px solid rgba(255,255,255,0.05);transition:background 0.15s}
+.act-item:hover{background:rgba(255,255,255,0.048)}
+.act-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.act-label{font-size:12.5px;color:#f1f5f9;font-weight:600;flex:1;min-width:0}
+.act-detail{font-size:11px;color:rgba(255,255,255,0.3);margin-left:5px;font-weight:400}
+.act-ip{font-size:10px;color:rgba(255,255,255,0.18);margin-left:5px}
+.act-time{font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,0.22);white-space:nowrap;flex-shrink:0}
 
-/* DELETE ACCOUNT */
-.ac-danger-zone{padding:20px 24px;border-radius:13px;background:rgba(239,68,68,.04);border:1px solid rgba(239,68,68,.15);display:flex;align-items:center;justify-content:space-between;gap:20px}
-.ac-danger-text h3{font-size:14px;font-weight:700;color:#ef4444;margin:0 0 4px}
-.ac-danger-text p{font-size:12px;color:rgba(255,255,255,.35);margin:0}
+.charts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:13px}
+.chart-card{background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.07);border-radius:12px;overflow:hidden;transition:all 0.2s}
+.chart-card:hover{border-color:rgba(255,140,0,0.22);transform:translateY(-2px)}
+.chart-thumb{height:100px;background:rgba(255,255,255,0.025);display:flex;align-items:center;justify-content:center;border-bottom:1px solid rgba(255,255,255,0.05);overflow:hidden}
+.chart-thumb img{width:100%;height:100%;object-fit:cover}
+.chart-thumb .no-thumb{font-size:28px;opacity:0.25}
+.chart-info{padding:11px 13px}
+.chart-name{font-size:12.5px;font-weight:600;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chart-meta{font-size:10px;color:rgba(255,255,255,0.28);margin-top:3px}
+.chart-btns{display:flex;gap:6px;margin-top:9px}
+.chart-btn{flex:1;padding:5px 0;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:all 0.15s}
+.chart-btn-load{background:rgba(255,140,0,0.1)!important;color:#ff8c00!important;border:1px solid rgba(255,140,0,0.18)!important}
+.chart-btn-load:hover{background:rgba(255,140,0,0.2)!important}
+.chart-btn-del{background:rgba(239,68,68,0.07)!important;color:#f87171!important;border:1px solid rgba(239,68,68,0.14)!important}
+.chart-btn-del:hover{background:rgba(239,68,68,0.16)!important}
 
-/* CONFIRM MODAL */
-.ac-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;display:none;align-items:center;justify-content:center}
-.ac-modal-overlay.open{display:flex}
-.ac-modal{background:#0d1626;border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:32px;max-width:420px;width:90%;display:flex;flex-direction:column;gap:20px;box-shadow:0 24px 64px rgba(0,0,0,.6)}
-.ac-modal h3{font-size:18px;font-weight:700;color:white;margin:0}
-.ac-modal p{font-size:14px;color:rgba(255,255,255,.45);margin:0;line-height:1.6}
-.ac-modal-btns{display:flex;gap:10px;justify-content:flex-end}
+.chat-turn{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.065);border-radius:12px;overflow:hidden;margin-bottom:8px}
+.chat-user-row,.chat-ai-row{display:flex;gap:10px;padding:12px 14px}
+.chat-user-row{border-bottom:1px solid rgba(255,255,255,0.04)}
+.chat-ai-row{background:rgba(255,255,255,0.015)}
+.chat-role-icon{width:26px;height:26px;border-radius:7px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px}
+.role-u{background:rgba(255,140,0,0.13);border:1px solid rgba(255,140,0,0.2)}
+.role-a{background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.18)}
+.chat-msg{flex:1;font-size:12.5px;color:rgba(255,255,255,0.7);line-height:1.55;word-break:break-word}
+.chat-ts{font-family:'DM Mono',monospace;font-size:9.5px;color:rgba(255,255,255,0.2);white-space:nowrap;align-self:flex-start;padding-top:2px}
+.date-divider{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.2);display:flex;align-items:center;gap:10px;padding:10px 0 6px}
+.date-divider::before,.date-divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.05)}
 
-/* EMPTY */
-.ac-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:52px 24px;color:rgba(255,255,255,.22);text-align:center}
-.ac-empty .ico{font-size:44px;opacity:.35;line-height:1}
-.ac-empty p{font-size:13px;line-height:1.7;color:rgba(255,255,255,.28)}
-.ac-empty a{color:#ff8c00;text-decoration:none;font-size:13px;font-weight:600;padding:9px 20px;border-radius:9px;background:rgba(255,140,0,.1);border:1px solid rgba(255,140,0,.25);transition:all .2s}
-.ac-empty a:hover{background:rgba(255,140,0,.2)}
+.danger-zone{padding:18px 22px;border-radius:12px;background:rgba(239,68,68,0.04);border:1px solid rgba(239,68,68,0.13);display:flex;align-items:center;justify-content:space-between;gap:20px}
+.danger-text h3{font-size:13px;font-weight:700;color:#f87171;margin:0 0 4px}
+.danger-text p{font-size:12px;color:rgba(255,255,255,0.32);margin:0}
 
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:13px;padding:52px 24px;color:rgba(255,255,255,0.22);text-align:center}
+.empty-ico{font-size:40px;opacity:0.3;line-height:1}
+.empty p{font-size:12.5px;line-height:1.7;color:rgba(255,255,255,0.28)}
+.empty a{color:#ff8c00;text-decoration:none;font-size:12.5px;font-weight:600;padding:8px 18px;border-radius:9px;background:rgba(255,140,0,0.09);border:1px solid rgba(255,140,0,0.22);transition:all 0.2s}
+.empty a:hover{background:rgba(255,140,0,0.18)}
 
-/* Activity log buttons */
-.ac-log-btn {
-  background: rgba(255,140,0,0.06) !important;
-  color: #ff8c00 !important;
-  border: 1px solid rgba(255,140,0,0.25) !important;
-  padding: 6px 16px !important;
-  border-radius: 9px !important;
-  font-size: 12px !important;
-  font-weight: 700 !important;
-  letter-spacing: 0.3px !important;
-  cursor: pointer !important;
-  font-family: Arial, sans-serif !important;
-  transition: all 0.2s !important;
-}
-.ac-log-btn:hover {
-  background: rgba(255,140,0,0.14) !important;
-  border-color: rgba(255,140,0,0.4) !important;
-  color: white !important;
-  transform: translateY(-1px) !important;
-}
-
-/* danger outline button */
-.ac-btn-danger-outline{background:rgba(239,68,68,.06)!important;color:#ef4444!important;border:1px solid rgba(239,68,68,.25)!important;padding:6px 16px!important;border-radius:9px!important;font-size:12px!important;font-weight:700!important;cursor:pointer!important;font-family:Arial,sans-serif!important;transition:all .2s!important;letter-spacing:.3px!important}
-.ac-btn-danger-outline:hover{background:rgba(239,68,68,.14)!important;border-color:rgba(239,68,68,.4)!important}
-/* SPINNER */
-.ac-spinner{width:32px;height:32px;border-radius:50%;border:3px solid rgba(255,255,255,.07);border-top-color:#ff8c00;animation:spin .7s linear infinite;margin:48px auto}
+.spinner{width:28px;height:28px;border-radius:50%;border:2.5px solid rgba(255,255,255,0.07);border-top-color:#ff8c00;animation:spin 0.7s linear infinite;margin:44px auto}
 @keyframes spin{to{transform:rotate(360deg)}}
-@keyframes bgMove{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
 
-.ac-charts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}
-.ac-chart-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:12px;overflow:hidden;transition:all .2s}
-.ac-chart-card:hover{border-color:rgba(255,140,0,.25);transform:translateY(-2px)}
-.ac-chart-thumb{height:110px;background:rgba(255,255,255,.03);display:flex;align-items:center;justify-content:center;border-bottom:1px solid rgba(255,255,255,.05);overflow:hidden}
-.ac-chart-thumb img{width:100%;height:100%;object-fit:cover}
-.ac-chart-thumb .no-thumb{font-size:32px;opacity:.3}
-.ac-chart-info{padding:12px 14px}
-.ac-chart-name{font-size:13px;font-weight:600;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ac-chart-meta{font-size:11px;color:rgba(255,255,255,.3);margin-top:3px}
-.ac-chart-actions{display:flex;gap:6px;margin-top:10px}
-.ac-chart-btn{flex:1;padding:5px 0;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:none;font-family:Arial,sans-serif;transition:all .15s}
-.ac-chart-btn-load{background:rgba(255,140,0,.12)!important;color:#ff8c00!important;border:1px solid rgba(255,140,0,.2)!important}
-.ac-chart-btn-load:hover{background:rgba(255,140,0,.22)!important}
-.ac-chart-btn-del{background:rgba(239,68,68,.08)!important;color:#ef4444!important;border:1px solid rgba(239,68,68,.15)!important}
-.ac-chart-btn-del:hover{background:rgba(239,68,68,.18)!important}
-.ac-chat-list{display:flex;flex-direction:column;gap:8px}
-.ac-chat-row{display:flex;gap:12px;padding:11px 14px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05)}
-.ac-chat-role{width:28px;height:28px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px}
-.role-user{background:rgba(255,140,0,.15);border:1px solid rgba(255,140,0,.2)}
-.role-assistant{background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.2)}
-.ac-chat-msg{flex:1;font-size:13px;color:rgba(255,255,255,.72);line-height:1.5;word-break:break-word}
-.ac-chat-time{font-size:10px;color:rgba(255,255,255,.2);white-space:nowrap;align-self:flex-start;margin-top:2px}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:1000;display:none;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:#0d1626;border:1px solid rgba(255,255,255,0.1);border-radius:18px;padding:30px;max-width:400px;width:90%;display:flex;flex-direction:column;gap:18px;box-shadow:0 24px 64px rgba(0,0,0,0.6)}
+.modal h3{font-size:17px;font-weight:700;color:#f8fafc}
+.modal p{font-size:13px;color:rgba(255,255,255,0.42);line-height:1.6}
+.modal-btns{display:flex;gap:9px;justify-content:flex-end}
 </style>
 </head>
 <body class="account-body">
 
 <!-- TOAST -->
-<div class="ac-toast" id="acToast">
-  <span class="ac-toast-ico" id="acToastIco">✓</span>
-  <span id="acToastMsg">Done</span>
+<div class="toast" id="acToast">
+  <span id="toastIco">✓</span><span id="toastMsg">Done</span>
 </div>
 
-<!-- CONFIRM MODAL -->
-<div class="ac-modal-overlay" id="confirmModal">
-  <div class="ac-modal">
+<!-- MODAL -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal">
     <h3 id="modalTitle">Are you sure?</h3>
     <p id="modalBody">This action cannot be undone.</p>
-    <div class="ac-modal-btns">
-      <button class="ac-btn ac-btn-outline" onclick="closeModal()">Cancel</button>
-      <button class="ac-btn ac-btn-danger" id="modalConfirmBtn">Confirm</button>
+    <div class="modal-btns">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-danger btn-sm" id="modalConfirmBtn">Confirm</button>
     </div>
   </div>
 </div>
@@ -311,289 +368,251 @@ body.account-body .ac-table .load-btn:hover{background:rgba(255,140,0,.2)!import
 <input type="file" id="avatarFileInput" accept="image/*" style="display:none" onchange="handleAvatarUpload(this)">
 
 <!-- TOPBAR -->
-<div class="r-topbar">
-  <div class="r-logo" onclick="window.location.href='dashboard.html'">INSIGHTFLOW</div>
-  <div class="r-nav">
-    <span onclick="window.location.href='dashboard.html'">← Dashboard</span>
-    <span onclick="confirmLogout()">Logout</span>
+<div class="ac-topbar">
+  <div class="ac-logo" onclick="window.location.href='dashboard.html'">INSIGHTFLOW</div>
+  <div class="ac-topnav">
+    <a class="ac-topnav-btn" href="dashboard.html">← Dashboard</a>
+    <a class="ac-topnav-btn" href="chatbot.html">🤖 AI Analyst</a>
+    <span class="ac-topnav-btn danger" onclick="confirmLogout()">Logout</span>
   </div>
 </div>
 
-<div class="r-body">
+<div class="ac-layout">
 
-  <!-- SIDEBAR -->
-  <div class="r-sidebar">
-
-    <!-- User card -->
-    <div class="r-sb-brand">
-      <div class="r-sb-avatar-wrap">
-        <div class="r-sb-brand-icon" id="sbAvatar" onclick="document.getElementById('avatarFileInput').click()" title="Click to change photo">?</div>
-      </div>
-      <div style="min-width:0;flex:1">
-        <div class="r-sb-brand-title" id="sbName">Loading...</div>
-        <div class="r-sb-brand-role">Account Settings</div>
+  <!-- ═══ SIDEBAR ═══ -->
+  <div class="ac-sidebar">
+    <div class="sb-user">
+      <div class="sb-avatar" id="sbAvatar" onclick="document.getElementById('avatarFileInput').click()" title="Change photo">?</div>
+      <div class="sb-user-info">
+        <div class="sb-user-name" id="sbName">Loading…</div>
+        <div class="sb-user-role">Account Settings</div>
       </div>
     </div>
 
-    <!-- Nav -->
-    <nav style="flex:1;padding:12px 10px;display:flex;flex-direction:column;gap:2px;overflow:hidden">
+    <nav class="sb-nav">
+      <div class="sb-section-label">Settings</div>
 
-      <div class="sb-group-label">Settings</div>
-
-      <div class="sb-item on" onclick="showTab('profile')" id="tab-profile">
-        <div class="sb-icon-wrap"><svg class="sb-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
+      <div class="sb-item active" id="tab-profile" onclick="showTab('profile')">
+        <div class="sb-icon-bg"><svg class="sb-icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
         <span>Profile</span>
       </div>
-
-      <div class="sb-item" onclick="showTab('password')" id="tab-password">
-        <div class="sb-icon-wrap"><svg class="sb-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+      <div class="sb-item" id="tab-password" onclick="showTab('password')">
+        <div class="sb-icon-bg"><svg class="sb-icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
         <span>Password</span>
       </div>
-
-      <div class="sb-item" onclick="showTab('session')" id="tab-session">
-        <div class="sb-icon-wrap"><svg class="sb-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+      <div class="sb-item" id="tab-session" onclick="showTab('session')">
+        <div class="sb-icon-bg"><svg class="sb-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
         <span>Session</span>
-        <span class="sb-badge" id="sbSessionBadge"></span>
       </div>
 
-      <div class="sb-group-label">Data</div>
+      <div class="sb-section-label" style="margin-top:6px">Data</div>
 
-      <div class="sb-item" onclick="showTab('history')" id="tab-history">
-        <div class="sb-icon-wrap"><svg class="sb-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div>
+      <div class="sb-item" id="tab-history" onclick="showTab('history')">
+        <div class="sb-icon-bg"><svg class="sb-icon" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div>
         <span>Upload History</span>
       </div>
-
-      <div class="sb-item" onclick="showTab('charts')" id="tab-charts">
-        <div class="sb-icon-wrap"><svg class="sb-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+      <div class="sb-item" id="tab-charts" onclick="showTab('charts')">
+        <div class="sb-icon-bg"><svg class="sb-icon" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
         <span>Saved Charts</span>
       </div>
-
-      <div class="sb-item" onclick="showTab('chathist')" id="tab-chathist">
-        <div class="sb-icon-wrap"><svg class="sb-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+      <div class="sb-item" id="tab-chathist" onclick="showTab('chathist')">
+        <div class="sb-icon-bg"><svg class="sb-icon" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
         <span>Chat History</span>
       </div>
-
-      <div class="sb-item" onclick="showTab('activity')" id="tab-activity">
-        <div class="sb-icon-wrap"><svg class="sb-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+      <div class="sb-item" id="tab-activity" onclick="showTab('activity')">
+        <div class="sb-icon-bg"><svg class="sb-icon" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
         <span>Activity Log</span>
       </div>
 
       <div class="sb-divider"></div>
 
-        <div class="sb-item sb-item-danger" onclick="confirmLogout()">
-        <div class="sb-icon-wrap"><svg class="sb-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div>
+      <div class="sb-item danger" onclick="confirmLogout()">
+        <div class="sb-icon-bg"><svg class="sb-icon" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div>
         <span>Logout</span>
       </div>
-
     </nav>
 
-    <div class="r-sb-live">
-      <div class="r-sb-live-left"><div class="r-ldot"></div>Live</div>
-      <div class="r-sb-live-time" id="sbTime">—</div>
+    <div class="sb-footer">
+      <div class="sb-live"><div class="sb-live-dot"></div>Live</div>
+      <div class="sb-clock" id="sbClock">—</div>
     </div>
   </div>
 
-  <!-- CANVAS -->
-  <div class="r-canvas">
+  <!-- ═══ CANVAS ═══ -->
+  <div class="ac-canvas">
 
-    <!-- Page Header -->
-    <div class="pg-header">
-      <div class="pg-header-left">
-        <div class="pg-header-icon">⚙️</div>
+    <div class="pg-head">
+      <div class="pg-head-left">
+        <div class="pg-head-icon">⚙️</div>
         <div>
-          <div class="pg-header-title">Account Settings</div>
-          <div class="pg-header-sub">Manage your profile, security and data</div>
+          <div class="pg-head-title">Account Settings</div>
+          <div class="pg-head-sub">Manage your profile, security and data</div>
         </div>
       </div>
-      <div class="pg-header-right">
-        <div class="pg-session-badge" id="sessionBadge" title="Time remaining in session">● Session active</div>
-      </div>
+      <div class="session-pill" id="sessionBadge">● Session active</div>
     </div>
 
-    <!-- ══ PROFILE ══ -->
-    <div class="ac-section active" id="sec-profile">
+    <!-- PROFILE -->
+    <div class="ac-sec active" id="sec-profile">
       <div class="ac-card">
-        <div class="ac-card-header"><div class="hico">👤</div><h2>Profile</h2></div>
-
-        <!-- Avatar + info -->
-        <div class="ac-profile-hero">
-          <div class="ac-avatar" id="acAvatar">
+        <div class="card-head"><div class="card-ico">👤</div><h2>Profile</h2></div>
+        <div class="profile-hero">
+          <div class="profile-avatar" id="acAvatar" onclick="document.getElementById('avatarFileInput').click()">
             <span id="acAvatarText">?</span>
-            <div class="ac-avatar-upload" onclick="document.getElementById('avatarFileInput').click()" title="Upload photo">📷</div>
+            <div class="avatar-overlay">📷</div>
           </div>
-          <div class="ac-profile-info">
-            <div class="ac-profile-name"  id="acName">Loading...</div>
-            <div class="ac-profile-email" id="acEmail">—</div>
-            <div class="ac-profile-badges">
-              <span class="ac-badge badge-active">✓ Active</span>
+          <div class="profile-info">
+            <div class="profile-name" id="acName">Loading…</div>
+            <div class="profile-email" id="acEmail">—</div>
+            <div class="profile-badges">
+              <span class="badge badge-green">✓ Active</span>
+              <span class="badge badge-orange">Pro</span>
             </div>
           </div>
         </div>
-
-        <!-- Dataset stats strip -->
-        <div class="ac-stats-strip">
-          <div class="ac-stat"><div class="ac-stat-val" id="statUploads">—</div><div class="ac-stat-lbl">Uploads</div></div>
-          <div class="ac-stat"><div class="ac-stat-val" id="statRows">—</div><div class="ac-stat-lbl">Total Rows</div></div>
-          <div class="ac-stat"><div class="ac-stat-val" id="statLast">—</div><div class="ac-stat-lbl">Last Upload</div></div>
+        <div class="stats-strip">
+          <div class="stat-card"><div class="stat-val" id="statUploads">—</div><div class="stat-lbl">Uploads</div></div>
+          <div class="stat-card"><div class="stat-val" id="statRows">—</div><div class="stat-lbl">Total Rows</div></div>
+          <div class="stat-card"><div class="stat-val" id="statLast">—</div><div class="stat-lbl">Last Upload</div></div>
         </div>
-
-        <!-- Edit name (hidden by default) -->
-        <div id="editNamePanel" style="display:none;flex-direction:column;gap:16px">
-          <div class="ac-field">
+        <div id="editNamePanel" style="display:none;flex-direction:column;gap:14px">
+          <div class="field">
             <label>Display Name</label>
             <input type="text" id="inputName" placeholder="Your display name">
           </div>
           <div id="msgProfile" class="ac-msg"></div>
-          <div class="ac-btn-row">
-            <button class="ac-btn ac-btn-primary" onclick="saveName()">Save Changes</button>
-            <button class="ac-btn ac-btn-outline" onclick="toggleEditName(false)">Cancel</button>
+          <div class="btn-row">
+            <button class="btn btn-primary btn-sm" onclick="saveName()">Save Changes</button>
+            <button class="btn btn-ghost btn-sm" onclick="toggleEditName(false)">Cancel</button>
           </div>
         </div>
-        <div class="ac-btn-row" id="editNameBtn">
-          <button class="ac-btn ac-btn-outline" onclick="toggleEditName(true)">✏ Edit Display Name</button>
+        <div class="btn-row" id="editNameBtnRow">
+          <button class="btn btn-ghost btn-sm" onclick="toggleEditName(true)">✏ Edit Display Name</button>
         </div>
       </div>
-
-      <!-- Danger zone — collapsed by default -->
-      <div class="ac-card" id="dangerZoneCard" style="border-color:rgba(239,68,68,.1);display:none">
-        <div class="ac-card-header" style="cursor:pointer;user-select:none" onclick="toggleDangerZone()">
-          <div class="hico" style="background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.2)">⚠️</div>
-          <h2 style="color:#ef4444">Danger Zone</h2>
-          <span id="dangerChevron" style="margin-left:auto;color:rgba(239,68,68,.5);font-size:12px;transition:transform .2s">▼</span>
+      <div class="ac-card" id="dangerZoneCard" style="display:none;border-color:rgba(239,68,68,0.12)">
+        <div class="card-head" style="cursor:pointer" onclick="toggleDangerZone()">
+          <div class="card-ico" style="background:rgba(239,68,68,0.1);border-color:rgba(239,68,68,0.2)">⚠️</div>
+          <h2 style="color:#f87171">Danger Zone</h2>
+          <span id="dangerChevron" style="margin-left:auto;color:rgba(239,68,68,0.5);font-size:12px;transition:transform 0.2s">▼</span>
         </div>
-        <div id="dangerZoneContent" style="display:none!important;flex-direction:column;gap:0">
-          <div class="ac-danger-zone">
-            <div class="ac-danger-text">
+        <div id="dangerZoneContent" style="display:none">
+          <div class="danger-zone">
+            <div class="danger-text">
               <h3>Delete Account</h3>
-              <p>Permanently delete your account and all data. This cannot be undone.</p>
+              <p>Permanently delete your account and all data. Cannot be undone.</p>
             </div>
-            <button class="ac-btn ac-btn-danger" onclick="confirmDelete()">Delete Account</button>
+            <button class="btn btn-danger btn-sm" onclick="confirmDelete()">Delete Account</button>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- ══ PASSWORD ══ -->
-    <div class="ac-section" id="sec-password">
+    <!-- PASSWORD -->
+    <div class="ac-sec" id="sec-password">
       <div class="ac-card">
-        <div class="ac-card-header"><div class="hico">🔒</div><h2>Change Password</h2></div>
-
-        <div class="ac-field">
+        <div class="card-head"><div class="card-ico">🔒</div><h2>Change Password</h2></div>
+        <div class="field">
           <label>Current Password</label>
-          <div class="ac-field-wrap">
-            <input type="password" id="inputCurr" placeholder="Enter your current password">
-            <span class="pw-toggle" onclick="togglePw('inputCurr',this)">👁</span>
+          <div class="field-wrap">
+            <input type="password" id="inputCurr" placeholder="Enter current password">
+            <span class="pw-eye" onclick="togglePw('inputCurr',this)">👁</span>
           </div>
         </div>
-
-        <div class="ac-field-row">
-          <div class="ac-field">
+        <div class="field-row">
+          <div class="field">
             <label>New Password</label>
-            <div class="ac-field-wrap">
-              <input type="password" id="inputNew" placeholder="Minimum 6 characters" oninput="checkStrength(this.value)">
-              <span class="pw-toggle" onclick="togglePw('inputNew',this)">👁</span>
+            <div class="field-wrap">
+              <input type="password" id="inputNew" placeholder="Min 6 characters" oninput="checkStrength(this.value)">
+              <span class="pw-eye" onclick="togglePw('inputNew',this)">👁</span>
             </div>
           </div>
-          <div class="ac-field">
-            <label>Confirm New Password</label>
-            <div class="ac-field-wrap">
+          <div class="field">
+            <label>Confirm Password</label>
+            <div class="field-wrap">
               <input type="password" id="inputConf" placeholder="Repeat new password">
-              <span class="pw-toggle" onclick="togglePw('inputConf',this)">👁</span>
+              <span class="pw-eye" onclick="togglePw('inputConf',this)">👁</span>
             </div>
           </div>
         </div>
-
-        <div class="pw-strength">
-          <div class="pw-strength-bar"><div class="pw-strength-fill" id="strFill"></div></div>
-          <div class="pw-strength-lbl" id="strLbl">Enter a new password to check strength</div>
+        <div>
+          <div class="pw-bar-wrap"><div class="pw-bar-fill" id="strFill"></div></div>
+          <div class="pw-bar-lbl" id="strLbl">Enter a new password to check strength</div>
         </div>
-
         <div id="msgPassword" class="ac-msg"></div>
-        <button class="ac-btn ac-btn-primary" onclick="changePassword()">Update Password</button>
+        <button class="btn btn-primary" onclick="changePassword()">Update Password</button>
       </div>
     </div>
 
-    <!-- ══ SESSION ══ -->
-    <div class="ac-section" id="sec-session">
+    <!-- SESSION -->
+    <div class="ac-sec" id="sec-session">
       <div class="ac-card">
-        <div class="ac-card-header"><div class="hico">⏱️</div><h2>Session</h2></div>
-
-        <div class="ac-session-info">
-          <div class="ac-session-left">
-            <div class="ac-session-dot"></div>
+        <div class="card-head"><div class="card-ico">⏱️</div><h2>Session</h2></div>
+        <div class="session-info">
+          <div class="session-left">
+            <div class="session-dot"></div>
             <div>
-              <div class="ac-session-text">Session Active</div>
-              <div class="ac-session-detail" id="sessionDetail">Logged in on this device</div>
+              <div class="session-label">Session Active</div>
+              <div class="session-detail" id="sessionDetail">Logged in on this device</div>
             </div>
           </div>
-          <div class="ac-session-time" id="sessionTimeLeft">—</div>
+          <div class="session-timer" id="sessionTimeLeft">—</div>
         </div>
+        <div class="session-grid">
+          <div class="session-box"><div class="session-box-lbl">Login Time</div><div class="session-box-val" id="sessionLoginTime">—</div></div>
+          <div class="session-box"><div class="session-box-lbl">Expires At</div><div class="session-box-val" id="sessionExpiry">—</div></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary btn-sm" onclick="extendSession()">Extend Session +8h</button>
+          <button class="btn btn-danger btn-sm" onclick="doLogout()">End Session</button>
+        </div>
+      </div>
+    </div>
 
-        <div style="display:flex;flex-direction:column;gap:6px">
-          <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.25)">Session Details</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-            <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:14px">
-              <div style="font-size:10px;color:rgba(255,255,255,.25);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px">Login Time</div>
-              <div style="font-size:13px;color:white;font-weight:600" id="sessionLoginTime">—</div>
-            </div>
-            <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:14px">
-              <div style="font-size:10px;color:rgba(255,255,255,.25);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px">Expires At</div>
-              <div style="font-size:13px;color:white;font-weight:600" id="sessionExpiry">—</div>
-            </div>
+    <!-- UPLOAD HISTORY -->
+    <div class="ac-sec" id="sec-history">
+      <div class="ac-card">
+        <div class="card-head"><div class="card-ico">📂</div><h2>Upload History</h2></div>
+        <div id="historyContent"><div class="spinner"></div></div>
+      </div>
+    </div>
+
+    <!-- SAVED CHARTS -->
+    <div class="ac-sec" id="sec-charts">
+      <div class="ac-card">
+        <div class="card-head">
+          <div class="card-ico">📊</div><h2>Saved Charts</h2>
+          <div class="card-head-right"><a href="visualize.html" class="btn btn-ghost btn-sm">+ Build Chart</a></div>
+        </div>
+        <div id="chartsContent"><div class="spinner"></div></div>
+      </div>
+    </div>
+
+    <!-- CHAT HISTORY -->
+    <div class="ac-sec" id="sec-chathist">
+      <div class="ac-card">
+        <div class="card-head">
+          <div class="card-ico">💬</div><h2>Chat History</h2>
+          <div class="card-head-right">
+            <button class="btn btn-danger btn-sm" onclick="clearChatHistory()">🗑 Clear</button>
+            <a href="chatbot.html" class="btn btn-ghost btn-sm">Open Chat</a>
           </div>
         </div>
-
-        <div class="ac-btn-row">
-          <button class="ac-btn ac-btn-primary" onclick="extendSession()">Extend Session +8h</button>
-          <button class="ac-btn ac-btn-danger" onclick="doLogout()">End Session</button>
-        </div>
+        <div id="chatHistContent"><div class="spinner"></div></div>
       </div>
     </div>
 
-    <!-- ══ UPLOAD HISTORY ══ -->
-    <div class="ac-section" id="sec-history">
+    <!-- ACTIVITY LOG -->
+    <div class="ac-sec" id="sec-activity">
       <div class="ac-card">
-        <div class="ac-card-header"><div class="hico">📂</div><h2>Upload History</h2></div>
-        <div id="historyContent"><div class="ac-spinner"></div></div>
-      </div>
-    </div>
-
-    <!-- == SAVED CHARTS == -->
-    <div class="ac-section" id="sec-charts">
-      <div class="ac-card">
-        <div class="ac-card-header">
-          <div class="hico">&#128202;</div><h2>Saved Charts</h2>
-          <a href="visualize.html" style="margin-left:auto;font-size:12px;color:#ff8c00;text-decoration:none;font-weight:600;padding:6px 14px;background:rgba(255,140,0,.1);border:1px solid rgba(255,140,0,.25);border-radius:8px">+ Build Chart</a>
-        </div>
-        <div id="chartsContent"><div class="ac-spinner"></div></div>
-      </div>
-    </div>
-
-    <!-- == CHAT HISTORY == -->
-    <div class="ac-section" id="sec-chathist">
-      <div class="ac-card">
-        <div class="ac-card-header">
-          <div class="hico">&#128172;</div><h2>Chat History</h2>
-          <div style="display:flex;gap:8px;margin-left:auto">
-            <button onclick="clearChatHistory()" style="background:linear-gradient(135deg,#ff8c00,#e07000)!important;color:white!important;border:none!important;padding:6px 16px!important;border-radius:9px!important;font-size:12px!important;font-weight:700!important;letter-spacing:0.3px!important;cursor:pointer!important;font-family:Arial,sans-serif!important;transition:all 0.2s!important;box-shadow:0 2px 8px rgba(255,140,0,0.3)!important;text-decoration:none!important;display:inline-block!important">&#128465; Clear History</button>
-            <a href="chatbot.html" style="background:linear-gradient(135deg,#ff8c00,#e07000)!important;color:white!important;border:none!important;padding:6px 16px!important;border-radius:9px!important;font-size:12px!important;font-weight:700!important;letter-spacing:0.3px!important;cursor:pointer!important;font-family:Arial,sans-serif!important;transition:all 0.2s!important;box-shadow:0 2px 8px rgba(255,140,0,0.3)!important;text-decoration:none!important;display:inline-block!important">Open Chat</a>
+        <div class="card-head">
+          <div class="card-ico">📋</div><h2>Activity Log</h2>
+          <div class="card-head-right">
+            <button class="btn btn-danger btn-sm" onclick="clearActivityLog()">🗑 Clear</button>
+            <button class="btn btn-ghost btn-sm" onclick="exportActivityCSV()">↓ Export CSV</button>
           </div>
         </div>
-        <div id="chatHistContent"><div class="ac-spinner"></div></div>
-      </div>
-    </div>
-
-    <!-- ══ ACTIVITY LOG ══ -->
-    <div class="ac-section" id="sec-activity">
-      <div class="ac-card">
-        <div class="ac-card-header">
-          <div class="hico">&#128203;</div><h2>Activity Log</h2>
-          <div style="display:flex;gap:8px;margin-left:auto">
-            <button onclick="clearActivityLog()" style="background:linear-gradient(135deg,#ff8c00,#e07000)!important;color:white!important;border:none!important;padding:6px 16px!important;border-radius:9px!important;font-size:12px!important;font-weight:700!important;letter-spacing:0.3px!important;cursor:pointer!important;font-family:Arial,sans-serif!important;transition:all 0.2s!important;box-shadow:0 2px 8px rgba(255,140,0,0.3)!important;text-decoration:none!important;display:inline-block!important">&#128465; Clear Log</button>
-            <button onclick="exportActivityCSV()" style="background:linear-gradient(135deg,#ff8c00,#e07000)!important;color:white!important;border:none!important;padding:6px 16px!important;border-radius:9px!important;font-size:12px!important;font-weight:700!important;letter-spacing:0.3px!important;cursor:pointer!important;font-family:Arial,sans-serif!important;transition:all 0.2s!important;box-shadow:0 2px 8px rgba(255,140,0,0.3)!important;text-decoration:none!important;display:inline-block!important">&#8595; Export CSV</button>
-          </div>
-        </div>
-        <div id="activityContent"><div class="ac-spinner"></div></div>
+        <div id="activityContent"><div class="spinner"></div></div>
       </div>
     </div>
 
@@ -601,700 +620,410 @@ body.account-body .ac-table .load-btn:hover{background:rgba(255,140,0,.2)!import
 </div>
 
 <script>
-var API       = 'http://127.0.0.1:5000'
+var API = 'http://127.0.0.1:5000'
 var userEmail = ''
 var activityData = []
-var _fixedExpiry = 0   // set once on page load, never updated by slideExpiry
+var _fixedExpiry = 0
+var _modalCb = null
 
-/* ── Init ── */
 window.addEventListener('DOMContentLoaded', function() {
-  userEmail = (window.Auth && window.Auth.getEmail())
-            ? window.Auth.getEmail()
+  userEmail = (window.Auth && window.Auth.getEmail()) ? window.Auth.getEmail()
             : (localStorage.getItem('userEmail') || '')
   if (!userEmail) { window.location.href = 'login.html'; return }
 
-  // Clock
   setInterval(function() {
-    var t = document.getElementById('sbTime')
+    var t = document.getElementById('sbClock')
     if (t) t.textContent = new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'})
   }, 1000)
 
-  // Read loginExpiry (fixed at login, never slid by activity).
-  // If missing (old session), compute from loginTime + 8h.
-  // Never use expiresAt — that gets bumped on every mouse move.
-  var _initSession = window.Auth ? window.Auth.getSession() : null
-  if (_initSession) {
-    if (_initSession.loginExpiry) {
-      _fixedExpiry = _initSession.loginExpiry
-    } else if (_initSession.loginTime) {
-      _fixedExpiry = _initSession.loginTime + (8 * 60 * 60 * 1000)
-    } else {
-      _fixedExpiry = _initSession.expiresAt || 0
-    }
-  }
+  var sess = window.Auth ? window.Auth.getSession() : null
+  if (sess) _fixedExpiry = sess.loginExpiry || (sess.loginTime ? sess.loginTime+8*3600000 : sess.expiresAt||0)
 
-  // Session badge + live countdown every second
   updateSessionBadge()
   setInterval(updateSessionBadge, 1000)
 
-  loadProfile()
-  loadHistory()
-  loadChartsSection()
-  loadChatHistorySection()
-  loadActivity()
-  loadSessionInfo()
+  loadProfile(); loadHistory(); loadChartsSection(); loadChatHistorySection(); loadActivity(); loadSessionInfo()
   setInterval(loadSessionInfo, 10000)
 
-  // Wire modal confirm button (must be after DOM ready)
   var mbtn = document.getElementById('modalConfirmBtn')
   if (mbtn) mbtn.onclick = function() { closeModal(); if (_modalCb) _modalCb() }
-  var overlay = document.getElementById('confirmModal')
-  if (overlay) overlay.addEventListener('click', function(e) { if (e.target === this) closeModal() })
+  var ov = document.getElementById('confirmModal')
+  if (ov) ov.addEventListener('click', function(e){ if(e.target===this) closeModal() })
 
-  // Load saved avatar
-  var savedAvatar = localStorage.getItem('insightflow_avatar_' + userEmail)
+  var savedAvatar = localStorage.getItem('insightflow_avatar_'+userEmail)
   if (savedAvatar) applyAvatar(savedAvatar)
 })
 
-/* ── Session badge — counts down to actual logout time ── */
 function updateSessionBadge() {
   if (!_fixedExpiry) return
   var ms = _fixedExpiry - Date.now()
-  if (ms <= 0) {
-    if (window.Auth) window.Auth.logout()
-    return
-  }
-  var h   = Math.floor(ms / 3600000)
-  var m   = Math.floor((ms % 3600000) / 60000)
-  var sec = Math.floor((ms % 60000) / 1000)
-  var pad = function(n){ return n < 10 ? '0' + n : '' + n }
-  var txt = h + 'h ' + pad(m) + 'm ' + pad(sec) + 's'
-  var badge = document.getElementById('sessionBadge')
-  if (badge) badge.textContent = '● ' + txt
-  var tl = document.getElementById('sessionTimeLeft')
-  if (tl) tl.textContent = txt
+  if (ms <= 0) { if (window.Auth) window.Auth.logout(); return }
+  var h=Math.floor(ms/3600000), m=Math.floor((ms%3600000)/60000), s=Math.floor((ms%60000)/1000)
+  var pad = function(n){ return n<10?'0'+n:''+n }
+  var txt = h+'h '+pad(m)+'m '+pad(s)+'s'
+  var b=document.getElementById('sessionBadge'); if(b) b.textContent='● '+txt
+  var tl=document.getElementById('sessionTimeLeft'); if(tl) tl.textContent=txt
 }
 
-/* ── Tab switcher ── */
 function showTab(name) {
-  ['profile','password','session','history','charts','chathist','activity'].forEach(function(t) {
-    var sec = document.getElementById('sec-' + t)
-    var tab = document.getElementById('tab-' + t)
-    if (sec) sec.classList.remove('active')
-    if (tab) tab.classList.remove('on')
+  ['profile','password','session','history','charts','chathist','activity'].forEach(function(t){
+    var sec=document.getElementById('sec-'+t), tab=document.getElementById('tab-'+t)
+    if(sec) sec.classList.remove('active')
+    if(tab) tab.classList.remove('active')
   })
-  var sec = document.getElementById('sec-' + name)
-  var tab = document.getElementById('tab-' + name)
-  if (sec) sec.classList.add('active')
-  if (tab) tab.classList.add('on')
-  var canvas = document.querySelector('.r-canvas')
-  if (canvas) canvas.scrollTop = 0
+  var sec=document.getElementById('sec-'+name), tab=document.getElementById('tab-'+name)
+  if(sec) sec.classList.add('active')
+  if(tab) tab.classList.add('active')
+  var c=document.querySelector('.ac-canvas'); if(c) c.scrollTop=0
 }
 
-/* ── Toast notification (replaces alert) ── */
-var toastTimer = null
-function toast(msg, type) {
-  var el  = document.getElementById('acToast')
-  var ico = document.getElementById('acToastIco')
-  var txt = document.getElementById('acToastMsg')
-  ico.textContent = type === 'ok' ? '✓' : type === 'err' ? '✕' : 'ℹ'
-  txt.textContent = msg
-  el.className = 'ac-toast ' + (type || 'info') + ' show'
-  if (toastTimer) clearTimeout(toastTimer)
-  toastTimer = setTimeout(function(){ el.classList.remove('show') }, 3500)
+var _toastTimer=null
+function toast(msg,type){
+  var el=document.getElementById('acToast'), ico=document.getElementById('toastIco'), txt=document.getElementById('toastMsg')
+  ico.textContent=type==='ok'?'✓':type==='err'?'✕':'ℹ'
+  txt.textContent=msg; el.className='toast '+(type||'info')+' show'
+  if(_toastTimer) clearTimeout(_toastTimer)
+  _toastTimer=setTimeout(function(){ el.classList.remove('show') },3500)
 }
 
-/* ── Confirm modal ── */
-var _modalCb = null
-function openModal(title, body, cb, danger) {
-  document.getElementById('modalTitle').textContent  = title
-  document.getElementById('modalBody').textContent   = body
-  var mbtn2 = document.getElementById('modalConfirmBtn')
-  if (mbtn2) {
-    mbtn2.textContent = danger ? 'Yes, ' + danger : 'Confirm'
-    mbtn2.className = 'ac-btn ' + (danger ? 'ac-btn-danger' : 'ac-btn-primary')
-  }
-  _modalCb = cb
-  var ov = document.getElementById('confirmModal')
-  if (ov) ov.classList.add('open')
+function openModal(title,body,cb,danger){
+  document.getElementById('modalTitle').textContent=title
+  document.getElementById('modalBody').textContent=body
+  var mb=document.getElementById('modalConfirmBtn')
+  if(mb){ mb.textContent=danger?'Yes, '+danger:'Confirm'; mb.className='btn btn-sm '+(danger?'btn-danger':'btn-primary') }
+  _modalCb=cb; document.getElementById('confirmModal').classList.add('open')
 }
-function closeModal() {
-  document.getElementById('confirmModal').classList.remove('open')
-  _modalCb = null
-}
-// Modal button wiring — must be inside DOMContentLoaded (done in init below)
+function closeModal(){ document.getElementById('confirmModal').classList.remove('open'); _modalCb=null }
 
-/* ── Toggle edit name panel ── */
-function toggleEditName(show) {
-  var panel  = document.getElementById('editNamePanel')
-  var btnRow = document.getElementById('editNameBtn')
-  panel.style.display  = show ? 'flex' : 'none'
-  btnRow.style.display = show ? 'none' : 'flex'
-  if (show) document.getElementById('inputName').focus()
+function toggleEditName(show){
+  document.getElementById('editNamePanel').style.display=show?'flex':'none'
+  document.getElementById('editNameBtnRow').style.display=show?'none':'flex'
+  if(show) document.getElementById('inputName').focus()
+}
+function showDangerZone(){
+  var card=document.getElementById('dangerZoneCard'); if(card){ card.style.display='block'; card.scrollIntoView({behavior:'smooth'}) }
+  var c=document.getElementById('dangerZoneContent'), ch=document.getElementById('dangerChevron')
+  if(c) c.style.display='block'; if(ch) ch.style.transform='rotate(180deg)'
+}
+function toggleDangerZone(){
+  var c=document.getElementById('dangerZoneContent'), ch=document.getElementById('dangerChevron')
+  var open=c.style.display==='block'
+  c.style.display=open?'none':'block'; ch.style.transform=open?'':'rotate(180deg)'
 }
 
-/* ── Toggle danger zone ── */
-function showDangerZone() {
-  var card = document.getElementById('dangerZoneCard')
-  if(card) {
-    card.style.setProperty('display','block','important')
-    card.scrollIntoView({behavior:'smooth'})
-    // auto expand content
-    var content2 = document.getElementById('dangerZoneContent')
-    var chevron  = document.getElementById('dangerChevron')
-    if(content2) content2.style.setProperty('display','flex','important')
-    if(chevron)  chevron.style.transform = 'rotate(180deg)'
+function confirmLogout(){ if(!confirm('Log out of InsightFlow?')) return; doLogout() }
+function doLogout(){
+  if(window.Auth){ window.Auth.logout() }
+  else{
+    try{localStorage.removeItem('insightflow_jwt')}catch(e){}
+    try{localStorage.removeItem('insightflow_session')}catch(e){}
+    try{localStorage.removeItem('insightflow_dataset')}catch(e){}
+    try{localStorage.removeItem('userEmail')}catch(e){}
+    window.location.replace('login.html')
   }
 }
 
-function toggleDangerZone() {
-  var content  = document.getElementById('dangerZoneContent')
-  var chevron  = document.getElementById('dangerChevron')
-  var open     = content.style.display === 'flex' || content.style.display === 'block'
-  if(open){
-    content.style.setProperty('display','none','important')
-    chevron.style.transform = ''
-  } else {
-    content.style.setProperty('display','flex','important')
-    chevron.style.transform = 'rotate(180deg)'
-  }
-}
-
-/* ── Logout with confirm ── */
-function confirmLogout() {
-  if (!confirm('Log out of InsightFlow?')) return
-  doLogout()
-}
-
-function doLogout() {
-  // Notify backend (fire and forget)
-  try {
-    var email = window.Auth ? window.Auth.getEmail() : localStorage.getItem('userEmail')
-    var token = window.Auth ? window.Auth.getToken() : ''
-    if (email) fetch('http://127.0.0.1:5000/logout', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({email:email, token:token})
-    }).catch(function(){})
-  } catch(e){}
-  // Wipe all session data
-  try { localStorage.removeItem('insightflow_session') } catch(e){}
-  try { localStorage.removeItem('userEmail') } catch(e){}
-  try { localStorage.removeItem('insightflow_dataset') } catch(e){}
-  // Redirect to login
-  window.location.replace('login.html')
-}
-
-/* ── Avatar upload ── */
-function handleAvatarUpload(input) {
-  var file = input.files[0]
-  if (!file) return
-  if (file.size > 2 * 1024 * 1024) { toast('Image must be under 2MB', 'err'); return }
-  var reader = new FileReader()
-  reader.onload = function(e) {
+function handleAvatarUpload(input){
+  var file=input.files[0]; if(!file) return
+  if(file.size>2*1024*1024){ toast('Image must be under 2MB','err'); return }
+  var reader=new FileReader()
+  reader.onload=function(e){
     applyAvatar(e.target.result)
-    localStorage.setItem('insightflow_avatar_' + userEmail, e.target.result)
-    toast('Profile photo updated', 'ok')
+    localStorage.setItem('insightflow_avatar_'+userEmail,e.target.result)
+    toast('Profile photo updated','ok')
   }
-  reader.readAsDataURL(file)
-  input.value = ''
+  reader.readAsDataURL(file); input.value=''
 }
-function applyAvatar(dataUrl) {
-  var av  = document.getElementById('acAvatar')
-  var txt = document.getElementById('acAvatarText')
-  var sb  = document.getElementById('sbAvatar')
-  if (txt) txt.style.display = 'none'
-  var existing = av ? av.querySelector('img') : null
-  if (!existing && av) {
-    var img = document.createElement('img')
-    img.src = dataUrl
-    av.insertBefore(img, av.firstChild)
-  } else if (existing) {
-    existing.src = dataUrl
-  }
-  if (sb) { sb.textContent = ''; sb.style.backgroundImage = 'url(' + dataUrl + ')'; sb.style.backgroundSize = 'cover'; sb.style.backgroundPosition = 'center' }
+function applyAvatar(dataUrl){
+  var av=document.getElementById('acAvatar'), txt=document.getElementById('acAvatarText'), sb=document.getElementById('sbAvatar')
+  if(txt) txt.style.display='none'
+  var existing=av?av.querySelector('img'):null
+  if(!existing&&av){ var img=document.createElement('img'); img.src=dataUrl; av.insertBefore(img,av.firstChild) }
+  else if(existing){ existing.src=dataUrl }
+  if(sb){ sb.textContent=''; sb.style.backgroundImage='url('+dataUrl+')'; sb.style.backgroundSize='cover'; sb.style.backgroundPosition='center' }
 }
 
-/* ── Session info tab ── */
-function loadSessionInfo() {
-  if (!window.Auth) return
-  var s = window.Auth.getSession()
-  if (!s) return
-  var lt = document.getElementById('sessionLoginTime')
-  var ex = document.getElementById('sessionExpiry')
-  var sd = document.getElementById('sessionDetail')
-  if (lt && s.loginTime) lt.textContent = new Date(s.loginTime).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})
-  if (ex && s.expiresAt) ex.textContent = new Date(s.expiresAt).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})
-  // Static — does not tick
-  if (sd) sd.textContent = 'Signed in as ' + (s.email || userEmail)
+function loadSessionInfo(){
+  if(!window.Auth) return
+  var s=window.Auth.getSession(); if(!s) return
+  var lt=document.getElementById('sessionLoginTime'), ex=document.getElementById('sessionExpiry'), sd=document.getElementById('sessionDetail')
+  if(lt&&s.loginTime) lt.textContent=new Date(s.loginTime).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})
+  if(ex&&s.expiresAt) ex.textContent=new Date(s.expiresAt).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})
+  if(sd) sd.textContent='Signed in as '+(s.email||userEmail)
 }
-
-function extendSession() {
-  if (!window.Auth) { toast('Auth module not loaded', 'err'); return }
+function extendSession(){
+  if(!window.Auth){ toast('Auth module not loaded','err'); return }
   window.Auth.touch()
-  // Update frozen expiry after manual extension
-  var s = window.Auth.getSession()
-  if (s && s.expiresAt) {
-    _fixedExpiry = s.expiresAt
-  }
-  loadSessionInfo()
-  updateSessionBadge()
-  toast('Session extended by 8 hours', 'ok')
+  var s=window.Auth.getSession(); if(s&&s.expiresAt) _fixedExpiry=s.expiresAt
+  loadSessionInfo(); updateSessionBadge(); toast('Session extended by 8 hours','ok')
 }
 
-/* ══ PROFILE ══ */
-function loadProfile() {
-  // ── Instant render — try Auth name, then session JSON, then email prefix ──
-  var instant = ''
-  if (window.Auth && window.Auth.getName()) {
-    instant = window.Auth.getName()
-  } else {
-    try {
-      var raw = localStorage.getItem('insightflow_session')
-      if (raw) { var parsed = JSON.parse(raw); if (parsed && parsed.name) instant = parsed.name }
-    } catch(e) {}
-  }
-  if (!instant || instant === userEmail) instant = userEmail.split('@')[0]
+/* ══ PROFILE — FIX: auth header on all fetches ══ */
+function loadProfile(){
+  var instant=(window.Auth&&window.Auth.getName())?window.Auth.getName():''
+  if(!instant){ try{ var r=localStorage.getItem('insightflow_session'); if(r){ var p=JSON.parse(r); if(p&&p.name) instant=p.name } }catch(e){} }
+  if(!instant||instant===userEmail) instant=userEmail.split('@')[0]
   setName(instant)
-  document.getElementById('acEmail').textContent = userEmail
-  document.getElementById('inputName').value     = instant
+  document.getElementById('acEmail').textContent=userEmail
+  document.getElementById('inputName').value=instant
 
-  // ── Then update from DB ──
-  fetch(API + '/account/' + encodeURIComponent(userEmail))
+  var hdrs=window.Auth?window.Auth.headers():{'Content-Type':'application/json'}
+
+  fetch(API+'/account/'+encodeURIComponent(userEmail), {headers:hdrs})
     .then(function(r){ return r.json() })
-    .then(function(d) {
-      var name = (d && d.name) ? d.name : instant
+    .then(function(d){
+      var name=(d&&d.name)?d.name:instant
       setName(name)
-      document.getElementById('acEmail').textContent = (d && d.email) ? d.email : userEmail
-      document.getElementById('inputName').value     = name
-    })
-    .catch(function() {})  // keep instant values on network failure
+      document.getElementById('acEmail').textContent=(d&&d.email)?d.email:userEmail
+      document.getElementById('inputName').value=name
+    }).catch(function(){})
 
-  fetch(API + '/datasets/' + encodeURIComponent(userEmail), { headers: window.Auth ? window.Auth.headers() : {} })
+  fetch(API+'/datasets/'+encodeURIComponent(userEmail), {headers:hdrs})
     .then(function(r){ return r.json() })
-    .then(function(d) {
-      var ds = d.datasets || []
-      document.getElementById('statUploads').textContent = ds.length
-      var total = ds.reduce(function(s,x){ return s + (x.total_rows || 0) }, 0)
-      document.getElementById('statRows').textContent = fmtNum(total)
-      document.getElementById('statLast').textContent = ds.length > 0 && ds[0].uploaded_at
-        ? new Date(ds[0].uploaded_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short'})
-        : '—'
-    })
-    .catch(function() {
-      ['statUploads','statRows','statLast'].forEach(function(id){ document.getElementById(id).textContent = '—' })
-    })
+    .then(function(d){
+      var ds=d.datasets||[]
+      document.getElementById('statUploads').textContent=ds.length
+      var total=ds.reduce(function(s,x){ return s+(x.total_rows||0) },0)
+      document.getElementById('statRows').textContent=fmtNum(total)
+      document.getElementById('statLast').textContent=ds.length>0&&ds[0].uploaded_at
+        ?new Date(ds[0].uploaded_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short'}):'—'
+    }).catch(function(){ ['statUploads','statRows','statLast'].forEach(function(id){ document.getElementById(id).textContent='—' }) })
 }
 
-function setName(name) {
-  document.getElementById('acName').textContent    = name
-  document.getElementById('sbName').textContent    = name
-  var savedAvatar = localStorage.getItem('insightflow_avatar_' + userEmail)
-  if (!savedAvatar) {
-    var txt = document.getElementById('acAvatarText')
-    if (txt) { txt.style.display = ''; txt.textContent = name.charAt(0).toUpperCase() }
-    var sb = document.getElementById('sbAvatar')
-    if (sb && !sb.style.backgroundImage) sb.textContent = name.charAt(0).toUpperCase()
+function setName(name){
+  document.getElementById('acName').textContent=name
+  document.getElementById('sbName').textContent=name
+  var saved=localStorage.getItem('insightflow_avatar_'+userEmail)
+  if(!saved){
+    var txt=document.getElementById('acAvatarText'); if(txt){ txt.style.display=''; txt.textContent=name.charAt(0).toUpperCase() }
+    var sb=document.getElementById('sbAvatar'); if(sb&&!sb.style.backgroundImage) sb.textContent=name.charAt(0).toUpperCase()
   }
 }
 
-function saveName() {
-  var name = document.getElementById('inputName').value.trim()
-  if (!name || name.length < 2) { toast('Name must be at least 2 characters.', 'err'); return }
-  fetch(API + '/account/update', {
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({email:userEmail, name:name})
-  })
-  .then(function(r){ return r.json() })
-  .then(function(d) {
-    if (d.status === 'success') {
-      setName(name)
-      if (window.Auth) {
-        var s = window.Auth.getSession()
-        if (s) { s.name = name; try{ localStorage.setItem('insightflow_session', JSON.stringify(s)) }catch(e){} }
-      }
-      toast('Name updated successfully', 'ok')
-    } else { toast(d.message || 'Update failed', 'err') }
-  })
-  .catch(function(){ toast('Could not reach server', 'err') })
-}
-
-/* ── Delete account ── */
-function confirmDelete() {
-  openModal(
-    'Delete your account?',
-    'All your data including upload history, chat history and saved charts will be permanently deleted. This cannot be undone.',
-    function() {
-      toast('Account deletion is not yet implemented on the server.', 'info')
-    },
-    'Delete'
-  )
-}
-
-/* ══ PASSWORD ══ */
-function togglePw(id, btn) {
-  var inp = document.getElementById(id)
-  if (inp.type === 'password') { inp.type = 'text'; btn.style.opacity = '.9' }
-  else                         { inp.type = 'password'; btn.style.opacity = '.4' }
-}
-
-function checkStrength(v) {
-  var fill = document.getElementById('strFill')
-  var lbl  = document.getElementById('strLbl')
-  if (!v) { fill.style.width='0'; lbl.textContent='Enter a new password to check strength'; lbl.style.color=''; return }
-  var s = 0
-  if (v.length >= 6) s++; if (v.length >= 10) s++
-  if (/[A-Z]/.test(v)) s++; if (/[0-9]/.test(v)) s++; if (/[^A-Za-z0-9]/.test(v)) s++
-  var lvl = [{w:'20%',bg:'#ef4444',t:'Too weak'},{w:'40%',bg:'#f97316',t:'Weak'},{w:'60%',bg:'#f59e0b',t:'Fair'},{w:'80%',bg:'#84cc16',t:'Good'},{w:'100%',bg:'#10b981',t:'Strong'}]
-  var l = lvl[Math.min(s-1,4)] || lvl[0]
-  fill.style.width=l.w; fill.style.background=l.bg
-  lbl.textContent=l.t; lbl.style.color=l.bg
-}
-
-function changePassword() {
-  var curr = document.getElementById('inputCurr').value
-  var nw   = document.getElementById('inputNew').value
-  var conf = document.getElementById('inputConf').value
-  if (!curr||!nw||!conf) { toast('All fields are required.', 'err'); return }
-  if (nw.length < 6)     { toast('Password must be at least 6 characters.', 'err'); return }
-  if (nw !== conf)        { toast('New passwords do not match.', 'err'); return }
-
-  fetch(API + '/login', {
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({email:userEmail, password:curr})
-  })
-  .then(function(r){ return r.json() })
-  .then(function(d) {
-    if (d.status !== 'success') { toast('Current password is incorrect.', 'err'); return }
-    return fetch(API + '/account/update', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({email:userEmail, password:nw})
-    })
+/* FIX: auth header on saveName */
+function saveName(){
+  var name=document.getElementById('inputName').value.trim()
+  if(!name||name.length<2){ toast('Name must be at least 2 characters.','err'); return }
+  var hdrs=window.Auth?window.Auth.headers():{'Content-Type':'application/json'}
+  fetch(API+'/account/update',{ method:'POST', headers:hdrs, body:JSON.stringify({email:userEmail,name:name}) })
     .then(function(r){ return r.json() })
-    .then(function(u) {
-      if (u.status === 'success') {
-        toast('Password updated successfully', 'ok')
-        document.getElementById('inputCurr').value = ''
-        document.getElementById('inputNew').value  = ''
-        document.getElementById('inputConf').value = ''
-        document.getElementById('strFill').style.width = '0'
-        document.getElementById('strLbl').textContent  = 'Enter a new password to check strength'
-        document.getElementById('strLbl').style.color  = ''
-      } else { toast(u.message || 'Update failed', 'err') }
-    })
-  })
-  .catch(function(){ toast('Could not reach server', 'err') })
+    .then(function(d){
+      if(d.status==='success'){
+        setName(name); toggleEditName(false)
+        if(window.Auth){ var s=window.Auth.getSession(); if(s){ s.name=name; try{ localStorage.setItem('insightflow_session',JSON.stringify(s)) }catch(e){} } }
+        toast('Name updated successfully','ok')
+      } else { toast(d.message||'Update failed','err') }
+    }).catch(function(){ toast('Could not reach server','err') })
 }
 
-/* ══ UPLOAD HISTORY ══ */
-function loadHistory() {
-  fetch(API + '/datasets/' + encodeURIComponent(userEmail), { headers: window.Auth ? window.Auth.headers() : {} })
+function confirmDelete(){
+  openModal('Delete your account?','All data including uploads, chat history and saved charts will be permanently deleted. This cannot be undone.',
+    function(){ toast('Account deletion is not yet implemented on the server.','info') },'Delete')
+}
+
+function togglePw(id,btn){
+  var inp=document.getElementById(id)
+  inp.type=inp.type==='password'?'text':'password'
+  btn.style.opacity=inp.type==='text'?'0.85':'0.35'
+}
+function checkStrength(v){
+  var fill=document.getElementById('strFill'), lbl=document.getElementById('strLbl')
+  if(!v){ fill.style.width='0'; lbl.textContent='Enter a new password to check strength'; lbl.style.color=''; return }
+  var s=0
+  if(v.length>=6)s++; if(v.length>=10)s++
+  if(/[A-Z]/.test(v))s++; if(/[0-9]/.test(v))s++; if(/[^A-Za-z0-9]/.test(v))s++
+  var lvl=[{w:'20%',bg:'#ef4444',t:'Too weak'},{w:'40%',bg:'#f97316',t:'Weak'},{w:'60%',bg:'#f59e0b',t:'Fair'},{w:'80%',bg:'#84cc16',t:'Good'},{w:'100%',bg:'#10b981',t:'Strong'}]
+  var l=lvl[Math.min(s-1,4)]||lvl[0]
+  fill.style.width=l.w; fill.style.background=l.bg; lbl.textContent=l.t; lbl.style.color=l.bg
+}
+function changePassword(){
+  var curr=document.getElementById('inputCurr').value, nw=document.getElementById('inputNew').value, conf=document.getElementById('inputConf').value
+  if(!curr||!nw||!conf){ toast('All fields are required.','err'); return }
+  if(nw.length<6){ toast('Password must be at least 6 characters.','err'); return }
+  if(nw!==conf){ toast('New passwords do not match.','err'); return }
+  fetch(API+'/login',{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email:userEmail,password:curr}) })
     .then(function(r){ return r.json() })
-    .then(function(d) {
-      var ds = d.datasets || []
-      var el = document.getElementById('historyContent')
-      if (!ds.length) {
-        el.innerHTML = '<div class="ac-empty"><div class="ico">📂</div><p>No uploads yet.<br>Upload your first dataset from the dashboard.</p><a href="dashboard.html">Go to Dashboard →</a></div>'
-        return
-      }
-      var rows = ds.map(function(x, idx) {
-        var t    = (x.file_type||'other').toLowerCase()
-        var date = x.uploaded_at ? new Date(x.uploaded_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '—'
-        var num  = x.numeric_cols !== null && x.numeric_cols !== undefined ? x.numeric_cols : '—'
-        var cat  = x.cat_cols     !== null && x.cat_cols     !== undefined ? x.cat_cols     : '—'
+    .then(function(d){
+      if(d.status!=='success'){ toast('Current password is incorrect.','err'); return }
+      var hdrs=window.Auth?window.Auth.headers():{'Content-Type':'application/json'}
+      return fetch(API+'/account/update',{ method:'POST', headers:hdrs, body:JSON.stringify({email:userEmail,password:nw}) })
+        .then(function(r){ return r.json() })
+        .then(function(u){
+          if(u.status==='success'){
+            toast('Password updated successfully','ok')
+            document.getElementById('inputCurr').value=''
+            document.getElementById('inputNew').value=''
+            document.getElementById('inputConf').value=''
+            document.getElementById('strFill').style.width='0'
+            document.getElementById('strLbl').textContent='Enter a new password to check strength'
+            document.getElementById('strLbl').style.color=''
+          } else { toast(u.message||'Update failed','err') }
+        })
+    }).catch(function(){ toast('Could not reach server','err') })
+}
+
+function loadHistory(){
+  var hdrs=window.Auth?window.Auth.headers():{}
+  fetch(API+'/datasets/'+encodeURIComponent(userEmail), {headers:hdrs})
+    .then(function(r){ return r.json() })
+    .then(function(d){
+      var ds=d.datasets||[], el=document.getElementById('historyContent')
+      if(!ds.length){ el.innerHTML='<div class="empty"><div class="empty-ico">📂</div><p>No uploads yet.<br>Upload your first dataset from the dashboard.</p><a href="dashboard.html">Go to Dashboard →</a></div>'; return }
+      var rows=ds.map(function(x,idx){
+        var t=(x.file_type||'other').toLowerCase()
+        var date=x.uploaded_at?new Date(x.uploaded_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):'—'
+        var num=x.numeric_cols!=null?x.numeric_cols:'—', cat=x.cat_cols!=null?x.cat_cols:'—'
         return '<tr>'
-          + '<td><strong>' + esc(x.file_name||'—') + '</strong></td>'
-          + '<td><span class="ft-badge ft-' + esc(t) + '">' + esc(t.toUpperCase()) + '</span></td>'
-          + '<td>' + fmtNum(x.total_rows) + '</td>'
-          + '<td>' + (x.total_cols||'—') + '</td>'
-          + '<td><span style="color:#10b981;font-weight:600">' + num + '</span> / <span style="color:#3b82f6;font-weight:600">' + cat + '</span></td>'
-          + '<td style="color:rgba(255,255,255,.35)">' + date + '</td>'
-          + '<td><button class="load-btn" onclick="reloadDataset(' + idx + ')">↗ Load</button></td>'
-          + '</tr>'
+          +'<td><strong>'+esc(x.file_name||'—')+'</strong></td>'
+          +'<td><span class="ft ft-'+esc(t)+'">'+esc(t.toUpperCase())+'</span></td>'
+          +'<td>'+fmtNum(x.total_rows)+'</td><td>'+(x.total_cols||'—')+'</td>'
+          +'<td><span style="color:#10b981;font-weight:600">'+num+'</span> / <span style="color:#60a5fa;font-weight:600">'+cat+'</span></td>'
+          +'<td style="color:rgba(255,255,255,.32)">'+date+'</td>'
+          +'<td><button class="load-btn" onclick="reloadDataset('+idx+')">↗ Load</button></td></tr>'
       }).join('')
-      el.innerHTML = '<div class="ac-table-wrap"><table class="ac-table">'
-        + '<thead><tr><th>File</th><th>Type</th><th>Rows</th><th>Cols</th><th>Num / Cat</th><th>Uploaded</th><th></th></tr></thead>'
-        + '<tbody>' + rows + '</tbody></table></div>'
-      el._ds = ds
-    })
-    .catch(function() {
-      document.getElementById('historyContent').innerHTML =
-        '<div class="ac-empty"><div class="ico">⚠️</div><p>Could not load upload history.<br>Make sure Flask is running.</p></div>'
-    })
+      el.innerHTML='<div class="table-wrap"><table class="ac-table"><thead><tr><th>File</th><th>Type</th><th>Rows</th><th>Cols</th><th>Num/Cat</th><th>Uploaded</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>'
+      el._ds=ds
+    }).catch(function(){ document.getElementById('historyContent').innerHTML='<div class="empty"><div class="empty-ico">⚠️</div><p>Could not load upload history.</p></div>' })
+}
+function reloadDataset(idx){
+  var el=document.getElementById('historyContent'), ds=el._ds
+  if(!ds||!ds[idx]){ toast('Dataset metadata not available','err'); return }
+  toast('Loading '+(ds[idx].file_name||'dataset')+'… please re-upload from dashboard.','info')
+  setTimeout(function(){ window.location.href='dashboard.html' },1800)
 }
 
-function reloadDataset(idx) {
-  var el = document.getElementById('historyContent')
-  var ds = el._ds
-  if (!ds || !ds[idx]) { toast('Dataset metadata not available', 'err'); return }
-  var d = ds[idx]
-  toast('Loading ' + (d.file_name || 'dataset') + '… please re-upload from dashboard.', 'info')
-  setTimeout(function(){ window.location.href = 'dashboard.html' }, 1800)
-}
-
-/* ══ ACTIVITY LOG ══ */
-function loadActivity() {
-  fetch(API + '/activity/' + encodeURIComponent(userEmail), { headers: window.Auth ? window.Auth.headers() : {} })
+function loadActivity(){
+  var hdrs=window.Auth?window.Auth.headers():{}
+  fetch(API+'/activity/'+encodeURIComponent(userEmail), {headers:hdrs})
     .then(function(r){ return r.json() })
-    .then(function(d) {
-      activityData = d.activity || []
-      renderActivity(activityData)
-    })
-    .catch(function() {
-      document.getElementById('activityContent').innerHTML =
-        '<div class="ac-empty"><div class="ico">⚠️</div><p>Could not load activity log.<br>Make sure Flask is running.</p></div>'
-    })
+    .then(function(d){ activityData=d.activity||[]; renderActivity(activityData) })
+    .catch(function(){ document.getElementById('activityContent').innerHTML='<div class="empty"><div class="empty-ico">⚠️</div><p>Could not load activity log.</p></div>' })
 }
-
-function renderActivity(acts) {
-  var el = document.getElementById('activityContent')
-  if (!acts.length) {
-    el.innerHTML = '<div class="ac-empty"><div class="ico">📋</div><p>No activity recorded yet.</p></div>'
-    return
-  }
-  var colMap = {login:'#10b981',login_failed:'#ef4444',logout:'#f59e0b',upload:'#3b82f6',register:'#8b5cf6'}
-  var lblMap = {login:'Logged in',login_failed:'Failed login attempt',logout:'Logged out',upload:'Dataset uploaded',register:'Account created'}
-  var items = acts.map(function(a) {
-    var col    = colMap[a.action] || '#778'
-    var label  = lblMap[a.action] || a.action
-    var time   = a.created_at ? new Date(a.created_at).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '—'
-    var detail = a.detail     ? '<span class="ac-act-detail">— ' + esc(a.detail)     + '</span>' : ''
-    var ip     = a.ip_address ? '<span class="ac-act-ip">· '     + esc(a.ip_address) + '</span>' : ''
-    return '<div class="ac-act-item">'
-      + '<div class="ac-act-dot" style="background:' + col + ';box-shadow:0 0 7px ' + col + '66"></div>'
-      + '<div class="ac-act-label">' + label + detail + ip + '</div>'
-      + '<div class="ac-act-time">' + time + '</div>'
-      + '</div>'
+function renderActivity(acts){
+  var el=document.getElementById('activityContent')
+  if(!acts.length){ el.innerHTML='<div class="empty"><div class="empty-ico">📋</div><p>No activity recorded yet.</p></div>'; return }
+  var colMap={login:'#10b981',login_failed:'#ef4444',logout:'#f59e0b',upload:'#3b82f6',register:'#8b5cf6'}
+  var lblMap={login:'Logged in',login_failed:'Failed login attempt',logout:'Logged out',upload:'Dataset uploaded',register:'Account created'}
+  var items=acts.map(function(a){
+    var col=colMap[a.action]||'#778', label=lblMap[a.action]||a.action
+    var time=a.created_at?new Date(a.created_at).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'—'
+    var detail=a.detail?'<span class="act-detail">— '+esc(a.detail)+'</span>':''
+    var ip=a.ip_address?'<span class="act-ip">· '+esc(a.ip_address)+'</span>':''
+    return '<div class="act-item"><div class="act-dot" style="background:'+col+';box-shadow:0 0 6px '+col+'55"></div><div class="act-label">'+label+detail+ip+'</div><div class="act-time">'+time+'</div></div>'
   }).join('')
-  el.innerHTML = '<div class="ac-activity-list">' + items + '</div>'
+  el.innerHTML='<div class="act-list">'+items+'</div>'
 }
-
-function exportActivityCSV() {
-  if (!activityData.length) { toast('No activity data to export', 'err'); return }
-  var rows = ['Action,Detail,IP Address,Time']
-  activityData.forEach(function(a) {
-    rows.push([
-      '"' + (a.action||'') + '"',
-      '"' + (a.detail||'') + '"',
-      '"' + (a.ip_address||'') + '"',
-      '"' + (a.created_at||'') + '"'
-    ].join(','))
-  })
-  var blob = new Blob([rows.join('\n')], {type:'text/csv'})
-  var url  = URL.createObjectURL(blob)
-  var a    = document.createElement('a')
-  a.href = url; a.download = 'insightflow_activity.csv'; a.click()
-  URL.revokeObjectURL(url)
-  toast('Activity log exported', 'ok')
+function exportActivityCSV(){
+  if(!activityData.length){ toast('No activity data to export','err'); return }
+  var rows=['Action,Detail,IP Address,Time']
+  activityData.forEach(function(a){ rows.push(['"'+(a.action||'')+'"','"'+(a.detail||'')+'"','"'+(a.ip_address||'')+'"','"'+(a.created_at||'')+'"'].join(',')) })
+  var blob=new Blob([rows.join('\n')],{type:'text/csv'}), url=URL.createObjectURL(blob), a=document.createElement('a')
+  a.href=url; a.download='insightflow_activity.csv'; a.click(); URL.revokeObjectURL(url)
+  toast('Activity log exported','ok')
 }
-
-/* ── Helpers ── */
-function fmtNum(n) {
-  if (!n && n !== 0) return '—'
-  if (n >= 1e6) return (n/1e6).toFixed(1)+'M'
-  if (n >= 1e3) return (n/1e3).toFixed(1)+'K'
-  return Number(n).toLocaleString()
-}
-function esc(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-}
-
-function loadChartsSection() {
-  var email = userEmail
-  if (!email) return
-  fetch('http://127.0.0.1:5000/charts/' + encodeURIComponent(email))
+function clearActivityLog(){
+  if(!confirm('Clear all activity log? This cannot be undone.')) return
+  var hdrs=window.Auth?window.Auth.headers():{'Content-Type':'application/json'}
+  fetch(API+'/activity/clear',{ method:'DELETE', headers:hdrs })
     .then(function(r){ return r.json() })
-    .then(function(d) {
-      var charts = d.charts || []
-      var el = document.getElementById('chartsContent')
-      if (!el) return
-      if (!charts.length) {
-        el.innerHTML = '<div class="ac-empty"><div class="ico">&#128202;</div><p>No saved charts yet.<br>Build one in the Visualize page.</p><a href="visualize.html">Go to Visualize &#8594;</a></div>'
-        return
-      }
-      el._charts = charts
-      var cards = charts.map(function(c) {
-        var thumb = c.thumbnail ? '<img src="' + c.thumbnail + '" alt="">' : '<div class="no-thumb">&#128202;</div>'
-        var date  = c.created_at ? new Date(c.created_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '-'
-        return '<div class="ac-chart-card">'
-          + '<div class="ac-chart-thumb">' + thumb + '</div>'
-          + '<div class="ac-chart-info">'
-          + '<div class="ac-chart-name">' + esc(c.chart_name||'Chart') + '</div>'
-          + '<div class="ac-chart-meta">' + esc((c.chart_type||'').toUpperCase()) + ' &middot; ' + date + '</div>'
-          + '<div class="ac-chart-actions">'
-          + '<button class="ac-chart-btn ac-chart-btn-load" onclick="loadChartById(' + c.id + ')">&#8599; Load</button>'
-          + '<button class="ac-chart-btn ac-chart-btn-del"  onclick="deleteChartById(' + c.id + ',this)">&#x2715; Delete</button>'
-          + '</div></div></div>'
+    .then(function(d){
+      if(d.status==='success'){ toast('Activity log cleared','ok'); activityData=[]; document.getElementById('activityContent').innerHTML='<div class="empty"><div class="empty-ico">📋</div><p>No activity recorded yet.</p></div>' }
+      else { toast('Could not clear: '+(d.error||'error'),'err') }
+    }).catch(function(){ toast('Could not reach server','err') })
+}
+
+/* FIX: auth header on charts fetch */
+function loadChartsSection(){
+  if(!userEmail) return
+  var hdrs=window.Auth?window.Auth.headers():{'Content-Type':'application/json'}
+  fetch(API+'/charts/'+encodeURIComponent(userEmail), {headers:hdrs})
+    .then(function(r){ return r.json() })
+    .then(function(d){
+      var charts=d.charts||[], el=document.getElementById('chartsContent'); if(!el) return
+      if(!charts.length){ el.innerHTML='<div class="empty"><div class="empty-ico">📊</div><p>No saved charts yet.<br>Build one in the Visualize page.</p><a href="visualize.html">Go to Visualize →</a></div>'; return }
+      el._charts=charts
+      var cards=charts.map(function(c){
+        var thumb=c.thumbnail?'<img src="'+c.thumbnail+'" alt="">':'<div class="no-thumb">📊</div>'
+        var date=c.created_at?new Date(c.created_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):'-'
+        return '<div class="chart-card"><div class="chart-thumb">'+thumb+'</div><div class="chart-info"><div class="chart-name">'+esc(c.chart_name||'Chart')+'</div><div class="chart-meta">'+esc((c.chart_type||'').toUpperCase())+' · '+date+'</div><div class="chart-btns"><button class="chart-btn chart-btn-load" onclick="loadChartById('+c.id+')">↗ Load</button><button class="chart-btn chart-btn-del" onclick="deleteChartById('+c.id+',this)">✕ Del</button></div></div></div>'
       }).join('')
-      el.innerHTML = '<div class="ac-charts-grid">' + cards + '</div>'
-    })
-    .catch(function() {
-      var el = document.getElementById('chartsContent')
-      if (el) el.innerHTML = '<div class="ac-empty"><div class="ico">&#9888;</div><p>Could not load charts.</p></div>'
-    })
+      el.innerHTML='<div class="charts-grid">'+cards+'</div>'
+    }).catch(function(){ var el=document.getElementById('chartsContent'); if(el) el.innerHTML='<div class="empty"><div class="empty-ico">⚠️</div><p>Could not load charts.</p></div>' })
 }
-
-function loadChartById(id) {
-  var el = document.getElementById('chartsContent')
-  var charts = (el && el._charts) ? el._charts : []
-  var c = null
-  for (var i=0;i<charts.length;i++) { if (charts[i].id===id){c=charts[i];break} }
-  if (!c) { toast('Chart not found','err'); return }
-  try {
-    localStorage.setItem('insightflow_load_chart', c.config)
-    toast('Opening Visualize...','ok')
-    setTimeout(function(){ window.location.href='visualize.html' }, 1000)
-  } catch(e) { toast('Could not load chart','err') }
+function loadChartById(id){
+  var el=document.getElementById('chartsContent'), charts=(el&&el._charts)?el._charts:[]
+  var c=null; for(var i=0;i<charts.length;i++){ if(charts[i].id===id){c=charts[i];break} }
+  if(!c){ toast('Chart not found','err'); return }
+  try{ localStorage.setItem('insightflow_load_chart',c.config); toast('Opening Visualize…','ok'); setTimeout(function(){ window.location.href='visualize.html' },1000) }
+  catch(e){ toast('Could not load chart','err') }
 }
-
-function deleteChartById(id, btn) {
-  if (!confirm('Delete this chart?')) return
-  fetch('http://127.0.0.1:5000/charts/delete/' + id, {
-    method: 'DELETE',
-    headers: window.Auth ? window.Auth.headers() : {'Content-Type':'application/json'}
-  })
-  .then(function(r){ return r.json() })
-  .then(function(d) {
-    if (d.status==='success') {
-      var card = btn
-      while(card && !card.classList.contains('ac-chart-card')) card = card.parentNode
-      if (card) card.remove()
-      toast('Chart deleted','ok')
-    } else { toast('Delete failed','err') }
-  })
-  .catch(function(){ toast('Could not reach server','err') })
-}
-
-function clearChatHistory() {
-  if (!confirm('Clear all chat history? This cannot be undone.')) return
-  fetch('http://127.0.0.1:5000/chat/history/clear', {
-    method: 'DELETE',
-    headers: window.Auth ? window.Auth.headers() : {'Content-Type':'application/json'}
-  })
-  .then(function(r){ return r.json() })
-  .then(function(d) {
-    if (d.status === 'success') {
-      toast('Chat history cleared', 'ok')
-      document.getElementById('chatHistContent').innerHTML =
-        '<div class="ac-empty"><div class="ico">&#128172;</div><p>No chat history yet.</p><a href="chatbot.html">Open Chat &#8594;</a></div>'
-    } else { toast('Could not clear: ' + (d.error||'error'), 'err') }
-  })
-  .catch(function(){ toast('Could not reach server', 'err') })
-}
-
-function clearActivityLog() {
-  if (!confirm('Clear all activity log? This cannot be undone.')) return
-  fetch('http://127.0.0.1:5000/activity/clear', {
-    method: 'DELETE',
-    headers: window.Auth ? window.Auth.headers() : {'Content-Type':'application/json'}
-  })
-  .then(function(r){ return r.json() })
-  .then(function(d) {
-    if (d.status === 'success') {
-      toast('Activity log cleared', 'ok')
-      activityData = []
-      document.getElementById('activityContent').innerHTML =
-        '<div class="ac-empty"><div class="ico">&#128202;</div><p>No activity recorded yet.</p></div>'
-    } else { toast('Could not clear: ' + (d.error||'error'), 'err') }
-  })
-  .catch(function(){ toast('Could not reach server', 'err') })
-}
-
-function loadChatHistorySection() {
-  var email = userEmail
-  if (!email) return
-  fetch('http://127.0.0.1:5000/chat/history/' + encodeURIComponent(email))
+function deleteChartById(id,btn){
+  if(!confirm('Delete this chart?')) return
+  var hdrs=window.Auth?window.Auth.headers():{'Content-Type':'application/json'}
+  fetch(API+'/charts/delete/'+id,{ method:'DELETE', headers:hdrs })
     .then(function(r){ return r.json() })
-    .then(function(d) {
-      var hist = d.history || []
-      var el = document.getElementById('chatHistContent')
-      if (!el) return
-      if (!hist.length) {
-        el.innerHTML = '<div class="ac-empty"><div class="ico">&#128172;</div><p>No chat history yet.<br>Start a conversation with the AI Analyst.</p><a href="chatbot.html">Open Chat &#8594;</a></div>'
-        return
-      }
+    .then(function(d){
+      if(d.status==='success'){ var card=btn; while(card&&!card.classList.contains('chart-card')) card=card.parentNode; if(card) card.remove(); toast('Chart deleted','ok') }
+      else { toast('Delete failed','err') }
+    }).catch(function(){ toast('Could not reach server','err') })
+}
 
-      // Deduplicate: remove consecutive duplicate messages
-      var deduped = []
-      for (var i = 0; i < hist.length; i++) {
-        if (deduped.length === 0) { deduped.push(hist[i]); continue }
-        var prev = deduped[deduped.length - 1]
-        if (prev.role === hist[i].role && prev.message === hist[i].message) continue
+/* FIX: auth header on chat history fetch */
+function loadChatHistorySection(){
+  if(!userEmail) return
+  var hdrs=window.Auth?window.Auth.headers():{'Content-Type':'application/json'}
+  fetch(API+'/chat/history/'+encodeURIComponent(userEmail), {headers:hdrs})
+    .then(function(r){ return r.json() })
+    .then(function(d){
+      var hist=d.history||[], el=document.getElementById('chatHistContent'); if(!el) return
+      if(!hist.length){ el.innerHTML='<div class="empty"><div class="empty-ico">💬</div><p>No chat history yet.<br>Start a conversation with the AI Analyst.</p><a href="chatbot.html">Open Chat →</a></div>'; return }
+      var deduped=[]
+      for(var i=0;i<hist.length;i++){
+        if(!deduped.length){ deduped.push(hist[i]); continue }
+        var prev=deduped[deduped.length-1]
+        if(prev.role===hist[i].role&&prev.message===hist[i].message) continue
         deduped.push(hist[i])
       }
-
-      // Group into Q&A pairs (user msg + next AI reply = one conversation turn)
-      var pairs = []
-      for (var i = 0; i < deduped.length; i++) {
-        if (deduped[i].role === 'user') {
-          var pair = { user: deduped[i], ai: null }
-          if (i + 1 < deduped.length && deduped[i+1].role === 'assistant') {
-            pair.ai = deduped[i+1]
-            i++
-          }
+      var pairs=[]
+      for(var i=0;i<deduped.length;i++){
+        if(deduped[i].role==='user'){
+          var pair={user:deduped[i],ai:null}
+          if(i+1<deduped.length&&deduped[i+1].role==='assistant'){ pair.ai=deduped[i+1]; i++ }
           pairs.push(pair)
         }
       }
-
-      // Group pairs by date
-      var byDate = {}
-      var dateOrder = []
-      pairs.forEach(function(p) {
-        var dateKey = p.user.created_at
-          ? new Date(p.user.created_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})
-          : 'Unknown'
-        if (!byDate[dateKey]) { byDate[dateKey] = []; dateOrder.push(dateKey) }
-        byDate[dateKey].push(p)
+      var byDate={}, dateOrder=[]
+      pairs.forEach(function(p){
+        var dk=p.user.created_at?new Date(p.user.created_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):'Unknown'
+        if(!byDate[dk]){ byDate[dk]=[]; dateOrder.push(dk) }
+        byDate[dk].push(p)
       })
-
-      var html = ''
-      dateOrder.forEach(function(date) {
-        // Date group header
-        html += '<div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;'
-              + 'color:rgba(255,255,255,.2);padding:12px 0 6px;display:flex;align-items:center;gap:10px">'
-              + '<div style="flex:1;height:1px;background:rgba(255,255,255,.06)"></div>'
-              + date
-              + '<div style="flex:1;height:1px;background:rgba(255,255,255,.06)"></div></div>'
-
-        byDate[date].forEach(function(p) {
-          var time = p.user.created_at
-            ? new Date(p.user.created_at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})
-            : ''
-
-          // User question
-          var userMsg = esc(p.user.message)
-          html += '<div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);'
-                + 'border-radius:12px;overflow:hidden;margin-bottom:8px">'
-
-          // User row
-          html += '<div style="display:flex;gap:10px;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.05)">'
-                + '<div style="width:26px;height:26px;border-radius:7px;background:rgba(255,140,0,.15);border:1px solid rgba(255,140,0,.2);'
-                + 'display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">&#128100;</div>'
-                + '<div style="flex:1;font-size:13px;color:white;font-weight:500;line-height:1.5">' + userMsg + '</div>'
-                + '<div style="font-size:10px;color:rgba(255,255,255,.2);white-space:nowrap;align-self:flex-start;padding-top:2px">' + time + '</div>'
-                + '</div>'
-
-          // AI reply
-          if (p.ai) {
-            var aiMsg = esc(p.ai.message)
-            if (aiMsg.length > 300) aiMsg = aiMsg.substring(0,300) + '...'
-            html += '<div style="display:flex;gap:10px;padding:12px 14px;background:rgba(255,255,255,.02)">'
-                  + '<div style="width:26px;height:26px;border-radius:7px;background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.2);'
-                  + 'display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">&#129302;</div>'
-                  + '<div style="flex:1;font-size:12px;color:rgba(255,255,255,.55);line-height:1.6">' + aiMsg + '</div>'
-                  + '</div>'
-          }
-
-          html += '</div>'
+      var html=''
+      dateOrder.forEach(function(date){
+        html+='<div class="date-divider">'+date+'</div>'
+        byDate[date].forEach(function(p){
+          var time=p.user.created_at?new Date(p.user.created_at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}):''
+          html+='<div class="chat-turn"><div class="chat-user-row"><div class="chat-role-icon role-u">👤</div><div class="chat-msg">'+esc(p.user.message)+'</div><div class="chat-ts">'+time+'</div></div>'
+          if(p.ai){ var aiMsg=esc(p.ai.message); if(aiMsg.length>300) aiMsg=aiMsg.substring(0,300)+'…'; html+='<div class="chat-ai-row"><div class="chat-role-icon role-a">🤖</div><div class="chat-msg" style="color:rgba(255,255,255,0.5)">'+aiMsg+'</div></div>' }
+          html+='</div>'
         })
       })
-
-      el.innerHTML = '<div style="display:flex;flex-direction:column">' + html + '</div>'
-    })
-    .catch(function() {
-      var el = document.getElementById('chatHistContent')
-      if (el) el.innerHTML = '<div class="ac-empty"><div class="ico">&#9888;</div><p>Could not load chat history.</p></div>'
-    })
+      el.innerHTML='<div>'+html+'</div>'
+    }).catch(function(){ var el=document.getElementById('chatHistContent'); if(el) el.innerHTML='<div class="empty"><div class="empty-ico">⚠️</div><p>Could not load chat history.</p></div>' })
 }
+function clearChatHistory(){
+  if(!confirm('Clear all chat history? This cannot be undone.')) return
+  var hdrs=window.Auth?window.Auth.headers():{'Content-Type':'application/json'}
+  fetch(API+'/chat/history/clear',{ method:'DELETE', headers:hdrs })
+    .then(function(r){ return r.json() })
+    .then(function(d){
+      if(d.status==='success'){ toast('Chat history cleared','ok'); document.getElementById('chatHistContent').innerHTML='<div class="empty"><div class="empty-ico">💬</div><p>No chat history yet.</p><a href="chatbot.html">Open Chat →</a></div>' }
+      else { toast('Could not clear: '+(d.error||'error'),'err') }
+    }).catch(function(){ toast('Could not reach server','err') })
+}
+
+function fmtNum(n){ if(!n&&n!==0) return '—'; if(n>=1e6) return (n/1e6).toFixed(1)+'M'; if(n>=1e3) return (n/1e3).toFixed(1)+'K'; return Number(n).toLocaleString() }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
 </script>
 </body>
 </html>

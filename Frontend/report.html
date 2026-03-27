@@ -390,6 +390,20 @@ function printReport(){
 var raw=null;try{raw=localStorage.getItem('insightflow_dataset')}catch(e){}
 if(!raw){document.getElementById('rNoData').style.display='flex';document.getElementById('rApp').style.display='none'}
 else{var d=JSON.parse(raw);H=d.headers||[];D=d.dataset||d.preview||[];fileName=d.fileName||'Report';document.getElementById('rNoData').style.display='none';var app=document.getElementById('rApp');app.style.display='flex';app.style.flexDirection='column';app.style.height='100vh';app.style.overflow='hidden';buildAll()}
+
+/* ── Nav helpers (report.html does not load script.js) ── */
+function logout() {
+  if (window.Auth) {
+    window.Auth.logout()
+  } else {
+    try { localStorage.removeItem('insightflow_jwt') } catch(e){}
+    try { localStorage.removeItem('insightflow_session') } catch(e){}
+    try { localStorage.removeItem('insightflow_dataset') } catch(e){}
+    try { localStorage.removeItem('userEmail') } catch(e){}
+    window.location.replace('login.html')
+  }
+}
+function goAccount() { window.location.href = 'account.html' }
 </script>
 </body>
 </html>
