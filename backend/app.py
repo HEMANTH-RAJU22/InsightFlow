@@ -126,11 +126,12 @@ def get_db():
 # JWT HELPERS
 # ─────────────────────────────────────────
 
-def create_token(user_id, email, name):
+def create_token(user_id, email, name, role="user"):
     payload = {
-        "sub":   str(user_id),   # PyJWT v2+ requires sub to be a string
+        "sub":   str(user_id),
         "email": email,
         "name":  name,
+        "role":  role,  # ← ADD THIS
         "iat":   datetime.utcnow(),
         "exp":   datetime.utcnow() + timedelta(hours=JWT_EXPIRY)
     }
@@ -350,7 +351,7 @@ def login():
                 (user["id"], "login", email, ip)
             )
             db.commit()
-            token = create_token(user["id"], user["email"], user["name"])
+            token = create_token(user["id"], user["email"], user["name"], user.get("role", "user"))
             log.info("Login OK: %s from %s", email, ip)
             return jsonify({
                 "status": "success",
@@ -1274,6 +1275,391 @@ def delete_account():
         cursor.close()
         db.close()
 
+
+def require_admin(f):
+    """
+    Decorator — returns 401 if user is not admin.
+    """
+
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if request.method == "OPTIONS":
+            return "", 200
+        user = get_current_user()
+        if not user:
+            return jsonify({"error": "Authentication required"}), 401
+
+        # Check role in database
+        db, cursor = get_db()
+        if not db:
+            return jsonify({"error": "Database unavailable"}), 500
+        try:
+            cursor.execute("SELECT role FROM users WHERE email=%s", (user["email"],))
+            row = cursor.fetchone()
+            if not row or row.get("role") != "admin":
+                return jsonify({"error": "Admin access required"}), 403
+        finally:
+            cursor.close()
+            db.close()
+
+        return f(*args, **kwargs)
+
+    return decorated
+
+# ═══════════════════════════════════════════
+#  ADMIN ROUTES  🔒 admin role required
+# ═══════════════════════════════════════════
+
+@app.route("/admin/stats")
+@require_admin
+def admin_stats():
+    """High-level platform stats for the admin dashboard KPIs."""
+    db, cursor = get_db()
+    if not db:
+        return jsonify({"error": "Database unavailable"}), 500
+    try:
+        cursor.execute("SELECT COUNT(*) as total FROM users")
+        total_users = cursor.fetchone()["total"]
+
+        cursor.execute("SELECT COUNT(*) as total FROM users WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)")
+        new_users_week = cursor.fetchone()["total"]
+
+        cursor.execute("SELECT COUNT(*) as total FROM datasets")
+        total_datasets = cursor.fetchone()["total"]
+
+        cursor.execute("SELECT COUNT(*) as total FROM datasets WHERE uploaded_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)")
+        new_ds_week = cursor.fetchone()["total"]
+
+        cursor.execute("SELECT COUNT(*) as total FROM chat_history")
+        total_chats = cursor.fetchone()["total"]
+
+        cursor.execute("SELECT COUNT(*) as total FROM saved_charts")
+        total_charts = cursor.fetchone()["total"]
+
+        cursor.execute("SELECT COUNT(*) as total FROM activity_log")
+        total_activity = cursor.fetchone()["total"]
+
+        cursor.execute("SELECT SUM(total_rows) as s FROM datasets")
+        row_result = cursor.fetchone()
+        total_rows_analyzed = int(row_result["s"] or 0)
+
+        cursor.execute("SELECT SUM(missing_vals) as s FROM datasets")
+        miss_result = cursor.fetchone()
+        total_missing = int(miss_result["s"] or 0)
+
+        cursor.execute("""
+            SELECT COALESCE(AVG(total_rows),0) as avg_rows, COALESCE(AVG(total_cols),0) as avg_cols
+            FROM datasets
+        """)
+        avgs = cursor.fetchone()
+
+        return jsonify({
+            "total_users": total_users,
+            "new_users_week": new_users_week,
+            "total_datasets": total_datasets,
+            "new_datasets_week": new_ds_week,
+            "total_chats": total_chats,
+            "total_charts": total_charts,
+            "total_activity": total_activity,
+            "total_rows_analyzed": total_rows_analyzed,
+            "total_missing": total_missing,
+            "avg_rows_per_upload": round(float(avgs["avg_rows"]), 1),
+            "avg_cols_per_upload": round(float(avgs["avg_cols"]), 1),
+        })
+    except Exception as e:
+        log.error("Admin stats error: %s", e)
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close()
+        db.close()
+
+
+@app.route("/admin/users")
+@require_admin
+def admin_users():
+    """All users with upload counts and last login."""
+    db, cursor = get_db()
+    if not db:
+        return jsonify({"error": "Database unavailable"}), 500
+    try:
+        cursor.execute("""
+            SELECT u.id, u.name, u.email, u.role,
+                   COALESCE(u.is_active, 1) as is_active,
+                   u.created_at, u.last_login,
+                   COUNT(d.id) as upload_count
+            FROM users u
+            LEFT JOIN datasets d ON d.user_id = u.id
+            GROUP BY u.id
+            ORDER BY u.created_at DESC
+        """)
+        rows = cursor.fetchall()
+        for r in rows:
+            if r.get("created_at"): r["created_at"] = str(r["created_at"])
+            if r.get("last_login"):  r["last_login"] = str(r["last_login"])
+            r["status"] = "active" if r.get("is_active", 1) else "suspended"
+        return jsonify({"users": rows})
+    except Exception as e:
+        log.error("Admin users error: %s", e)
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close()
+        db.close()
+
+
+@app.route("/admin/users/<int:user_id>", methods=["PUT"])
+@require_admin
+def admin_update_user(user_id):
+    """Edit user name, email, role, or status."""
+    data = request.json or {}
+    db, cursor = get_db()
+    if not db:
+        return jsonify({"error": "Database unavailable"}), 500
+    try:
+        updates = []
+        params = []
+        if "name" in data:
+            updates.append("name=%s")
+            params.append(data["name"].strip())
+        if "email" in data:
+            updates.append("email=%s")
+            params.append(data["email"].strip().lower())
+        if "role" in data and data["role"] in ("user", "admin"):
+            updates.append("role=%s")
+            params.append(data["role"])
+        if "status" in data:
+            updates.append("is_active=%s")
+            params.append(1 if data["status"] == "active" else 0)
+
+        if not updates:
+            return jsonify({"status": "error", "message": "Nothing to update"}), 400
+
+        params.append(user_id)
+        cursor.execute(f"UPDATE users SET {', '.join(updates)} WHERE id=%s", params)
+        db.commit()
+        return jsonify({"status": "success", "message": "User updated"})
+    except Exception as e:
+        log.error("Admin update user error: %s", e)
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close()
+        db.close()
+
+
+@app.route("/admin/users/<int:user_id>", methods=["DELETE"])
+@require_admin
+def admin_delete_user(user_id):
+    """Hard-delete a user and all their data."""
+    db, cursor = get_db()
+    if not db:
+        return jsonify({"error": "Database unavailable"}), 500
+    try:
+        cursor.execute("DELETE FROM chat_history WHERE user_id=%s", (user_id,))
+        cursor.execute("DELETE FROM activity_log  WHERE user_id=%s", (user_id,))
+        cursor.execute("DELETE FROM saved_charts  WHERE user_id=%s", (user_id,))
+        cursor.execute("DELETE FROM datasets      WHERE user_id=%s", (user_id,))
+        cursor.execute("DELETE FROM users         WHERE id=%s", (user_id,))
+        db.commit()
+        return jsonify({"status": "success"})
+    except Exception as e:
+        log.error("Admin delete user error: %s", e)
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close()
+        db.close()
+
+
+@app.route("/admin/datasets")
+@require_admin
+def admin_datasets():
+    """All datasets across all users."""
+    db, cursor = get_db()
+    if not db:
+        return jsonify({"error": "Database unavailable"}), 500
+    try:
+        cursor.execute("""
+            SELECT d.id, d.file_name, d.file_type, d.file_size,
+                   d.total_rows, d.total_cols, d.numeric_cols, d.cat_cols,
+                   d.missing_vals, d.duplicates, d.uploaded_at,
+                   u.name as user_name, u.email as user_email
+            FROM datasets d
+            JOIN users u ON u.id = d.user_id
+            ORDER BY d.uploaded_at DESC
+            LIMIT 500
+        """)
+        rows = cursor.fetchall()
+        for r in rows:
+            if r.get("uploaded_at"): r["uploaded_at"] = str(r["uploaded_at"])
+        return jsonify({"datasets": rows})
+    except Exception as e:
+        log.error("Admin datasets error: %s", e)
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close()
+        db.close()
+
+
+@app.route("/admin/datasets/<int:ds_id>", methods=["DELETE"])
+@require_admin
+def admin_delete_dataset(ds_id):
+    db, cursor = get_db()
+    if not db:
+        return jsonify({"error": "Database unavailable"}), 500
+    try:
+        cursor.execute("DELETE FROM datasets WHERE id=%s", (ds_id,))
+        db.commit()
+        return jsonify({"status": "success"})
+    except Exception as e:
+        log.error("Admin delete dataset error: %s", e)
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close()
+        db.close()
+
+
+@app.route("/admin/chats")
+@require_admin
+def admin_chats():
+    """All chat messages across all users."""
+    db, cursor = get_db()
+    if not db:
+        return jsonify({"error": "Database unavailable"}), 500
+    try:
+        cursor.execute("""
+            SELECT ch.id, ch.role, ch.message, ch.created_at,
+                   u.name as user_name, u.email as user_email
+            FROM chat_history ch
+            JOIN users u ON u.id = ch.user_id
+            ORDER BY ch.created_at DESC
+            LIMIT 500
+        """)
+        rows = cursor.fetchall()
+        for r in rows:
+            if r.get("created_at"): r["created_at"] = str(r["created_at"])
+        return jsonify({"chats": rows})
+    except Exception as e:
+        log.error("Admin chats error: %s", e)
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close()
+        db.close()
+
+
+@app.route("/admin/chats/clear-all", methods=["DELETE"])
+@require_admin
+def admin_clear_all_chats():
+    db, cursor = get_db()
+    if not db:
+        return jsonify({"error": "Database unavailable"}), 500
+    try:
+        cursor.execute("DELETE FROM chat_history")
+        db.commit()
+        return jsonify({"status": "success", "deleted": cursor.rowcount})
+    except Exception as e:
+        log.error("Admin clear chats error: %s", e)
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close()
+        db.close()
+
+
+@app.route("/admin/charts")
+@require_admin
+def admin_charts():
+    """All saved charts across all users."""
+    db, cursor = get_db()
+    if not db:
+        return jsonify({"error": "Database unavailable"}), 500
+    try:
+        cursor.execute("""
+            SELECT sc.id, sc.chart_name, sc.chart_type, sc.created_at,
+                   u.name as user_name, u.email as user_email
+            FROM saved_charts sc
+            JOIN users u ON u.id = sc.user_id
+            ORDER BY sc.created_at DESC
+            LIMIT 500
+        """)
+        rows = cursor.fetchall()
+        for r in rows:
+            if r.get("created_at"): r["created_at"] = str(r["created_at"])
+        return jsonify({"charts": rows})
+    except Exception as e:
+        log.error("Admin charts error: %s", e)
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close()
+        db.close()
+
+
+@app.route("/admin/activity")
+@require_admin
+def admin_activity():
+    """Full activity log across all users."""
+    db, cursor = get_db()
+    if not db:
+        return jsonify({"error": "Database unavailable"}), 500
+    try:
+        cursor.execute("""
+            SELECT al.id, al.action, al.detail, al.ip_address, al.created_at,
+                   u.name as user_name, u.email as user_email
+            FROM activity_log al
+            LEFT JOIN users u ON u.id = al.user_id
+            ORDER BY al.created_at DESC
+            LIMIT 1000
+        """)
+        rows = cursor.fetchall()
+        for r in rows:
+            if r.get("created_at"): r["created_at"] = str(r["created_at"])
+        return jsonify({"activity": rows})
+    except Exception as e:
+        log.error("Admin activity error: %s", e)
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close()
+        db.close()
+
+
+@app.route("/admin/activity/clear-all", methods=["DELETE"])
+@require_admin
+def admin_clear_all_activity():
+    db, cursor = get_db()
+    if not db:
+        return jsonify({"error": "Database unavailable"}), 500
+    try:
+        cursor.execute("DELETE FROM activity_log")
+        db.commit()
+        return jsonify({"status": "success", "deleted": cursor.rowcount})
+    except Exception as e:
+        log.error("Admin clear activity error: %s", e)
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close()
+        db.close()
+
+
+@app.route("/admin/promote", methods=["POST"])
+@require_admin
+def admin_promote():
+    """Promote or demote a user's role."""
+    data = request.json or {}
+    email = data.get("email", "").strip().lower()
+    role = data.get("role", "user")
+    if role not in ("user", "admin"):
+        return jsonify({"error": "Invalid role"}), 400
+    db, cursor = get_db()
+    if not db:
+        return jsonify({"error": "Database unavailable"}), 500
+    try:
+        cursor.execute("UPDATE users SET role=%s WHERE email=%s", (role, email))
+        db.commit()
+        if cursor.rowcount == 0:
+            return jsonify({"error": "User not found"}), 404
+        return jsonify({"status": "success", "message": f"{email} is now {role}"})
+    except Exception as e:
+        log.error("Admin promote error: %s", e)
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close()
+        db.close()
 # ─────────────────────────────────────────
 # RUN
 # ─────────────────────────────────────────
