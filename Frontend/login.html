@@ -171,7 +171,71 @@ function setFieldState(id,state,msg){var inp=document.getElementById(id),msgEl=d
 function checkStrength(v){var fill=document.getElementById('strFill'),lbl=document.getElementById('strLbl');if(!v){fill.style.width='0';lbl.textContent='Enter a password';lbl.style.color='';return}var s=0;if(v.length>=6)s++;if(v.length>=10)s++;if(/[A-Z]/.test(v))s++;if(/[0-9]/.test(v))s++;if(/[^A-Za-z0-9]/.test(v))s++;var lvl=[{w:'20%',bg:'#ef4444',t:'Too weak'},{w:'40%',bg:'#f97316',t:'Weak'},{w:'60%',bg:'#f59e0b',t:'Fair'},{w:'80%',bg:'#84cc16',t:'Good'},{w:'100%',bg:'#10b981',t:'Strong'}][Math.min(s-1,4)]||{w:'20%',bg:'#ef4444',t:'Too weak'};fill.style.width=lvl.w;fill.style.background=lvl.bg;lbl.textContent=lvl.t;lbl.style.color=lvl.bg}
 function toggleEye(id,btn){var inp=document.getElementById(id);if(inp.type==='password'){inp.type='text';btn.style.opacity='.65'}else{inp.type='password';btn.style.opacity='.28'}}
 function setLoading(btnId,on){var btn=document.getElementById(btnId);if(!btn)return;btn.disabled=on;btn.classList.toggle('loading',on)}
-function doLogin(){hideBanners();var email=document.getElementById('lEmail').value.trim().toLowerCase(),pass=document.getElementById('lPass').value,ok=true;if(!email){setFieldState('lEmail','err','Email is required');ok=false}else if(!/^[^@]+@[^@]+\.[^@]+$/.test(email)){setFieldState('lEmail','err','Enter a valid email');ok=false}if(!pass){setFieldState('lPass','err','Password is required');ok=false}if(!ok)return;setLoading('loginBtn',true);var token='';try{var arr=new Uint8Array(32);window.crypto.getRandomValues(arr);token=Array.from(arr).map(function(b){return b.toString(16).padStart(2,'0')}).join('')}catch(e){}fetch(API+'/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,password:pass,token:token})}).then(function(r){return r.json()}).then(function(data){setLoading('loginBtn',false);if(data.status==='success'){document.getElementById('rememberMe').checked?localStorage.setItem('insightflow_remember',email):localStorage.removeItem('insightflow_remember');if(window.Auth&&data.token){window.Auth.setSession(data.token)}else{localStorage.setItem('userEmail',data.email)}showOk('Login successful! Redirecting...');var dest='dashboard.html';try{dest=sessionStorage.getItem('insightflow_redirect')||'dashboard.html'}catch(e){}try{sessionStorage.removeItem('insightflow_redirect')}catch(e){}setTimeout(function(){window.location.href=dest},600)}else{setFieldState('lPass','err','');showErr(data.message||'Invalid email or password')}}).catch(function(){setLoading('loginBtn',false);showErr('Cannot reach server. Make sure Flask is running.')})}
+function doLogin(){
+  hideBanners();
+  var email=document.getElementById('lEmail').value.trim().toLowerCase(),
+      pass=document.getElementById('lPass').value,
+      ok=true;
+  if(!email){
+    setFieldState('lEmail','err','Email is required');
+    ok=false
+  }else if(!/^[^@]+@[^@]+\.[^@]+$/.test(email)){
+    setFieldState('lEmail','err','Enter a valid email');
+    ok=false
+  }
+  if(!pass){
+    setFieldState('lPass','err','Password is required');
+    ok=false
+  }
+  if(!ok)return;
+  setLoading('loginBtn',true);
+  var token='';
+  try{
+    var arr=new Uint8Array(32);
+    window.crypto.getRandomValues(arr);
+    token=Array.from(arr).map(function(b){return b.toString(16).padStart(2,'0')}).join('')
+  }catch(e){}
+  
+  fetch(API+'/login',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({email:email,password:pass,token:token})
+  }).then(function(r){
+    return r.json()
+  }).then(function(data){
+    setLoading('loginBtn',false);
+    if(data.status==='success'){
+      document.getElementById('rememberMe').checked?localStorage.setItem('insightflow_remember',email):localStorage.removeItem('insightflow_remember');
+      if(window.Auth&&data.token){
+        window.Auth.setSession(data.token)
+      }else{
+        localStorage.setItem('userEmail',data.email)
+      }
+      showOk('Login successful! Redirecting...');
+      
+      // ← UPDATE THIS SECTION BELOW ↓
+      localStorage.setItem('insightflow_jwt', data.token);
+      
+      try {
+        var payload = JSON.parse(atob(data.token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+        var dest = payload.role === 'admin' ? 'admin.html' : 'dashboard.html';
+      } catch(e) {
+        var dest = 'dashboard.html';
+      }
+      
+      try{sessionStorage.removeItem('insightflow_redirect')}catch(e){}
+      setTimeout(function(){window.location.href=dest},600)
+      // ← UPDATE THIS SECTION ABOVE ↑
+      
+    }else{
+      setFieldState('lPass','err','');
+      showErr(data.message||'Invalid email or password')
+    }
+  }).catch(function(){
+    setLoading('loginBtn',false);
+    showErr('Cannot reach server. Make sure Flask is running.')
+  })
+}
 function doRegister(){hideBanners();var name=document.getElementById('rName').value.trim(),email=document.getElementById('rEmail').value.trim().toLowerCase(),pass=document.getElementById('rPass').value,conf=document.getElementById('rConf').value,ok=true;if(!name||name.length<2){setFieldState('rName','err','Name must be at least 2 characters');ok=false}if(!email||!/^[^@]+@[^@]+\.[^@]+$/.test(email)){setFieldState('rEmail','err','Enter a valid email');ok=false}if(!pass||pass.length<6){setFieldState('rPass','err','Password must be at least 6 characters');ok=false}if(pass!==conf){setFieldState('rConf','err','Passwords do not match');ok=false}if(!ok)return;setLoading('registerBtn',true);fetch(API+'/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:name,email:email,password:pass})}).then(function(r){return r.json()}).then(function(data){setLoading('registerBtn',false);if(data.status==='success'){showOk('Account created! Signing you in...');setTimeout(function(){resetForm('registerForm');document.getElementById('lEmail').value=email;document.getElementById('lPass').value=pass;switchTab('login');setTimeout(doLogin,300)},800)}else{showErr(data.message||'Registration failed')}}).catch(function(){setLoading('registerBtn',false);showErr('Cannot reach server. Make sure Flask is running.')})}
 function showForgot(){var tabs=document.querySelector('.tabs'),lf=document.getElementById('loginForm'),hdr=document.getElementById('cardTitle'),sub=document.getElementById('cardSub');if(tabs)tabs.style.display='none';if(lf)lf.style.display='none';if(hdr)hdr.textContent='Forgot Password';if(sub)sub.textContent='Enter your email to retrieve your password';var ex=document.getElementById('forgotPanel');if(ex)ex.remove();var panel=document.createElement('div');panel.id='forgotPanel';panel.className='form-scroll';panel.innerHTML='<div class="form-body" style="justify-content:flex-start"><div class="fg"><label class="fl">Email Address</label><input class="fi" type="email" id="forgotEmail" placeholder="you@example.com" oninput="clearForgotState()"><div class="vmsg" id="forgotMsg"></div></div><button class="sbtn" id="forgotBtn" onclick="submitForgot()" style="margin-bottom:12px"><span class="btn-text">Retrieve Password</span><div class="btn-spin"></div></button><div id="pwReveal"></div><div class="trow" style="margin-top:14px">Remember it? <span onclick="closeForgot()">Back to Sign In</span></div></div>';document.querySelector('.card').appendChild(panel);setTimeout(function(){var e=document.getElementById('forgotEmail');if(e)e.focus()},50)}
 function clearForgotState(){var m=document.getElementById('forgotMsg'),e=document.getElementById('forgotEmail'),r=document.getElementById('pwReveal');if(m){m.textContent='';m.className='vmsg'}if(e)e.className='fi';if(r)r.innerHTML=''}
