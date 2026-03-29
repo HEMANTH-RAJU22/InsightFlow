@@ -140,14 +140,13 @@ body.account-body {
 /* ══ CANVAS ══ */
 .ac-canvas {
   flex: 1;
-  /* Ensures the main area never grows beyond the window height */
-  height: calc(100vh - 56px); 
+  height: calc(100vh - 56px);
   overflow-y: auto;
   overflow-x: hidden;
   padding: 28px 36px 40px;
-  display: flex;
-  flex-direction: column;
+  display: block;  /* Change from flex to block */
   gap: 22px;
+  align-items: stretch;
 }
 .ac-canvas::-webkit-scrollbar{width:3px}
 .ac-canvas::-webkit-scrollbar-thumb{background:rgba(255,140,0,0.25);border-radius:3px}
@@ -167,8 +166,8 @@ body.account-body {
   background:rgba(16,185,129,0.07);color:#10b981;border:1px solid rgba(16,185,129,0.18);
 }
 
-.ac-sec{display:none;flex-direction:column;gap:18px}
-.ac-sec.active{display:flex}
+.ac-sec{display:none;flex-direction:column;gap:18px;width:100%;align-self:flex-start}
+.ac-sec.active{display:flex;width:100%;align-self:flex-start}
 
 .ac-card {
   background: rgba(255, 255, 255, 0.036);
@@ -475,7 +474,10 @@ body.account-body {
         <div class="sb-icon-bg"><svg class="sb-icon" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
         <span>Activity Log</span>
       </div>
-
+      <div class="sb-item" id="tab-support" onclick="showTab('support')">
+        <div class="sb-icon-bg"><svg class="sb-icon" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="9" y1="10" x2="15" y2="10"/><line x1="12" y1="7" x2="12" y2="13"/></svg></div>
+        <span>Support</span>
+      </div>
       <div class="sb-divider"></div>
 
       <div class="sb-item danger" onclick="confirmLogout()">
@@ -668,9 +670,76 @@ body.account-body {
       </div>
     </div>
 
+
+<!-- SUPPORT -->
+<div class="ac-sec" id="sec-support" style="width:100%">
+  <div class="ac-card" style="width:100%">
+    <div class="card-head">
+      <div class="card-ico">🎫</div><h2>Support</h2>
+      <div class="card-head-right">
+        <button class="btn btn-ghost btn-sm" id="supportNewBtn" onclick="showSupportView('new')">+ New Ticket</button>
+      </div>
+    </div>
+
+    <!-- New ticket form -->
+    <div id="supportNewView" style="display:none;flex-direction:column;gap:14px">
+      <div class="field">
+        <label>Subject</label>
+        <input type="text" id="suppSubj" class="field input" placeholder="Briefly describe your issue..." style="width:100%;padding:11px 15px;background:rgba(255,255,255,0.055);border:1px solid rgba(255,255,255,0.09);border-radius:10px;color:#f1f5f9;font-size:13px;outline:none">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="field">
+          <label>Category</label>
+          <select id="suppCat" style="width:100%;padding:11px 15px;background:rgba(255,255,255,0.055);border:1px solid rgba(255,255,255,0.09);border-radius:10px;color:#f1f5f9;font-size:13px;outline:none;font-family:'DM Sans',sans-serif">
+            <option value="bug">🐛 Bug / Error</option>
+            <option value="feature">💡 Feature Request</option>
+            <option value="data">📊 Data / Upload Issue</option>
+            <option value="account">👤 Account / Login</option>
+            <option value="other">📌 Other</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Priority</label>
+          <select id="suppPri" style="width:100%;padding:11px 15px;background:rgba(255,255,255,0.055);border:1px solid rgba(255,255,255,0.09);border-radius:10px;color:#f1f5f9;font-size:13px;outline:none;font-family:'DM Sans',sans-serif">
+            <option value="low">🟢 Low</option>
+            <option value="medium" selected>🟡 Medium</option>
+            <option value="high">🔴 High</option>
+            <option value="urgent">🚨 Urgent</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>Description</label>
+        <textarea id="suppDesc" rows="4" placeholder="Provide as much detail as possible..." style="width:100%;padding:11px 15px;background:rgba(255,255,255,0.055);border:1px solid rgba(255,255,255,0.09);border-radius:10px;color:#f1f5f9;font-size:13px;outline:none;resize:vertical;font-family:'DM Sans',sans-serif;line-height:1.6"></textarea>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary btn-sm" onclick="submitSupportTicket()">Submit Ticket →</button>
+        <button class="btn btn-ghost btn-sm" onclick="showSupportView('list')">Cancel</button>
+      </div>
+    </div>
+
+    <!-- Ticket list -->
+    <div id="supportListView">
+      <div id="supportTicketList"><div class="spinner"></div></div>
+    </div>
+
+    <!-- Ticket detail -->
+    <div id="supportDetailView" style="display:none;flex-direction:column;gap:14px">
+      <span style="color:#ff8c00;cursor:pointer;font-size:12px;font-weight:600" onclick="showSupportView('list')">← Back to tickets</span>
+      <div style="background:rgba(255,140,0,0.05);border:1px solid rgba(255,140,0,0.12);border-radius:10px;padding:14px 16px">
+        <div style="font-size:14px;font-weight:700;color:#f1f5f9;margin-bottom:4px" id="suppDetailSubj"></div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.3)" id="suppDetailMeta"></div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.6);margin-top:10px;line-height:1.7" id="suppDetailDesc"></div>
+      </div>
+      <div id="suppReplyList" style="display:flex;flex-direction:column;gap:9px"></div>
+      <div style="padding-top:12px;border-top:1px solid rgba(255,255,255,0.06)">
+        <textarea id="suppReplyInput" rows="3" placeholder="Write your reply..." style="width:100%;padding:11px 15px;background:rgba(255,255,255,0.055);border:1px solid rgba(255,255,255,0.09);border-radius:10px;color:#f1f5f9;font-size:13px;outline:none;resize:vertical;font-family:'DM Sans',sans-serif;margin-bottom:10px"></textarea>
+        <button class="btn btn-primary btn-sm" onclick="sendSupportReply()">Send Reply</button>
+      </div>
+    </div>
+
   </div>
 </div>
-
 <script>
 var API = 'http://127.0.0.1:5000'
 var userEmail = ''
@@ -719,10 +788,11 @@ function updateSessionBadge() {
 }
 
 function showTab(name) {
-  ['profile','password','session','history','charts','chathist','activity'].forEach(function(t){
+  ['profile','password','session','history','charts','chathist','activity','support'].forEach(function(t){
     var sec=document.getElementById('sec-'+t), tab=document.getElementById('tab-'+t)
     if(sec) sec.classList.remove('active')
     if(tab) tab.classList.remove('active')
+    if(name==='support') showSupportView('list')
   })
   var sec=document.getElementById('sec-'+name), tab=document.getElementById('tab-'+name)
   if(sec) sec.classList.add('active')
@@ -1070,6 +1140,82 @@ function clearChatHistory(){
       if(d.status==='success'){ toast('Chat history cleared','ok'); document.getElementById('chatHistContent').innerHTML='<div class="empty"><div class="empty-ico">💬</div><p>No chat history yet.</p><a href="chatbot.html">Open Chat →</a></div>' }
       else { toast('Could not clear: '+(d.error||'error'),'err') }
     }).catch(function(){ toast('Could not reach server','err') })
+}
+/* ══ SUPPORT ══ */
+var currentSuppTicketId=null
+
+function showSupportView(view){
+  document.getElementById('supportNewView').style.display=view==='new'?'flex':'none'
+  document.getElementById('supportListView').style.display=view==='list'?'block':'none'
+  document.getElementById('supportDetailView').style.display=view==='detail'?'flex':'none'
+  document.getElementById('supportNewBtn').style.display=view==='new'?'none':'inline-flex'
+  if(view==='list') loadSupportTickets()
+}
+
+function loadSupportTickets(){
+  var hdrs2=window.Auth?window.Auth.headers():{}
+  document.getElementById('supportTicketList').innerHTML='<div class="spinner"></div>'
+  fetch(API+'/support/tickets',{headers:hdrs2})
+    .then(function(r){ return r.json() })
+    .then(function(d){
+      var tickets=d.tickets||[]
+      if(!tickets.length){ document.getElementById('supportTicketList').innerHTML='<div class="empty"><div class="empty-ico">🎫</div><p>No tickets yet.<br>Submit one if you need help.</p></div>'; return }
+      var priColor={urgent:'#ff4d6d',high:'#ff8c00',medium:'#ffd166',low:'#10b981'}
+      var statusColor={open:'#ff4d6d',in_progress:'#4d9fff',resolved:'#10b981',closed:'rgba(255,255,255,0.3)'}
+      document.getElementById('supportTicketList').innerHTML=tickets.map(function(t){
+        return '<div onclick="openSupportTicket('+t.id+')" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;background:rgba(255,255,255,0.028);border:1px solid rgba(255,255,255,0.05);margin-bottom:7px;cursor:pointer;transition:background 0.15s" onmouseover="this.style.background=\'rgba(255,255,255,0.048)\'" onmouseout="this.style.background=\'rgba(255,255,255,0.028)\'">'
+          +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:#f1f5f9">#'+t.id+' — '+esc(t.subject)+'</div>'
+          +'<div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:2px">'+t.category+' · '+new Date(t.created_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short'})+'</div></div>'
+          +'<span style="font-size:10px;font-weight:700;text-transform:uppercase;color:'+priColor[t.priority]+'">'+t.priority+'</span>'
+          +'<span style="font-size:10px;font-weight:700;text-transform:uppercase;color:'+statusColor[t.status]+'">'+t.status.replace('_',' ')+'</span>'
+          +'</div>'
+      }).join('')
+    }).catch(function(){ document.getElementById('supportTicketList').innerHTML='<div class="empty"><div class="empty-ico">⚠️</div><p>Could not load tickets.</p></div>' })
+}
+
+function openSupportTicket(id){
+  currentSuppTicketId=id
+  showSupportView('detail')
+  document.getElementById('suppReplyList').innerHTML='<div class="spinner"></div>'
+  var hdrs2=window.Auth?window.Auth.headers():{}
+  fetch(API+'/support/tickets/'+id,{headers:hdrs2})
+    .then(function(r){ return r.json() })
+    .then(function(d){
+      var t=d.ticket, replies=d.replies||[]
+      document.getElementById('suppDetailSubj').textContent='#'+t.id+' — '+t.subject
+      document.getElementById('suppDetailMeta').textContent='Status: '+t.status.replace('_',' ')+' · Priority: '+t.priority+' · '+new Date(t.created_at).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})
+      document.getElementById('suppDetailDesc').textContent=t.description
+      if(!replies.length){ document.getElementById('suppReplyList').innerHTML='<div style="text-align:center;padding:16px;color:rgba(255,255,255,0.25);font-size:12px">No replies yet.</div>'; return }
+      document.getElementById('suppReplyList').innerHTML=replies.map(function(r){
+        return '<div style="padding:11px 14px;border-radius:10px;'+(r.sender_role==='admin'?'background:rgba(77,159,255,0.08);border:1px solid rgba(77,159,255,0.15)':'background:rgba(255,140,0,0.08);border:1px solid rgba(255,140,0,0.15)')+'"><div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:'+(r.sender_role==='admin'?'#4d9fff':'#ff8c00')+';margin-bottom:4px">'+(r.sender_role==='admin'?'Support Team':'You')+'</div><div style="font-size:12.5px;color:rgba(255,255,255,0.7);line-height:1.55">'+esc(r.message)+'</div><div style="font-size:10px;color:rgba(255,255,255,0.2);margin-top:4px">'+new Date(r.created_at).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})+'</div></div>'
+      }).join('')
+    }).catch(function(){ toast('Could not load ticket','err') })
+}
+
+function submitSupportTicket(){
+  var subj=document.getElementById('suppSubj').value.trim()
+  var desc=document.getElementById('suppDesc').value.trim()
+  if(!subj){ toast('Please enter a subject','err'); return }
+  if(!desc){ toast('Please describe your issue','err'); return }
+  var hdrs2=window.Auth?window.Auth.headers():{'Content-Type':'application/json'}
+  fetch(API+'/support/tickets',{method:'POST',headers:hdrs2,body:JSON.stringify({subject:subj,category:document.getElementById('suppCat').value,priority:document.getElementById('suppPri').value,description:desc})})
+    .then(function(r){ return r.json() })
+    .then(function(d){
+      if(d.status==='success'){ toast('Ticket #'+d.ticket_id+' submitted!','ok'); document.getElementById('suppSubj').value=''; document.getElementById('suppDesc').value=''; showSupportView('list') }
+      else toast(d.error||'Submit failed','err')
+    }).catch(function(){ toast('Cannot reach server','err') })
+}
+
+function sendSupportReply(){
+  var msg=document.getElementById('suppReplyInput').value.trim()
+  if(!msg){ toast('Please write a reply','err'); return }
+  var hdrs2=window.Auth?window.Auth.headers():{'Content-Type':'application/json'}
+  fetch(API+'/support/tickets/'+currentSuppTicketId+'/reply',{method:'POST',headers:hdrs2,body:JSON.stringify({message:msg})})
+    .then(function(r){ return r.json() })
+    .then(function(d){
+      if(d.status==='success'){ document.getElementById('suppReplyInput').value=''; toast('Reply sent','ok'); openSupportTicket(currentSuppTicketId) }
+      else toast(d.error||'Failed','err')
+    }).catch(function(){ toast('Cannot reach server','err') })
 }
 
 function fmtNum(n){ if(!n&&n!==0) return '—'; if(n>=1e6) return (n/1e6).toFixed(1)+'M'; if(n>=1e3) return (n/1e3).toFixed(1)+'K'; return Number(n).toLocaleString() }

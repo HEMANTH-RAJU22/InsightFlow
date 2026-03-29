@@ -382,6 +382,10 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
         <span class="nav-badge" id="sbUserCnt">—</span>
       </div>
       <div class="nav-item" id="tab-announcements" onclick="showTab('announcements')"><div class="nav-icon">🔔</div><span>Announcements</span></div>
+      <div class="nav-item" id="tab-tickets" onclick="showTab('tickets')">
+        <div class="nav-icon">🎫</div><span>Manage Tickets</span>
+        <span class="nav-badge" id="sbTicketCnt">—</span>
+      </div>
       <div class="sb-section">System</div>
       <div class="nav-item" id="tab-settings" onclick="showTab('settings')"><div class="nav-icon">⚙️</div><span>Settings</span></div>
       <div class="sb-div"></div>
@@ -451,7 +455,7 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
       </div>
     </div>
 
-    <!-- USER MANAGEMENT (combined) -->
+    <!-- USER MANAGEMENT -->
     <div class="sec" id="sec-management">
       <div class="pg-head">
         <div class="pg-head-l">
@@ -462,15 +466,11 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
           <button class="btn btn-glass btn-sm" onclick="exportUsersCSV()">↓ Export Users CSV</button>
         </div>
       </div>
-
-      <!-- Inner tabs -->
       <div class="inner-tabs">
         <button class="inner-tab active" id="itab-users" onclick="showInnerTab('users')">👥 Users <span class="tab-count" id="tabCntUsers">—</span></button>
         <button class="inner-tab" id="itab-datasets" onclick="showInnerTab('datasets')">🗂️ Datasets <span class="tab-count" id="tabCntDatasets">—</span></button>
         <button class="inner-tab" id="itab-charts" onclick="showInnerTab('charts')">📊 Saved Charts <span class="tab-count" id="tabCntCharts">—</span></button>
       </div>
-
-      <!-- USERS inner section -->
       <div class="inner-sec active" id="isec-users">
         <div class="stat-row">
           <div class="stat-mini"><div class="stat-mini-val" style="color:var(--green)" id="statActive">—</div><div class="stat-mini-lbl">Active</div></div>
@@ -492,8 +492,6 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
           <div class="pag" id="usersPag"></div>
         </div>
       </div>
-
-      <!-- DATASETS inner section -->
       <div class="inner-sec" id="isec-datasets">
         <div class="glass">
           <div class="sbar">
@@ -509,8 +507,6 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
           <div class="pag" id="datasetsPag"></div>
         </div>
       </div>
-
-      <!-- CHARTS inner section -->
       <div class="inner-sec" id="isec-charts">
         <div class="glass">
           <div class="sbar">
@@ -544,7 +540,87 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
           <div style="display:flex;flex-direction:column;gap:14px">
             <div class="stat-mini" style="text-align:left;display:flex;align-items:center;justify-content:space-between;padding:18px"><div><div class="stat-mini-lbl" style="margin-bottom:6px">Total Sent</div><div class="stat-mini-val" style="color:var(--accent)" id="annTotal">0</div></div><div style="font-size:28px;opacity:0.3">📢</div></div>
             <div class="stat-mini" style="text-align:left;display:flex;align-items:center;justify-content:space-between;padding:18px"><div><div class="stat-mini-lbl" style="margin-bottom:6px">This Month</div><div class="stat-mini-val" style="color:var(--blue)" id="annMonth">0</div></div><div style="font-size:28px;opacity:0.3">📅</div></div>
-            <div style="background:rgba(255,140,0,0.07);border:1px solid rgba(255,140,0,0.15);border-radius:var(--r-sm);padding:16px 18px"><div style="font-size:11px;color:var(--text-3);margin-bottom:6px;font-weight:600;letter-spacing:0.5px">INFO</div><div style="font-size:12px;color:var(--text-2);line-height:1.6">Announcements persist in your browser's localStorage. They'll survive page refreshes but are per-device.</div></div>
+            <div style="background:rgba(255,140,0,0.07);border:1px solid rgba(255,140,0,0.15);border-radius:var(--r-sm);padding:16px 18px"><div style="font-size:11px;color:var(--text-3);margin-bottom:6px;font-weight:600;letter-spacing:0.5px">INFO</div><div style="font-size:12px;color:var(--text-2);line-height:1.6">Announcements are saved to the database and visible to all active users in real-time.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MANAGE TICKETS -->
+    <div class="sec" id="sec-tickets">
+      <div class="pg-head">
+        <div class="pg-head-l">
+          <div class="pg-icon" style="background:rgba(255,209,102,0.08);border-color:rgba(255,209,102,0.15)">🎫</div>
+          <div><div class="pg-title">Manage Tickets</div><div class="pg-sub">All user support tickets — reply, resolve, close</div></div>
+        </div>
+        <div class="pg-actions">
+          <button class="btn btn-glass btn-sm" onclick="loadAdminTickets()">↻ Refresh</button>
+        </div>
+      </div>
+
+      <!-- Ticket Stats -->
+      <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
+        <div class="kpi-card kpi-r"><div class="kpi-label">Open</div><div class="kpi-value red" id="tktOpen">—</div></div>
+        <div class="kpi-card kpi-b"><div class="kpi-label">In Progress</div><div class="kpi-value blue" id="tktInProg">—</div></div>
+        <div class="kpi-card kpi-g"><div class="kpi-label">Resolved</div><div class="kpi-value green" id="tktResolved">—</div></div>
+        <div class="kpi-card kpi-y"><div class="kpi-label">Avg Rating</div><div class="kpi-value yellow" id="tktRating">—</div></div>
+      </div>
+
+      <!-- Ticket list -->
+      <div id="adminTicketList">
+        <div class="glass">
+          <div class="sbar">
+            <div class="sw"><span class="sw-ico">🔍</span><input class="sinput" id="tktSearch" placeholder="Search tickets..." oninput="filterAdminTickets()"></div>
+            <select class="fsel" id="tktStatusFilter" onchange="filterAdminTickets()">
+              <option value="">All Status</option>
+              <option value="open">Open</option>
+              <option value="in_progress">In Progress</option>
+              <option value="resolved">Resolved</option>
+              <option value="closed">Closed</option>
+            </select>
+            <select class="fsel" id="tktPriFilter" onchange="filterAdminTickets()">
+              <option value="">All Priority</option>
+              <option value="urgent">Urgent</option>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>
+          </div>
+          <div class="tbl-wrap">
+            <table class="gtable">
+              <thead><tr><th>#</th><th>Subject</th><th>User</th><th>Category</th><th>Priority</th><th>Status</th><th>Created</th><th>Replies</th><th>Actions</th></tr></thead>
+              <tbody id="adminTicketsBody"><tr><td colspan="9"><div class="spinner"></div></td></tr></tbody>
+            </table>
+          </div>
+          <div class="pag" id="tktPag"></div>
+        </div>
+      </div>
+
+      <!-- Ticket detail -->
+      <div id="adminTicketDetail" style="display:none;flex-direction:column;gap:16px">
+        <span style="color:var(--accent);cursor:pointer;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px" onclick="backToAdminTickets()">← Back to tickets</span>
+        <div class="glass">
+          <div class="glass-head">
+            <div class="glass-head-ico">🎫</div>
+            <h2 id="tktDetailSubj">—</h2>
+            <div class="glass-head-r" id="tktDetailBadges"></div>
+          </div>
+          <div style="font-size:11px;color:var(--text-3);margin-bottom:12px" id="tktDetailMeta"></div>
+          <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:14px 16px;font-size:13px;color:var(--text-2);line-height:1.7" id="tktDetailDesc"></div>
+          <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap">
+            <button class="btn btn-glass btn-sm" onclick="setTicketStatus('open')">🔴 Open</button>
+            <button class="btn btn-glass btn-sm" onclick="setTicketStatus('in_progress')">🔵 In Progress</button>
+            <button class="btn btn-success btn-sm" onclick="setTicketStatus('resolved')">✅ Resolved</button>
+            <button class="btn btn-glass btn-sm" onclick="setTicketStatus('closed')">⬜ Closed</button>
+            <button class="btn btn-danger btn-sm" style="margin-left:auto" onclick="deleteAdminTicket()">🗑 Delete</button>
+          </div>
+        </div>
+        <div class="glass">
+          <div class="glass-head"><div class="glass-head-ico">💬</div><h2>Conversation</h2></div>
+          <div id="adminReplyList" style="display:flex;flex-direction:column;gap:10px"></div>
+          <div style="margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.05)">
+            <textarea class="mi" id="adminReplyInput" rows="3" placeholder="Write your reply as support team..." style="width:100%;margin-bottom:10px;resize:vertical"></textarea>
+            <button class="btn btn-primary btn-sm" onclick="sendAdminReply()">Send Reply</button>
           </div>
         </div>
       </div>
@@ -585,8 +661,8 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
       </div>
     </div>
 
-  </div>
-</div>
+  </div><!-- end .canvas -->
+</div><!-- end .layout -->
 
 <script>
 const API='http://127.0.0.1:5000'
@@ -615,7 +691,7 @@ setInterval(()=>{
   if(a)a.textContent=t; if(b)b.textContent=t
 },1000)
 
-/* ── Auto Refresh every 30s ── */
+/* ── Auto Refresh ── */
 function startAutoRefresh(){
   refreshTimer=30
   refreshInterval=setInterval(()=>{
@@ -646,9 +722,10 @@ function showTab(name){
   document.getElementById('mainCanvas').scrollTop=0
   if(name==='analytics')renderAnalytics()
   if(name==='management'){ loadDatasets(); loadAdminCharts() }
+  if(name==='tickets') loadAdminTickets()
 }
 
-/* ── Inner Tab (User Management) ── */
+/* ── Inner Tab ── */
 function showInnerTab(name){
   document.querySelectorAll('.inner-sec').forEach(s=>s.classList.remove('active'))
   document.querySelectorAll('.inner-tab').forEach(t=>t.classList.remove('active'))
@@ -926,128 +1003,148 @@ function pag(elId,total,cur,cb){
   el.innerHTML=`<span class="pag-info">Showing ${s}–${e} of ${total}</span><div class="pag-btns">${btns}</div>`
 }
 
-/* ══ ANNOUNCEMENTS (localStorage persistence) ══ */
-/*
-  ══════════════════════════════════════════════════════════════
-  INSIGHTFLOW ADMIN — Announcement Functions Fix
-  ══════════════════════════════════════════════════════════════
-
-  In admin.html, REPLACE the entire block marked
-  "ANNOUNCEMENTS (localStorage persistence)" with this code.
-
-  The original used localStorage only — announcements were not
-  saved to the database and never appeared in the dashboard ticker.
-
-  This version:
-  • Saves announcements to MySQL via POST /admin/announcements
-  • Loads them from DB via GET /admin/announcements
-  • Deletes from DB via DELETE /admin/announcements/<id>
-  • Dashboard ticker reads /announcements/active → now shows them
-  ══════════════════════════════════════════════════════════════
-*/
-
-/* ══ ANNOUNCEMENTS (DB-backed via /admin/announcements) ══ */
+/* ══ ANNOUNCEMENTS ══ */
 async function loadAnnFromStorage(){
   try{
     const d=await fetch(API+'/admin/announcements',{headers:hdrs()}).then(r=>r.json())
     if(d.error){ toast('Announcements: '+d.error,'err'); return }
     annList=d.announcements||[]
   }catch(e){
-    // fallback to localStorage if server unavailable
     try{ const s=localStorage.getItem('insightflow_admin_ann'); if(s) annList=JSON.parse(s) }catch(e2){}
   }
   renderAnn()
-}
-
-function saveAnnToStorage(){
-  // kept as local backup only
-  try{ localStorage.setItem('insightflow_admin_ann',JSON.stringify(annList)) }catch(e){}
 }
 
 function sendAnn(){
   const title=document.getElementById('annTitle').value.trim()
   const body=document.getElementById('annBody').value.trim()
   if(!title||!body){ toast('Title and message are required','err'); return }
-
-  fetch(API+'/admin/announcements',{
-    method:'POST',
-    headers:hdrs(),
-    body:JSON.stringify({
-      title,
-      message: body,
-      type:   document.getElementById('annType').value,
-      target: document.getElementById('annTarget').value
-    })
-  })
-  .then(r=>r.json())
-  .then(d=>{
-    if(d.status==='success'){
-      closeModal('annModal')
-      document.getElementById('annTitle').value=''
-      document.getElementById('annBody').value=''
-      toast('Announcement broadcast to all users ✓','ok')
-      loadAnnFromStorage()
-    } else {
-      toast(d.message||d.error||'Broadcast failed','err')
-    }
-  })
-  .catch(()=>toast('Server error — check Flask is running','err'))
+  fetch(API+'/admin/announcements',{method:'POST',headers:hdrs(),body:JSON.stringify({title,message:body,type:document.getElementById('annType').value,target:document.getElementById('annTarget').value})})
+  .then(r=>r.json()).then(d=>{
+    if(d.status==='success'){ closeModal('annModal'); document.getElementById('annTitle').value=''; document.getElementById('annBody').value=''; toast('Announcement broadcast to all users ✓','ok'); loadAnnFromStorage() }
+    else toast(d.message||d.error||'Broadcast failed','err')
+  }).catch(()=>toast('Server error — check Flask is running','err'))
 }
 
 function renderAnn(){
   document.getElementById('annTotal').textContent=annList.length
-  document.getElementById('annMonth').textContent=annList.filter(
-    a=>new Date(a.created_at||a.sent||Date.now()).getMonth()===new Date().getMonth()
-  ).length
-
+  document.getElementById('annMonth').textContent=annList.filter(a=>new Date(a.created_at||a.sent||Date.now()).getMonth()===new Date().getMonth()).length
   const el=document.getElementById('annList')
   const tc={info:'b-blue',warning:'b-orange',success:'b-green'}
-
-  if(!annList.length){
-    el.innerHTML='<div class="empty"><div class="empty-ico">📢</div><p>No announcements yet.<br>Create one to notify all users.</p></div>'
-    return
-  }
-
-  el.innerHTML=annList.map(a=>{
-    const typeColor=tc[a.type]||'b-gray'
-    const typeLabel=esc((a.type||'info').toUpperCase())
-    const whenSent=fmtDT(a.created_at||a.sent)
-    const audience=(a.target||'all')==='all'?'All users':'Active users'
-    const statusBadge=a.is_active!==undefined
-      ? (a.is_active
-          ? '<span style="color:var(--green)">● Active</span>'
-          : '<span style="color:var(--red)">○ Inactive</span>')
-      : ''
-    return `<div class="ann-card">
-      <div class="ann-head">
-        <span class="badge ${typeColor}">${typeLabel}</span>
-        <div class="ann-title">${esc(a.title)}</div>
-        <button onclick="delAnn(${a.id})"
-          style="background:none;border:none;cursor:pointer;color:var(--text-3);font-size:14px;padding:0;transition:color 0.15s"
-          onmouseover="this.style.color='var(--red)'"
-          onmouseout="this.style.color='var(--text-3)'">✕</button>
-      </div>
-      <div class="ann-body">${esc(a.message||a.body||'')}</div>
-      <div class="ann-meta">${whenSent} · ${audience} ${statusBadge}</div>
-    </div>`
-  }).join('')
+  if(!annList.length){ el.innerHTML='<div class="empty"><div class="empty-ico">📢</div><p>No announcements yet.<br>Create one to notify all users.</p></div>'; return }
+  el.innerHTML=annList.map(a=>`<div class="ann-card"><div class="ann-head"><span class="badge ${tc[a.type]||'b-gray'}">${esc((a.type||'info').toUpperCase())}</span><div class="ann-title">${esc(a.title)}</div><button onclick="delAnn(${a.id})" style="background:none;border:none;cursor:pointer;color:var(--text-3);font-size:14px;padding:0;transition:color 0.15s" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--text-3)'">✕</button></div><div class="ann-body">${esc(a.message||a.body||'')}</div><div class="ann-meta">${fmtDT(a.created_at||a.sent)} · ${(a.target||'all')==='all'?'All users':'Active users'} ${a.is_active!==undefined?(a.is_active?'<span style="color:var(--green)">● Active</span>':'<span style="color:var(--red)">○ Inactive</span>'):''}</div></div>`).join('')
 }
 
 function delAnn(id){
   if(!confirm('Delete this announcement?')) return
-  fetch(API+'/admin/announcements/'+id,{method:'DELETE',headers:hdrs()})
-  .then(r=>r.json())
-  .then(d=>{
-    if(d.status==='success'){
-      annList=annList.filter(a=>a.id!==id)
-      renderAnn()
-      toast('Announcement removed','ok')
-    } else {
-      toast(d.error||'Delete failed','err')
-    }
-  })
-  .catch(()=>toast('Server error','err'))
+  fetch(API+'/admin/announcements/'+id,{method:'DELETE',headers:hdrs()}).then(r=>r.json()).then(d=>{
+    if(d.status==='success'){ annList=annList.filter(a=>a.id!==id); renderAnn(); toast('Announcement removed','ok') }
+    else toast(d.error||'Delete failed','err')
+  }).catch(()=>toast('Server error','err'))
 }
+
+/* ══ TICKETS ══ */
+var allAdminTickets=[], tktPage=1, currentAdminTicketId=null
+
+async function loadAdminTickets(){
+  try{
+    const d=await fetch(API+'/admin/tickets',{headers:hdrs()}).then(r=>r.json())
+    allAdminTickets=d.tickets||[]
+    renderAdminTickets()
+    const stats=await fetch(API+'/admin/support/stats',{headers:hdrs()}).then(r=>r.json())
+    document.getElementById('tktOpen').textContent=stats.open||0
+    document.getElementById('tktInProg').textContent=stats.in_progress||0
+    document.getElementById('tktResolved').textContent=stats.resolved||0
+    document.getElementById('tktRating').textContent=stats.avg_rating?stats.avg_rating+'★':'—'
+    document.getElementById('sbTicketCnt').textContent=stats.open||0
+  }catch(e){ console.error('loadAdminTickets',e) }
+}
+
+function renderAdminTickets(filtered=null){
+  const data=filtered||allAdminTickets, tbody=document.getElementById('adminTicketsBody')
+  if(!data.length){ tbody.innerHTML='<tr><td colspan="9"><div class="empty"><div class="empty-ico">🎫</div><p>No tickets found.</p></div></td></tr>'; document.getElementById('tktPag').innerHTML=''; return }
+  const s=(tktPage-1)*PER, slice=data.slice(s,s+PER)
+  const priColor={urgent:'var(--red)',high:'#ff8c00',medium:'var(--yellow)',low:'var(--green)'}
+  const statusColor={open:'var(--red)',in_progress:'var(--blue)',resolved:'var(--green)',closed:'var(--text-3)'}
+  tbody.innerHTML=slice.map(t=>`<tr>
+    <td><strong>#${t.id}</strong></td>
+    <td><strong>${esc(t.subject)}</strong></td>
+    <td><div style="font-size:11px"><div style="color:var(--text-1);font-weight:600">${esc(t.user_name||'—')}</div><div style="color:var(--text-3)">${esc(t.user_email||'—')}</div></div></td>
+    <td><span class="badge b-gray">${esc(t.category)}</span></td>
+    <td><span style="color:${priColor[t.priority]||'#fff'};font-size:11px;font-weight:700;text-transform:uppercase">${t.priority}</span></td>
+    <td><span style="color:${statusColor[t.status]||'#fff'};font-size:11px;font-weight:700;text-transform:uppercase">${t.status.replace('_',' ')}</span></td>
+    <td style="font-size:11px;color:var(--text-3)">${fmtDate(t.created_at)}</td>
+    <td><span class="badge b-blue">${t.reply_count||0}</span></td>
+    <td><button class="btn btn-glass btn-sm" onclick="openAdminTicket(${t.id})">View →</button></td>
+  </tr>`).join('')
+  pag('tktPag',data.length,tktPage,p=>{ tktPage=p; renderAdminTickets(filtered) })
+}
+
+function filterAdminTickets(){
+  const q=document.getElementById('tktSearch').value.toLowerCase()
+  const s=document.getElementById('tktStatusFilter').value
+  const p=document.getElementById('tktPriFilter').value
+  const f=allAdminTickets.filter(t=>{
+    const mq=!q||t.subject.toLowerCase().includes(q)||t.user_email.toLowerCase().includes(q)||t.user_name.toLowerCase().includes(q)
+    return mq&&(!s||t.status===s)&&(!p||t.priority===p)
+  })
+  tktPage=1; renderAdminTickets(f)
+}
+
+async function openAdminTicket(id){
+  currentAdminTicketId=id
+  document.getElementById('adminTicketList').style.display='none'
+  document.getElementById('adminTicketDetail').style.display='flex'
+  document.getElementById('adminReplyList').innerHTML='<div class="spinner"></div>'
+  try{
+    const d=await fetch(API+'/support/tickets/'+id,{headers:hdrs()}).then(r=>r.json())
+    const t=d.ticket, replies=d.replies||[]
+    document.getElementById('tktDetailSubj').textContent='#'+t.id+' — '+t.subject
+    document.getElementById('tktDetailMeta').textContent='User: '+(t.user_email||'—')+' · Category: '+t.category+' · Created: '+fmtDT(t.created_at)
+    document.getElementById('tktDetailDesc').textContent=t.description
+    const priColor={urgent:'b-red',high:'b-orange',medium:'b-orange',low:'b-green'}
+    const statusColor={open:'b-red',in_progress:'b-blue',resolved:'b-green',closed:'b-gray'}
+    document.getElementById('tktDetailBadges').innerHTML='<span class="badge '+priColor[t.priority]+'">'+t.priority+'</span>'+'<span class="badge '+statusColor[t.status]+'">'+t.status.replace('_',' ')+'</span>'
+    if(!replies.length){
+      document.getElementById('adminReplyList').innerHTML='<div style="text-align:center;padding:22px;color:var(--text-3);font-size:13px">No replies yet.</div>'
+    } else {
+      document.getElementById('adminReplyList').innerHTML=replies.map(r=>`<div style="padding:13px 16px;border-radius:11px;${r.sender_role==='admin'?'background:rgba(77,159,255,0.08);border:1px solid rgba(77,159,255,0.15)':'background:rgba(255,140,0,0.08);border:1px solid rgba(255,140,0,0.15)'}"><div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:${r.sender_role==='admin'?'var(--blue)':'var(--accent)'};margin-bottom:5px">${r.sender_role==='admin'?'Support Team':'User'}</div><div style="font-size:13px;color:var(--text-2);line-height:1.6">${esc(r.message)}</div><div style="font-size:10px;color:var(--text-3);margin-top:4px">${fmtDT(r.created_at)}</div></div>`).join('')
+    }
+  }catch(e){ toast('Could not load ticket','err') }
+}
+
+function backToAdminTickets(){
+  currentAdminTicketId=null
+  document.getElementById('adminTicketDetail').style.display='none'
+  document.getElementById('adminTicketList').style.display='block'
+}
+
+async function sendAdminReply(){
+  const msg=document.getElementById('adminReplyInput').value.trim()
+  if(!msg){ toast('Please write a reply','err'); return }
+  try{
+    const d=await fetch(API+'/support/tickets/'+currentAdminTicketId+'/reply',{method:'POST',headers:hdrs(),body:JSON.stringify({message:msg})}).then(r=>r.json())
+    if(d.status==='success'){ document.getElementById('adminReplyInput').value=''; toast('Reply sent','ok'); openAdminTicket(currentAdminTicketId) }
+    else toast(d.error||'Failed','err')
+  }catch(e){ toast('Server error','err') }
+}
+
+async function setTicketStatus(status){
+  try{
+    const d=await fetch(API+'/support/tickets/'+currentAdminTicketId+'/status',{method:'PUT',headers:hdrs(),body:JSON.stringify({status})}).then(r=>r.json())
+    if(d.status==='success'){ toast('Status updated to '+status,'ok'); openAdminTicket(currentAdminTicketId); loadAdminTickets() }
+    else toast(d.error||'Failed','err')
+  }catch(e){ toast('Server error','err') }
+}
+
+async function deleteAdminTicket(){
+  if(!confirm('Delete this ticket permanently?')) return
+  try{
+    await fetch(API+'/support/tickets/'+currentAdminTicketId,{method:'DELETE',headers:hdrs()})
+    toast('Ticket deleted','ok'); backToAdminTickets(); loadAdminTickets()
+  }catch(e){ toast('Server error','err') }
+}
+
 /* ══ SETTINGS ══ */
 function saveSettings(){
   try{ localStorage.setItem('insightflow_admin_cfg',JSON.stringify({name:document.getElementById('cfg-name').value,api:document.getElementById('cfg-api').value,jwt:document.getElementById('cfg-jwt').value,size:document.getElementById('cfg-size').value,rate:document.getElementById('cfg-rate').value,model:document.getElementById('cfg-model').value})) }catch(e){}
@@ -1069,6 +1166,7 @@ function exportReport(){
   const rows=['InsightFlow Admin Report','Generated: '+new Date().toLocaleString(),'','Metric,Value','Total Users,'+document.getElementById('kpiUsers').textContent,'Total Datasets,'+document.getElementById('kpiDs').textContent,'Chat Messages,'+document.getElementById('kpiChats').textContent,'Saved Charts,'+document.getElementById('kpiCharts').textContent,'Activity Events,'+document.getElementById('kpiActivity').textContent,'Avg Rows/Upload,'+document.getElementById('kpiAvgRows').textContent,'Total Rows Analyzed,'+document.getElementById('kpiTotalRows').textContent]
   dlCSV(rows,'insightflow_admin_report.csv'); toast('Report exported','ok')
 }
+
 function adminLogout(){
   if(!confirm('Log out of the admin panel?'))return
   try{ if(window.Auth)window.Auth.logout(); else{ localStorage.clear(); window.location.replace('login.html') } }
