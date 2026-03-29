@@ -1816,6 +1816,421 @@ def admin_delete_announcement(ann_id):
     finally:
         cursor.close()
         db.close()
+
+
+# ═══════════════════════════════════════════════════════════════
+#  SUPPORT SYSTEM ROUTES
+# ═══════════════════════════════════════════════════════════════
+
+# ── GET all tickets for a user ───────────────────────────────
+@app.route("/support/tickets")
+@require_auth
+def get_tickets():
+    user = get_current_user()
+    db, cursor = get_db()
+    if not db:
+        return jsonify({"error": "Database unavailable"}), 500
+    try:
+        cursor.execute("SELECT id FROM users WHERE email=%s", (user["email"],))
+        u = cursor.fetchone()
+        if not u:
+            return jsonify({"tickets": []})
+        cursor.execute(
+            """SELECT id, subject, category, priority, status, rating, created_at, updated_at, resolved_at
+               FROM support_tickets WHERE user_id=%s
+               ORDER BY created_at DESC LIMIT 50""",
+            (u["id"],)
+        )
+        rows = cursor.fetchall()
+        for r in rows:
+            for k in ["created_at", "updated_at", "resolved_at"]:
+                if r.get(k): r[k] = str(r[k])
+        return jsonify({"tickets": rows})
+    except Exception as e:
+        log.error("Get tickets error: %s", e)
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close();
+        db.close()
+
+
+# ── CREATE a ticket ──────────────────────────────────────────
+@app.route("/support/tickets", methods=["POST"])
+@require_auth
+def create_ticket():
+    user = get_current_user()
+    data = request.json or {}
+    subject = data.get("subject", "").strip()[:255]
+    category = data.get("category", "other")
+    priority = data.get("priority", "medium")
+    description = data.get("description", "").strip()
+
+    if not subject or not description:
+        return jsonify({"error": "Subject and description are required"}), 400
+    if category not in ("bug", "feature", "billing", "account", "data", "other"):
+        category = "other"
+    if priority not in ("low", "medium", "high", "urgent"):
+        priority = "medium"
+
+    db, cursor = get_db()
+    if not db:
+        return jsonify({"error": "Database unavailable"}), 500
+    try:
+        cursor.execute("SELECT id FROM users WHERE email=%s", (user["email"],))
+        u = cursor.fetchone()
+        if not u:
+            return jsonify({"error": "User not found"}), 404
+        cursor.execute(
+            """INSERT INTO support_tickets (user_id, subject, category, priority, description)
+               VALUES (%s,%s,%s,%s,%s)""",
+            (u["id"], subject, category, priority, description)
+        )
+        ticket_id = cursor.lastrowid
+        cursor.execute(
+            "INSERT INTO activity_log(user_id, action, detail, ip_address) VALUES(%s,%s,%s,%s)",
+            (u["id"], "support_ticket", subject[:100], request.remote_addr or "unknown")
+        )
+        db.commit()
+        log.info("Support ticket #%d created by %s", ticket_id, user["email"])
+        return jsonify({"status": "success", "ticket_id": ticket_id})
+    except Exception as e:
+        log.error("Create ticket error: %s", e)
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close();
+        db.close()
+
+
+# ── GET single ticket with replies ───────────────────────────
+@app.route("/support/tickets/<int:ticket_id>")
+@require_auth
+def get_ticket(ticket_id):
+    user = get_current_user()
+    db, cursor = get_db()
+    if not db:
+        return jsonify({"error": "Database unavailable"}), 500
+    try:
+        cursor.execute("SELECT id, role FROM users WHERE email=%s", (user["email"],))
+        u = cursor.fetchone()
+        if not u:
+            return jsonify({"error": "User not found"}), 404
+
+        # Admins can see all tickets, users only their own
+        if u.get("role") == "admin":
+            cursor.execute("SELECT * FROM support_tickets WHERE id=%s", (ticket_id,))
+        else:
+            cursor.execute("SELECT * FROM support_tickets WHERE id=%s AND user_id=%s", (ticket_id, u["id"]))
+
+        ticket = cursor.fetchone()
+        if not ticket:
+            return jsonify({"error": "Ticket not found"}), 404
+        for k in ["created_at", "updated_at", "resolved_at"]:
+            if ticket.get(k): ticket[k] = str(ticket[k])
+
+        cursor.execute(
+            """SELECT r.id, r.sender_role, r.message, r.created_at,
+                      COALESCE(u2.name, 'Support Team') as sender_name
+               FROM ticket_replies r
+               LEFT JOIN users u2 ON u2.id = r.user_id
+               WHERE r.ticket_id=%s ORDER BY r.created_at ASC""",
+            (ticket_id,)
+        )
+        replies = cursor.fetchall()
+        for r in replies:
+            if r.get("created_at"): r["created_at"] = str(r["created_at"])
+
+        return jsonify({"ticket": ticket, "replies": replies})
+    except Exception as e:
+        log.error("Get ticket error: %s", e)
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close();
+        db.close()
+
+
+# ── REPLY to a ticket ────────────────────────────────────────
+@app.route("/support/tickets/<int:ticket_id>/reply", methods=["POST"])
+@require_auth
+def reply_ticket(ticket_id):
+    user = get_current_user()
+    data = request.json or {}
+    message = data.get("message", "").strip()
+    if not message:
+        return jsonify({"error": "Message is required"}), 400
+
+    db, cursor = get_db()
+    if not db:
+        return jsonify({"error": "Database unavailable"}), 500
+    try:
+        cursor.execute("SELECT id, role FROM users WHERE email=%s", (user["email"],))
+        u = cursor.fetchone()
+        if not u:
+            return jsonify({"error": "User not found"}), 404
+
+        is_admin = u.get("role") == "admin"
+        sender_role = "admin" if is_admin else "user"
+
+        # Verify access
+        if is_admin:
+            cursor.execute("SELECT id FROM support_tickets WHERE id=%s", (ticket_id,))
+        else:
+            cursor.execute("SELECT id FROM support_tickets WHERE id=%s AND user_id=%s", (ticket_id, u["id"]))
+        if not cursor.fetchone():
+            return jsonify({"error": "Ticket not found"}), 404
+
+        cursor.execute(
+            """INSERT INTO ticket_replies (ticket_id, user_id, sender_role, message)
+               VALUES (%s,%s,%s,%s)""",
+            (ticket_id, u["id"], sender_role, message)
+        )
+        # Update ticket status
+        if is_admin:
+            cursor.execute(
+                "UPDATE support_tickets SET status='in_progress', updated_at=NOW() WHERE id=%s AND status='open'",
+                (ticket_id,)
+            )
+        else:
+            cursor.execute(
+                "UPDATE support_tickets SET updated_at=NOW() WHERE id=%s", (ticket_id,)
+            )
+        db.commit()
+        return jsonify({"status": "success"})
+    except Exception as e:
+        log.error("Reply ticket error: %s", e)
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close();
+        db.close()
+
+
+# ── UPDATE ticket status (admin) ─────────────────────────────
+@app.route("/support/tickets/<int:ticket_id>/status", methods=["PUT"])
+@require_auth
+def update_ticket_status(ticket_id):
+    user = get_current_user()
+    data = request.json or {}
+    status = data.get("status", "")
+    if status not in ("open", "in_progress", "resolved", "closed"):
+        return jsonify({"error": "Invalid status"}), 400
+
+    db, cursor = get_db()
+    if not db:
+        return jsonify({"error": "Database unavailable"}), 500
+    try:
+        cursor.execute("SELECT role FROM users WHERE email=%s", (user["email"],))
+        u = cursor.fetchone()
+        if not u or u.get("role") != "admin":
+            return jsonify({"error": "Admin access required"}), 403
+
+        resolved_at = "NOW()" if status == "resolved" else "NULL"
+        cursor.execute(
+            f"UPDATE support_tickets SET status=%s, updated_at=NOW(), resolved_at={'NOW()' if status == 'resolved' else 'NULL'} WHERE id=%s",
+            (status, ticket_id)
+        )
+        db.commit()
+        return jsonify({"status": "success"})
+    except Exception as e:
+        log.error("Update ticket status error: %s", e)
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close();
+        db.close()
+
+
+# ── RATE a resolved ticket ───────────────────────────────────
+@app.route("/support/tickets/<int:ticket_id>/rate", methods=["POST"])
+@require_auth
+def rate_ticket(ticket_id):
+    user = get_current_user()
+    data = request.json or {}
+    rating = int(data.get("rating", 0))
+    note = data.get("note", "").strip()[:500]
+    if rating < 1 or rating > 5:
+        return jsonify({"error": "Rating must be 1-5"}), 400
+
+    db, cursor = get_db()
+    if not db:
+        return jsonify({"error": "Database unavailable"}), 500
+    try:
+        cursor.execute("SELECT id FROM users WHERE email=%s", (user["email"],))
+        u = cursor.fetchone()
+        if not u:
+            return jsonify({"error": "User not found"}), 404
+        cursor.execute(
+            "SELECT id FROM support_tickets WHERE id=%s AND user_id=%s AND status='resolved'",
+            (ticket_id, u["id"])
+        )
+        if not cursor.fetchone():
+            return jsonify({"error": "Ticket not found or not resolved"}), 404
+        cursor.execute(
+            "UPDATE support_tickets SET rating=%s, rating_note=%s WHERE id=%s",
+            (rating, note, ticket_id)
+        )
+        db.commit()
+        return jsonify({"status": "success"})
+    except Exception as e:
+        log.error("Rate ticket error: %s", e)
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close();
+        db.close()
+
+
+# ── FAQ — public list ────────────────────────────────────────
+@app.route("/support/faq")
+def get_faq():
+    db, cursor = get_db()
+    if not db:
+        return jsonify({"faq": []})
+    try:
+        cursor.execute(
+            "SELECT id, question, answer, category FROM faq_items WHERE is_active=1 ORDER BY category, sort_order"
+        )
+        return jsonify({"faq": cursor.fetchall()})
+    except Exception as e:
+        log.error("FAQ error: %s", e)
+        return jsonify({"faq": []})
+    finally:
+        cursor.close();
+        db.close()
+
+
+# ── ADMIN: all tickets ───────────────────────────────────────
+@app.route("/admin/tickets")
+@require_admin
+def admin_tickets():
+    db, cursor = get_db()
+    if not db:
+        return jsonify({"error": "Database unavailable"}), 500
+    try:
+        cursor.execute(
+            """SELECT t.id, t.subject, t.category, t.priority, t.status,
+                      t.rating, t.created_at, t.updated_at, t.resolved_at,
+                      u.name as user_name, u.email as user_email,
+                      (SELECT COUNT(*) FROM ticket_replies r WHERE r.ticket_id=t.id) as reply_count
+               FROM support_tickets t
+               JOIN users u ON u.id = t.user_id
+               ORDER BY
+                 FIELD(t.status,'open','in_progress','resolved','closed'),
+                 FIELD(t.priority,'urgent','high','medium','low'),
+                 t.created_at DESC
+               LIMIT 500"""
+        )
+        rows = cursor.fetchall()
+        for r in rows:
+            for k in ["created_at", "updated_at", "resolved_at"]:
+                if r.get(k): r[k] = str(r[k])
+        return jsonify({"tickets": rows})
+    except Exception as e:
+        log.error("Admin tickets error: %s", e)
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close();
+        db.close()
+
+
+# ── ADMIN: support stats ─────────────────────────────────────
+@app.route("/admin/support/stats")
+@require_admin
+def admin_support_stats():
+    db, cursor = get_db()
+    if not db:
+        return jsonify({"error": "Database unavailable"}), 500
+    try:
+        cursor.execute("SELECT COUNT(*) as total FROM support_tickets")
+        total = cursor.fetchone()["total"]
+        cursor.execute("SELECT COUNT(*) as c FROM support_tickets WHERE status='open'")
+        open_count = cursor.fetchone()["c"]
+        cursor.execute("SELECT COUNT(*) as c FROM support_tickets WHERE status='in_progress'")
+        in_prog = cursor.fetchone()["c"]
+        cursor.execute("SELECT COUNT(*) as c FROM support_tickets WHERE status='resolved'")
+        resolved = cursor.fetchone()["c"]
+        cursor.execute("SELECT ROUND(AVG(rating),1) as avg FROM support_tickets WHERE rating IS NOT NULL")
+        avg_rating = cursor.fetchone()["avg"] or 0
+        cursor.execute(
+            """SELECT ROUND(AVG(TIMESTAMPDIFF(HOUR, t.created_at, r.created_at)),1) as avg_hrs
+               FROM support_tickets t
+               JOIN ticket_replies r ON r.ticket_id=t.id AND r.sender_role='admin'
+               WHERE t.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)"""
+        )
+        avg_response = cursor.fetchone()["avg_hrs"] or 0
+        return jsonify({
+            "total": total, "open": open_count,
+            "in_progress": in_prog, "resolved": resolved,
+            "avg_rating": float(avg_rating),
+            "avg_response_hours": float(avg_response)
+        })
+    except Exception as e:
+        log.error("Admin support stats error: %s", e)
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close();
+        db.close()
+
+
+# ── ADMIN: manage FAQ ────────────────────────────────────────
+@app.route("/admin/faq", methods=["POST"])
+@require_admin
+def admin_create_faq():
+    data = request.json or {}
+    question = data.get("question", "").strip()[:500]
+    answer = data.get("answer", "").strip()
+    category = data.get("category", "General").strip()[:100]
+    if not question or not answer:
+        return jsonify({"error": "Question and answer required"}), 400
+    db, cursor = get_db()
+    if not db:
+        return jsonify({"error": "Database unavailable"}), 500
+    try:
+        cursor.execute(
+            "INSERT INTO faq_items (question, answer, category) VALUES (%s,%s,%s)",
+            (question, answer, category)
+        )
+        db.commit()
+        return jsonify({"status": "success", "id": cursor.lastrowid})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close();
+        db.close()
+
+
+@app.route("/admin/faq/<int:faq_id>", methods=["DELETE"])
+@require_admin
+def admin_delete_faq(faq_id):
+    db, cursor = get_db()
+    if not db:
+        return jsonify({"error": "Database unavailable"}), 500
+    try:
+        cursor.execute("DELETE FROM faq_items WHERE id=%s", (faq_id,))
+        db.commit()
+        return jsonify({"status": "success"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close();
+        db.close()
+@app.route("/support/tickets/<int:ticket_id>", methods=["DELETE"])
+@require_auth
+def delete_ticket(ticket_id):
+    user = get_current_user()
+    db, cursor = get_db()
+    if not db:
+        return jsonify({"error": "Database unavailable"}), 500
+    try:
+        cursor.execute("SELECT role FROM users WHERE email=%s", (user["email"],))
+        u = cursor.fetchone()
+        if not u or u.get("role") != "admin":
+            return jsonify({"error": "Admin only"}), 403
+        cursor.execute("DELETE FROM ticket_replies WHERE ticket_id=%s", (ticket_id,))
+        cursor.execute("DELETE FROM support_tickets WHERE id=%s", (ticket_id,))
+        db.commit()
+        return jsonify({"status": "success"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close(); db.close()
+
 # ─────────────────────────────────────────
 # RUN
 # ─────────────────────────────────────────
