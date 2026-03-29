@@ -991,7 +991,7 @@ def dataset_history(email):
             """SELECT id, file_name, file_type, total_rows, total_cols,
                       numeric_cols, cat_cols, missing_vals, duplicates, uploaded_at
                FROM datasets WHERE user_id=%s
-               ORDER BY uploaded_at DESC LIMIT 20""",
+               ORDER BY uploaded_at DESC LIMIT 100""",
             (u["id"],)
         )
         rows = cursor.fetchall()
@@ -1657,6 +1657,162 @@ def admin_promote():
     except Exception as e:
         log.error("Admin promote error: %s", e)
         return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close()
+        db.close()
+
+# ─────────────────────────────────────────────────────────────────
+#  ANNOUNCEMENT ROUTES — paste these into your app.py
+#
+#  SQL to run ONCE in MySQL:
+#
+#  CREATE TABLE IF NOT EXISTS announcements (
+#      id         INT AUTO_INCREMENT PRIMARY KEY,
+#      title      VARCHAR(255)  NOT NULL,
+#      message    TEXT          NOT NULL,
+#      type       ENUM('info','warning','success') DEFAULT 'info',
+#      target     ENUM('all','active')             DEFAULT 'all',
+#      is_active  TINYINT(1)                       DEFAULT 1,
+#      created_by VARCHAR(255),
+#      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+#  );
+# ─────────────────────────────────────────────────────────────────
+
+
+# ── GET active announcements (shown to all logged-in users) ──────
+@app.route("/announcements/active")
+@require_auth
+def get_active_announcements():
+    db, cursor = get_db()
+    if not db:
+        return jsonify({"announcements": []})
+    try:
+        cursor.execute(
+            """SELECT id, title, message, type, target, created_at
+               FROM announcements
+               WHERE is_active = 1
+               ORDER BY created_at DESC
+               LIMIT 10"""
+        )
+        rows = cursor.fetchall()
+        for r in rows:
+            if r.get("created_at"):
+                r["created_at"] = str(r["created_at"])
+        return jsonify({"announcements": rows})
+    except Exception as e:
+        log.error("Get announcements error: %s", e)
+        return jsonify({"announcements": []})
+    finally:
+        cursor.close()
+        db.close()
+
+
+# ── GET all announcements (admin view) ───────────────────────────
+@app.route("/admin/announcements")
+@require_admin
+def admin_get_announcements():
+    db, cursor = get_db()
+    if not db:
+        return jsonify({"error": "Database unavailable"}), 500
+    try:
+        cursor.execute(
+            """SELECT id, title, message, type, target, is_active, created_by, created_at
+               FROM announcements
+               ORDER BY created_at DESC
+               LIMIT 100"""
+        )
+        rows = cursor.fetchall()
+        for r in rows:
+            if r.get("created_at"):
+                r["created_at"] = str(r["created_at"])
+        return jsonify({"announcements": rows})
+    except Exception as e:
+        log.error("Admin get announcements error: %s", e)
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close()
+        db.close()
+
+
+# ── CREATE announcement (admin only) ────────────────────────────
+@app.route("/admin/announcements", methods=["POST"])
+@require_admin
+def admin_create_announcement():
+    user = get_current_user()
+    data = request.json or {}
+    title   = data.get("title", "").strip()
+    message = data.get("message", "").strip()
+    ann_type = data.get("type", "info")
+    target   = data.get("target", "all")
+
+    if not title or not message:
+        return jsonify({"status": "error", "message": "Title and message are required"}), 400
+    if ann_type not in ("info", "warning", "success"):
+        ann_type = "info"
+    if target not in ("all", "active"):
+        target = "all"
+
+    db, cursor = get_db()
+    if not db:
+        return jsonify({"status": "error", "message": "Database unavailable"}), 500
+    try:
+        cursor.execute(
+            """INSERT INTO announcements (title, message, type, target, is_active, created_by)
+               VALUES (%s, %s, %s, %s, 1, %s)""",
+            (title, message, ann_type, target, user["email"])
+        )
+        db.commit()
+        ann_id = cursor.lastrowid
+        log.info("Announcement created: '%s' by %s", title, user["email"])
+        return jsonify({"status": "success", "id": ann_id, "message": "Announcement broadcast"})
+    except Exception as e:
+        log.error("Create announcement error: %s", e)
+        return jsonify({"status": "error", "message": str(e)}), 500
+    finally:
+        cursor.close()
+        db.close()
+
+
+# ── TOGGLE active/inactive (admin only) ─────────────────────────
+@app.route("/admin/announcements/<int:ann_id>/toggle", methods=["POST"])
+@require_admin
+def admin_toggle_announcement(ann_id):
+    db, cursor = get_db()
+    if not db:
+        return jsonify({"status": "error", "message": "Database unavailable"}), 500
+    try:
+        cursor.execute("SELECT is_active FROM announcements WHERE id=%s", (ann_id,))
+        row = cursor.fetchone()
+        if not row:
+            return jsonify({"status": "error", "message": "Announcement not found"}), 404
+        new_state = 0 if row["is_active"] else 1
+        cursor.execute("UPDATE announcements SET is_active=%s WHERE id=%s", (new_state, ann_id))
+        db.commit()
+        return jsonify({"status": "success", "is_active": new_state})
+    except Exception as e:
+        log.error("Toggle announcement error: %s", e)
+        return jsonify({"status": "error", "message": str(e)}), 500
+    finally:
+        cursor.close()
+        db.close()
+
+
+# ── DELETE announcement (admin only) ────────────────────────────
+@app.route("/admin/announcements/<int:ann_id>", methods=["DELETE"])
+@require_admin
+def admin_delete_announcement(ann_id):
+    db, cursor = get_db()
+    if not db:
+        return jsonify({"status": "error", "message": "Database unavailable"}), 500
+    try:
+        cursor.execute("DELETE FROM announcements WHERE id=%s", (ann_id,))
+        db.commit()
+        if cursor.rowcount == 0:
+            return jsonify({"status": "error", "message": "Not found"}), 404
+        return jsonify({"status": "success"})
+    except Exception as e:
+        log.error("Delete announcement error: %s", e)
+        return jsonify({"status": "error", "message": str(e)}), 500
     finally:
         cursor.close()
         db.close()
