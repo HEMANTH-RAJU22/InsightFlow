@@ -3568,3 +3568,39 @@ body.report-body::before,
 body.report-body::after {
   display: none !important;
 }
+
+/* ══════════════════════════════════════════
+   ANNOUNCEMENT TICKER — position fix
+   ══════════════════════════════════════════ */
+
+/* Dashboard body must be block (not flex center from login styles) */
+body.dashboard-page,
+body:has(.dashboard) {
+  display: block !important;
+  align-items: unset !important;
+  justify-content: unset !important;
+}
+
+/* Ticker sits flush under topbar, full width */
+#annTicker {
+  position: fixed !important;
+  top: 60px !important;        /* exactly topbar height */
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  z-index: 999 !important;
+  display: none;                /* JS sets to flex when active */
+}
+
+/* When ticker is visible, push dashboard content down */
+body.ticker-visible .dashboard,
+body.ticker-visible .viz-page,
+body.ticker-visible .report-page,
+body.ticker-visible .chatbot-page {
+  padding-top: 158px !important;  /* 60px topbar + 38px ticker + 60px original */
+}
+
+/* Default dashboard padding (no ticker) */
+.dashboard {
+  padding-top: 120px;
+}

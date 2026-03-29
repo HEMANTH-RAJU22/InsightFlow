@@ -158,7 +158,7 @@ nav.solid{background:rgba(2,4,10,.96)}
 .stat{padding:22px 42px;display:flex;flex-direction:column;align-items:center;gap:5px;border-right:1px solid rgba(255,140,0,.08);position:relative}
 .stat::before{content:'';position:absolute;top:0;left:25%;right:25%;height:1px;background:linear-gradient(90deg,transparent,rgba(255,140,0,.3),transparent)}
 .stat:last-child{border-right:none}
-.stat-v{font-size:32px;font-weight:900;letter-spacing:-1px;line-height:1;background:linear-gradient(135deg,#ffdd55,#ff8c00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.stat-v{font-size:32px;font-weight:900;letter-spacing:-1px;line-height:1.2;background:linear-gradient(135deg,#ffdd55,#ff8c00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;padding:4px 8px;display:inline-block}
 .stat-l{font-size:10px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--faint)}
 
 @keyframes fadeUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
@@ -244,7 +244,7 @@ nav.solid{background:rgba(2,4,10,.96)}
 .num{background:var(--bg);padding:52px 34px;text-align:center;display:flex;flex-direction:column;gap:8px;align-items:center;position:relative;transition:.3s}
 .num::before{content:'';position:absolute;top:0;left:22%;right:22%;height:1px;background:linear-gradient(90deg,transparent,rgba(255,140,0,.35),transparent)}
 .num:hover{background:rgba(255,140,0,.02)}
-.num-v{font-size:56px;font-weight:900;letter-spacing:-3px;line-height:1;background:linear-gradient(135deg,#ffdd55,#ff8c00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.num-v{font-size:56px;font-weight:900;letter-spacing:-3px;line-height:1.2;background:linear-gradient(135deg,#ffdd55,#ff8c00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;padding:4px 8px;display:inline-block}
 .num-l{font-size:12px;color:var(--muted);font-weight:500}
 
 /* ════════ CTA ════════ */
@@ -428,7 +428,7 @@ footer{position:relative;z-index:10;border-top:1px solid var(--border);padding:2
 <!-- NUMBERS -->
 <div class="numbers sr">
   <div class="nums-grid">
-    <div class="num"><div class="num-v" data-n="6">0</div><div class="num-l">File formats supported</div></div>
+    <div class="num"><div class="num-v" data-n="6" data-s="+">0</div><div class="num-l">File formats supported</div></div>
     <div class="num"><div class="num-v" data-n="11">0</div><div class="num-l">Interactive chart types</div></div>
     <div class="num"><div class="num-v">∞</div><div class="num-l">Insights per dataset</div></div>
     <div class="num"><div class="num-v" data-n="0">0</div><div class="num-l">Lines of code needed</div></div>
@@ -524,7 +524,7 @@ wave()
 
 /* ── COUNT UP ── */
 var counted=false
-new IntersectionObserver(function(e){e.forEach(function(en){if(en.isIntersecting&&!counted){counted=true;document.querySelectorAll('.num-v[data-n]').forEach(function(el){var end=parseInt(el.getAttribute('data-n')),cur=0,steps=55,inc=end/steps;var t=setInterval(function(){cur=Math.min(cur+inc,end);el.textContent=Math.round(cur);if(cur>=end)clearInterval(t)},1400/steps)})}})},{threshold:.4}).observe(document.querySelector('.nums-grid'))
+new IntersectionObserver(function(e){e.forEach(function(en){if(en.isIntersecting&&!counted){counted=true;document.querySelectorAll('.num-v[data-n]').forEach(function(el){var end=parseInt(el.getAttribute('data-n')),suffix=el.getAttribute('data-s')||'',cur=0,steps=55,inc=end/steps;var t=setInterval(function(){cur=Math.min(cur+inc,end);el.textContent=Math.round(cur)+suffix;if(cur>=end)clearInterval(t)},1400/steps)})}})},{threshold:.4}).observe(document.querySelector('.nums-grid'))
 </script>
 </body>
 </html>

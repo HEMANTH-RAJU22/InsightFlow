@@ -5,6 +5,34 @@
 <meta charset="UTF-8">
 <title>InsightFlow Dashboard</title>
 <link rel="stylesheet" href="style.css">
+<style>
+#annTicker{
+  position:fixed;top:60px;left:0;right:0;width:100%;
+  height:38px;z-index:998;overflow:hidden;
+  align-items:center;
+  background:linear-gradient(90deg,rgba(255,140,0,0.1),rgba(255,90,0,0.06),rgba(255,140,0,0.1));
+  border-bottom:1px solid rgba(255,140,0,0.22);
+  display:none;
+}
+#annTicker.warning{background:linear-gradient(90deg,rgba(255,77,109,0.1),rgba(200,0,50,0.05),rgba(255,77,109,0.1));border-bottom-color:rgba(255,77,109,0.28)}
+#annTicker.success{background:linear-gradient(90deg,rgba(0,229,160,0.09),rgba(0,180,110,0.04),rgba(0,229,160,0.09));border-bottom-color:rgba(0,229,160,0.22)}
+.t-icon{flex-shrink:0;padding:0 13px;display:flex;align-items:center;gap:7px;height:100%;border-right:1px solid rgba(255,255,255,0.07)}
+.t-badge{font-size:8px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;padding:2px 8px;border-radius:10px;white-space:nowrap;background:rgba(255,140,0,0.18);color:#ffb347;border:1px solid rgba(255,140,0,0.28)}
+#annTicker.warning .t-badge{background:rgba(255,77,109,0.15);color:#ff8099;border-color:rgba(255,77,109,0.28)}
+#annTicker.success .t-badge{background:rgba(0,229,160,0.12);color:#00e5a0;border-color:rgba(0,229,160,0.22)}
+.t-track{flex:1;overflow:hidden;height:100%;position:relative;display:flex;align-items:center;-webkit-mask-image:linear-gradient(90deg,transparent,black 5%,black 95%,transparent);mask-image:linear-gradient(90deg,transparent,black 5%,black 95%,transparent)}
+.t-inner{display:flex;align-items:center;white-space:nowrap;animation:tickerRoll 30s linear infinite}
+.t-inner:hover{animation-play-state:paused;cursor:default}
+@keyframes tickerRoll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.t-msg{font-size:12.5px;color:rgba(230,238,255,0.8);padding:0 36px;display:inline-flex;align-items:center;gap:9px}
+.t-msg b{font-weight:700;color:#ffd166}
+#annTicker.warning .t-msg b{color:#ff99aa}
+#annTicker.success .t-msg b{color:#00e5a0}
+.t-dot{color:rgba(255,255,255,0.18);font-size:9px;padding:0 8px}
+.t-close{flex-shrink:0;width:36px;height:100%;cursor:pointer;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.28);font-size:13px;background:transparent;border:none;border-left:1px solid rgba(255,255,255,0.06);font-family:inherit;transition:all 0.15s}
+.t-close:hover{color:rgba(255,255,255,0.75);background:rgba(255,255,255,0.05)}
+body.ticker-visible .dashboard { padding-top: 158px !important; }
+</style>
 </head>
 
 <body>
@@ -16,6 +44,18 @@
     <span onclick="goAccount()">Account</span>
     <span onclick="logout()">Logout</span>
   </div>
+</div>
+
+<!-- Announcement Ticker — fixed at top:60px, right under topbar -->
+<div id="annTicker">
+  <div class="t-icon">
+    <span id="tEmoji">🔔</span>
+    <span class="t-badge" id="tBadge">INFO</span>
+  </div>
+  <div class="t-track">
+    <div class="t-inner" id="tInner"></div>
+  </div>
+  <button class="t-close" onclick="closeTicker()" title="Dismiss">✕</button>
 </div>
 
 <div class="dashboard">
@@ -55,7 +95,7 @@
     </div>
   </div>
 
-  <!-- 3. KPI Cards — always visible with zeros, animate after upload -->
+  <!-- 3. KPI Cards -->
   <div class="data-overview" id="dataOverview" style="display:block">
     <h2>Data Overview</h2>
     <div class="kpi-container" id="kpiContainer" style="display:flex; flex-wrap:wrap; gap:20px;">
@@ -101,7 +141,7 @@
     </div>
   </div>
 
-  <!-- 4. Analyze with AI — hidden until upload -->
+  <!-- 4. Analyze with AI -->
   <div class="ai-cta" id="aiCta" style="display:none">
     <div class="ai-cta-inner">
       <div class="ai-cta-text">
@@ -125,5 +165,76 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="script.js"></script>
+
+<!-- Announcement Ticker Script -->
+<script>
+(function(){
+  var API = 'http://127.0.0.1:5000'
+
+  function tok(){
+    try{ return localStorage.getItem('insightflow_jwt')||'' }catch(e){ return '' }
+  }
+
+  function fetchAnnouncements(){
+    if(sessionStorage.getItem('ann_dismissed')) return
+    fetch(API+'/announcements/active',{
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok()}
+    })
+    .then(function(r){ return r.json() })
+    .then(function(d){
+      var list = d.announcements || []
+      if(!list.length) return
+      renderTicker(list)
+    })
+    .catch(function(){})
+  }
+
+  function renderTicker(list){
+    var ticker = document.getElementById('annTicker')
+    var inner  = document.getElementById('tInner')
+    var emoji  = document.getElementById('tEmoji')
+    var badge  = document.getElementById('tBadge')
+    if(!ticker || !inner) return
+
+    var type = list[0].type || 'info'
+    ticker.className = type
+    emoji.textContent = type==='warning' ? '⚠️' : type==='success' ? '✅' : '🔔'
+    badge.textContent = type.toUpperCase()
+
+    var seg = list.map(function(a){
+      return '<span class="t-msg"><b>' + x(a.title) + '</b> — ' + x(a.message) + '</span>'
+           + '<span class="t-dot">◆</span>'
+    }).join('')
+    inner.innerHTML = seg + seg
+
+    var chars = list.reduce(function(s,a){ return s + a.title.length + a.message.length }, 0)
+    inner.style.animationDuration = Math.max(16, Math.min(55, chars * 0.2)) + 's'
+
+    ticker.style.display = 'flex'
+    document.body.classList.add('ticker-visible')
+  }
+
+  function x(s){
+    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+  }
+
+  window.closeTicker = function(){
+    var el = document.getElementById('annTicker')
+    if(el) el.style.display = 'none'
+    document.body.classList.remove('ticker-visible')
+    try{ sessionStorage.setItem('ann_dismissed','1') }catch(e){}
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', function(){ setTimeout(fetchAnnouncements, 400) })
+  } else {
+    setTimeout(fetchAnnouncements, 400)
+  }
+
+  setInterval(function(){
+    if(!sessionStorage.getItem('ann_dismissed')) fetchAnnouncements()
+  }, 5*60*1000)
+})()
+</script>
 </body>
 </html>

@@ -704,6 +704,7 @@ window.addEventListener('DOMContentLoaded', function() {
 
   var savedAvatar = localStorage.getItem('insightflow_avatar_'+userEmail)
   if (savedAvatar) applyAvatar(savedAvatar)
+  
 })
 
 function updateSessionBadge() {
@@ -830,16 +831,6 @@ function loadProfile(){
       document.getElementById('inputName').value=name
     }).catch(function(){})
 
-  fetch(API+'/datasets/'+encodeURIComponent(userEmail), {headers:hdrs})
-    .then(function(r){ return r.json() })
-    .then(function(d){
-      var ds=d.datasets||[]
-      document.getElementById('statUploads').textContent=ds.length
-      var total=ds.reduce(function(s,x){ return s+(x.total_rows||0) },0)
-      document.getElementById('statRows').textContent=fmtNum(total)
-      document.getElementById('statLast').textContent=ds.length>0&&ds[0].uploaded_at
-        ?new Date(ds[0].uploaded_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short'}):'—'
-    }).catch(function(){ ['statUploads','statRows','statLast'].forEach(function(id){ document.getElementById(id).textContent='—' }) })
 }
 
 function setName(name){
@@ -916,16 +907,16 @@ function changePassword(){
 
 function loadHistory(){
   var hdrs=window.Auth?window.Auth.headers():{}
-  fetch(API+'/datasets/'+encodeURIComponent(userEmail), {headers:hdrs})
+  fetch(API+'/datasets/'+encodeURIComponent(userEmail)+'?t='+Date.now(), {headers:hdrs})
     .then(function(r){ return r.json() })
     .then(function(d){
       var ds=d.datasets||[], el=document.getElementById('historyContent')
-      // --- ADD THIS BLOCK ---
-     // --- ADD THIS CODE TO UPDATE THE STAT ---
-      var statEl = document.getElementById('statUploads');
-      if (statEl) {
-          statEl.textContent = ds.length; 
-      }
+      var upEl = document.getElementById('statUploads');
+      if(upEl) upEl.textContent = ds.length;
+      var total = ds.reduce(function(s,x){ return s+(x.total_rows||0); }, 0);
+      document.getElementById('statRows').textContent = fmtNum(total);
+      document.getElementById('statLast').textContent = ds.length>0&&ds[0].uploaded_at
+        ? new Date(ds[0].uploaded_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short'}) : '—';
       // ----------------------------------------
       if(!ds.length){ el.innerHTML='<div class="empty"><div class="empty-ico">📂</div><p>No uploads yet.<br>Upload your first dataset from the dashboard.</p><a href="dashboard.html">Go to Dashboard →</a></div>'; return }
       var rows=ds.map(function(x,idx){
