@@ -57,7 +57,7 @@ html,body{height:100%;font-family:Arial,Helvetica,sans-serif;background:linear-g
 /* BADGE */
 .badge{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.8px;padding:3px 9px;border-radius:20px;text-transform:uppercase;white-space:nowrap}
 .b-open{background:rgba(255,140,0,.12);color:#ff8c00;border:1px solid rgba(255,140,0,.25)}
-.b-inprog{background:rgba(77,159,255,.12);color:#4d9fff;border:1px solid rgba(77,159,255,.25)}
+.b-inprog,.b-inprogress{background:rgba(77,159,255,.12);color:#4d9fff;border:1px solid rgba(77,159,255,.25)}
 .b-resolved{background:rgba(16,185,129,.12);color:#10b981;border:1px solid rgba(16,185,129,.25)}
 .b-closed{background:rgba(255,255,255,.07);color:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.1)}
 .b-low{background:rgba(16,185,129,.1);color:#10b981;border:1px solid rgba(16,185,129,.2)}
@@ -93,23 +93,44 @@ html,body{height:100%;font-family:Arial,Helvetica,sans-serif;background:linear-g
 .star{font-size:26px;cursor:pointer;transition:transform .15s;opacity:.3;filter:grayscale(1)}
 .star.on,.star:hover{opacity:1;filter:none;transform:scale(1.1)}
 
-/* FAQ */
-.faq-search{position:relative;margin-bottom:22px}
-.faq-search input{width:100%;padding:12px 14px 12px 40px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:11px;color:white;font-size:13px;font-family:Arial,sans-serif;outline:none}
-.faq-search input:focus{border-color:rgba(255,140,0,.4)}
+/* ═══ FAQ STYLES ═══ */
+.faq-search{position:relative;margin-bottom:24px}
+.faq-search input{width:100%;padding:12px 14px 12px 42px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:11px;color:white;font-size:13px;font-family:Arial,sans-serif;outline:none;transition:border-color .2s}
+.faq-search input:focus{border-color:rgba(255,140,0,.4);background:rgba(255,140,0,.03)}
 .faq-search input::placeholder{color:rgba(255,255,255,.25)}
-.faq-search-ico{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:15px;opacity:.35;pointer-events:none}
-.faq-cat{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.25);margin:18px 0 8px;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,.06)}
-.faq-item{border:1px solid rgba(255,255,255,.07);border-radius:11px;overflow:hidden;margin-bottom:8px;transition:border-color .18s}
-.faq-item:hover{border-color:rgba(255,140,0,.2)}
-.faq-q{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer;font-size:13px;font-weight:600;color:rgba(255,255,255,.85);background:rgba(255,255,255,.03);user-select:none}
-.faq-arrow{font-size:11px;transition:transform .2s;opacity:.5}
-.faq-item.open .faq-arrow{transform:rotate(180deg)}
-.faq-a{max-height:0;overflow:hidden;transition:max-height .3s ease,padding .3s}
-.faq-item.open .faq-a{max-height:300px;padding:14px 16px 16px}
-.faq-a-text{font-size:13px;color:rgba(255,255,255,.55);line-height:1.7}
+.faq-search-ico{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:15px;opacity:.35;pointer-events:none}
 
-/* EMPTY / SPINNER */
+/* Category filter pills */
+.faq-cats{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px}
+.faq-cat-pill{padding:6px 15px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(255,255,255,.45);transition:all .18s;letter-spacing:.3px}
+.faq-cat-pill:hover{color:rgba(255,255,255,.8);background:rgba(255,255,255,.08)}
+.faq-cat-pill.active{background:rgba(255,140,0,.15);color:#ff8c00;border-color:rgba(255,140,0,.3)}
+
+/* Category heading inside FAQ list */
+.faq-cat-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.25);margin:22px 0 10px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:8px}
+.faq-cat-label::before{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;background:#ff8c00}
+.faq-cat-label:first-child{margin-top:0}
+
+/* FAQ accordion item */
+.faq-item{border:1px solid rgba(255,255,255,.07);border-radius:12px;overflow:hidden;margin-bottom:8px;transition:border-color .18s,box-shadow .18s}
+.faq-item:hover{border-color:rgba(255,140,0,.22);box-shadow:0 0 0 1px rgba(255,140,0,.08)}
+.faq-item.open{border-color:rgba(255,140,0,.3)}
+.faq-q{display:flex;align-items:center;justify-content:space-between;padding:15px 18px;cursor:pointer;font-size:13px;font-weight:600;color:rgba(255,255,255,.85);background:rgba(255,255,255,.03);user-select:none;gap:12px;transition:background .18s}
+.faq-item.open .faq-q{background:rgba(255,140,0,.06);color:white}
+.faq-q-text{flex:1}
+.faq-arrow{font-size:11px;transition:transform .25s;opacity:.4;flex-shrink:0}
+.faq-item.open .faq-arrow{transform:rotate(180deg);opacity:.7}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .35s ease,padding .3s}
+.faq-item.open .faq-a{max-height:400px}
+.faq-a-inner{padding:4px 18px 18px;font-size:13px;color:rgba(255,255,255,.55);line-height:1.75}
+
+/* FAQ stats row */
+.faq-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px}
+.faq-stat{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:14px 16px;text-align:center}
+.faq-stat-val{font-size:22px;font-weight:700;color:#ff8c00;font-family:'Courier New',monospace;line-height:1}
+.faq-stat-lbl{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.25);margin-top:5px}
+
+/* No results */
 .empty{display:flex;flex-direction:column;align-items:center;gap:10px;padding:44px;text-align:center;color:rgba(255,255,255,.25)}
 .empty-ico{font-size:36px;opacity:.3}
 .spinner{width:28px;height:28px;border-radius:50%;border:2.5px solid rgba(255,255,255,.07);border-top-color:#ff8c00;animation:spin .7s linear infinite;margin:44px auto}
@@ -212,8 +233,6 @@ html,body{height:100%;font-family:Arial,Helvetica,sans-serif;background:linear-g
 
   <!-- ══ MY TICKETS ══ -->
   <div id="sec-tickets" style="display:none">
-
-    <!-- Ticket list view -->
     <div id="ticketListView">
       <div class="card">
         <div class="card-head">
@@ -224,7 +243,6 @@ html,body{height:100%;font-family:Arial,Helvetica,sans-serif;background:linear-g
       </div>
     </div>
 
-    <!-- Ticket detail view -->
     <div id="ticketDetailView" class="ticket-detail">
       <span class="back-btn" onclick="backToList()">← Back to tickets</span>
       <div class="card">
@@ -236,7 +254,6 @@ html,body{height:100%;font-family:Arial,Helvetica,sans-serif;background:linear-g
         <div class="ticket-desc" id="detailDesc"></div>
       </div>
 
-      <!-- Replies -->
       <div class="card">
         <div class="card-head">
           <div class="card-title"><div class="card-ico">💬</div>Conversation</div>
@@ -248,7 +265,6 @@ html,body{height:100%;font-family:Arial,Helvetica,sans-serif;background:linear-g
         </div>
       </div>
 
-      <!-- Rating (shown only when resolved) -->
       <div class="card" id="ratingCard" style="display:none">
         <div class="card-head">
           <div class="card-title"><div class="card-ico">⭐</div>Rate this support experience</div>
@@ -274,10 +290,25 @@ html,body{height:100%;font-family:Arial,Helvetica,sans-serif;background:linear-g
         <div class="card-title"><div class="card-ico">❓</div>Frequently Asked Questions</div>
         <button class="btn btn-primary btn-sm" onclick="showTab('new')">Still need help?</button>
       </div>
+
+      <!-- Stats row -->
+      <div class="faq-stats" id="faqStats" style="display:none">
+        <div class="faq-stat"><div class="faq-stat-val" id="faqTotal">0</div><div class="faq-stat-lbl">Total FAQs</div></div>
+        <div class="faq-stat"><div class="faq-stat-val" id="faqCatCount">0</div><div class="faq-stat-lbl">Categories</div></div>
+        <div class="faq-stat"><div class="faq-stat-val" id="faqSearchCount">—</div><div class="faq-stat-lbl">Showing</div></div>
+        <div class="faq-stat"><div class="faq-stat-val" style="color:#10b981">✓</div><div class="faq-stat-lbl">Always Updated</div></div>
+      </div>
+
+      <!-- Search -->
       <div class="faq-search">
         <span class="faq-search-ico">🔍</span>
-        <input id="faqSearch" placeholder="Search questions..." oninput="filterFaq()">
+        <input id="faqSearch" placeholder="Search questions and answers..." oninput="filterFaq()">
       </div>
+
+      <!-- Category filter pills -->
+      <div class="faq-cats" id="faqCatPills"></div>
+
+      <!-- FAQ items -->
       <div id="faqList"><div class="spinner"></div></div>
     </div>
   </div>
@@ -287,17 +318,37 @@ html,body{height:100%;font-family:Arial,Helvetica,sans-serif;background:linear-g
 <script>
 var API = 'http://127.0.0.1:5000'
 var currentTicketId = null
-var selectedRating   = 0
-var allFaq           = []
+var selectedRating  = 0
+var allFaq          = []
+var activeCategory  = 'All'
 
-function tok(){
-  try{ return localStorage.getItem('insightflow_jwt')||'' }catch(e){ return '' }
+/* ── Hardcoded fallback FAQ (matches your DB inserts) ── */
+var FALLBACK_FAQ = [
+  {id:1, question:'How do I upload a dataset?', answer:'Go to the Dashboard and click "Select Dataset". Supported formats are CSV, Excel (.xlsx), JSON and SQL. Max file size is 15 MB.', category:'Getting Started'},
+  {id:2, question:'What file formats are supported?', answer:'InsightFlow supports CSV, TXT, Excel (.xlsx / .xls), JSON and SQL files. Password-protected Excel files are not supported — remove the password before uploading.', category:'Getting Started'},
+  {id:3, question:'How does the AI analyst work?', answer:'After uploading a dataset, click "Analyze with AI". The AI reads your data and answers questions about patterns, trends, anomalies and more. You can ask follow-up questions in the chat.', category:'AI Features'},
+  {id:4, question:'How do I save a chart?', answer:'Build a chart in the Visualize page, then click the "Save Chart" button. Charts are saved to your account and viewable under Account → Saved Charts.', category:'Charts'},
+  {id:5, question:'Can I export my charts?', answer:'Yes. Use the Download PNG or Download JPG buttons on the Visualize page. You can also export the full report as a PDF via the Report page.', category:'Charts'},
+  {id:6, question:'How long does my session last?', answer:'Sessions last 8 hours from login. You can extend it from Account → Session by clicking "Extend Session +8h".', category:'Account'},
+  {id:7, question:'How do I change my password?', answer:'Go to Account → Password, enter your current password and then your new one. Click Save.', category:'Account'},
+  {id:8, question:'Why is my data not showing?', answer:'Make sure the Flask backend is running (python app.py). If it is running but data is not showing, try re-uploading your dataset from the Dashboard.', category:'Troubleshooting'},
+  {id:9, question:'Is my data private?', answer:'Yes. Your data is stored only in your local database. InsightFlow does not send your raw data to any third-party service — only your questions about the data are sent to the AI.', category:'Privacy'},
+  {id:10, question:'How do I delete my account?', answer:'Go to Account → Danger Zone and click "Delete Account". This permanently removes all your data including datasets, charts and chat history.', category:'Account'}
+]
+
+/* Category emoji map */
+var CAT_ICO = {
+  'Getting Started': '🚀',
+  'AI Features':     '🤖',
+  'Charts':          '📊',
+  'Account':         '👤',
+  'Troubleshooting': '🔧',
+  'Privacy':         '🔒',
+  'General':         '📌'
 }
-function hdrs(){
-  var t=tok()
-  return t ? {'Content-Type':'application/json','Authorization':'Bearer '+t}
-           : {'Content-Type':'application/json'}
-}
+
+function tok(){ try{ return localStorage.getItem('insightflow_jwt')||'' }catch(e){ return '' } }
+function hdrs(){ var t=tok(); return t?{'Content-Type':'application/json','Authorization':'Bearer '+t}:{'Content-Type':'application/json'} }
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
 function logout(){
   try{ localStorage.removeItem('insightflow_jwt') }catch(e){}
@@ -311,12 +362,12 @@ var _tt=null
 function toast(msg,type){
   var el=document.getElementById('toast')
   el.textContent=msg; el.className='toast '+(type||'ok')+' show'
-  if(_tt)clearTimeout(_tt); _tt=setTimeout(()=>el.classList.remove('show'),3200)
+  if(_tt)clearTimeout(_tt); _tt=setTimeout(function(){ el.classList.remove('show') },3200)
 }
 
 /* ── Tab switch ── */
 function showTab(name){
-  ['new','tickets','faq'].forEach(t=>{
+  ['new','tickets','faq'].forEach(function(t){
     document.getElementById('sec-'+t).style.display = t===name?'block':'none'
     document.getElementById('tab-'+t).classList.toggle('active',t===name)
   })
@@ -331,38 +382,30 @@ function clearForm(){
 }
 
 function submitTicket(){
-  var subj = document.getElementById('ticketSubj').value.trim()
-  var desc = document.getElementById('ticketDesc').value.trim()
-  var cat  = document.getElementById('ticketCat').value
-  var pri  = document.getElementById('ticketPri').value
+  var subj=document.getElementById('ticketSubj').value.trim()
+  var desc=document.getElementById('ticketDesc').value.trim()
+  var cat=document.getElementById('ticketCat').value
+  var pri=document.getElementById('ticketPri').value
   if(!subj){ toast('Please enter a subject','err'); return }
   if(!desc){ toast('Please describe your issue','err'); return }
-
-  var btn = document.getElementById('submitBtn')
+  var btn=document.getElementById('submitBtn')
   btn.disabled=true; btn.textContent='Submitting...'
-
-  fetch(API+'/support/tickets',{
-    method:'POST', headers:hdrs(),
-    body:JSON.stringify({subject:subj,category:cat,priority:pri,description:desc})
-  })
-  .then(r=>r.json())
-  .then(d=>{
+  fetch(API+'/support/tickets',{method:'POST',headers:hdrs(),body:JSON.stringify({subject:subj,category:cat,priority:pri,description:desc})})
+  .then(function(r){ return r.json() })
+  .then(function(d){
     btn.disabled=false; btn.textContent='Submit Ticket →'
-    if(d.status==='success'){
-      toast('Ticket #'+d.ticket_id+' submitted! We\'ll get back to you soon.','ok')
-      clearForm()
-      showTab('tickets')
-    } else { toast(d.error||'Submit failed','err') }
+    if(d.status==='success'){ toast('Ticket #'+d.ticket_id+' submitted! We\'ll get back to you soon.','ok'); clearForm(); showTab('tickets') }
+    else toast(d.error||'Submit failed','err')
   })
-  .catch(()=>{ btn.disabled=false; btn.textContent='Submit Ticket →'; toast('Cannot reach server','err') })
+  .catch(function(){ btn.disabled=false; btn.textContent='Submit Ticket →'; toast('Cannot reach server','err') })
 }
 
 /* ── MY TICKETS ── */
 function loadTickets(){
   document.getElementById('ticketList').innerHTML='<div class="spinner"></div>'
   fetch(API+'/support/tickets',{headers:hdrs()})
-  .then(r=>r.json())
-  .then(d=>{
+  .then(function(r){ return r.json() })
+  .then(function(d){
     var tickets=d.tickets||[]
     document.getElementById('ticketCnt').textContent=tickets.length
     if(!tickets.length){
@@ -370,60 +413,56 @@ function loadTickets(){
       return
     }
     var catIco={bug:'🐛',feature:'💡',data:'📊',account:'👤',billing:'💳',other:'📌'}
-    document.getElementById('ticketList').innerHTML=tickets.map(t=>`
-      <div class="ticket-item" onclick="openTicket(${t.id})">
-        <div style="font-size:20px">${catIco[t.category]||'📌'}</div>
-        <div style="flex:1;min-width:0">
-          <div class="ticket-subj">${esc(t.subject)}</div>
-          <div class="ticket-meta">#${t.id} · ${new Date(t.created_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}</div>
-        </div>
-        <div class="ticket-badges">
-          <span class="badge b-${t.priority}">${t.priority}</span>
-          <span class="badge b-${t.status.replace('_','')}">${t.status.replace('_',' ')}</span>
-          ${t.status==='resolved'&&!t.rating?'<span style="font-size:11px;color:#ff8c00">⭐ Rate</span>':''}
-          ${t.rating?'<span style="font-size:11px;color:#ffd166">'.repeat(t.rating)+'★</span>':''}
-        </div>
-      </div>`).join('')
+    document.getElementById('ticketList').innerHTML=tickets.map(function(t){
+      var statusCls=t.status.replace('_','')
+      var stars=t.rating?'<span style="font-size:11px;color:#ffd166">'+('★').repeat(t.rating)+'</span>':''
+      var ratePrompt=(t.status==='resolved'&&!t.rating)?'<span style="font-size:11px;color:#ff8c00">⭐ Rate</span>':''
+      return '<div class="ticket-item" onclick="openTicket('+t.id+')">'
+        +'<div style="font-size:20px">'+(catIco[t.category]||'📌')+'</div>'
+        +'<div style="flex:1;min-width:0">'
+        +'<div class="ticket-subj">'+esc(t.subject)+'</div>'
+        +'<div class="ticket-meta">#'+t.id+' · '+new Date(t.created_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})+'</div>'
+        +'</div>'
+        +'<div class="ticket-badges">'
+        +'<span class="badge b-'+t.priority+'">'+t.priority+'</span>'
+        +'<span class="badge b-'+statusCls+'">'+t.status.replace('_',' ')+'</span>'
+        +ratePrompt+stars
+        +'</div></div>'
+    }).join('')
   })
-  .catch(()=>{ document.getElementById('ticketList').innerHTML='<div class="empty"><div class="empty-ico">⚠️</div><p>Could not load tickets.</p></div>' })
+  .catch(function(){ document.getElementById('ticketList').innerHTML='<div class="empty"><div class="empty-ico">⚠️</div><p>Could not load tickets.</p></div>' })
 }
 
 function openTicket(id){
-  currentTicketId=id
-  selectedRating=0
+  currentTicketId=id; selectedRating=0
   document.getElementById('ticketListView').style.display='none'
   document.getElementById('ticketDetailView').classList.add('open')
   document.getElementById('replyList').innerHTML='<div class="spinner"></div>'
-
   fetch(API+'/support/tickets/'+id,{headers:hdrs()})
-  .then(r=>r.json())
-  .then(d=>{
+  .then(function(r){ return r.json() })
+  .then(function(d){
     var t=d.ticket, replies=d.replies||[]
     document.getElementById('detailSubj').textContent='#'+t.id+' — '+t.subject
-    document.getElementById('detailMeta').textContent=
-      'Category: '+t.category+' · Created: '+new Date(t.created_at).toLocaleString('en-GB')
+    document.getElementById('detailMeta').textContent='Category: '+t.category+' · Created: '+new Date(t.created_at).toLocaleString('en-GB')
     document.getElementById('detailDesc').textContent=t.description
-    document.getElementById('detailBadges').innerHTML=
-      '<span class="badge b-'+t.priority+'">'+t.priority+'</span>'+
-      '<span class="badge b-'+t.status.replace('_','')+'">'+t.status.replace('_',' ')+'</span>'
-
+    var statusCls=t.status.replace('_','')
+    document.getElementById('detailBadges').innerHTML='<span class="badge b-'+t.priority+'">'+t.priority+'</span><span class="badge b-'+statusCls+'">'+t.status.replace('_',' ')+'</span>'
     if(!replies.length){
       document.getElementById('replyList').innerHTML='<div style="text-align:center;padding:22px;color:rgba(255,255,255,.25);font-size:13px">No replies yet — we\'ll get back to you soon.</div>'
     } else {
-      document.getElementById('replyList').innerHTML=replies.map(r=>`
-        <div class="reply-bubble reply-${r.sender_role}">
-          <div class="reply-sender">${r.sender_role==='admin'?'Support Team':'You'}</div>
-          <div>${esc(r.message)}</div>
-          <div class="reply-time">${new Date(r.created_at).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}</div>
-        </div>`).join('')
+      document.getElementById('replyList').innerHTML=replies.map(function(r){
+        return '<div class="reply-bubble reply-'+r.sender_role+'">'
+          +'<div class="reply-sender">'+(r.sender_role==='admin'?'Support Team':'You')+'</div>'
+          +'<div>'+esc(r.message)+'</div>'
+          +'<div class="reply-time">'+new Date(r.created_at).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})+'</div>'
+          +'</div>'
+      }).join('')
     }
-
-    // Show rating section if resolved and not yet rated
-    var showRating = t.status==='resolved' && !t.rating
-    document.getElementById('ratingCard').style.display = showRating?'block':'none'
-    if(showRating){ setStar(0) }
+    var showRating=t.status==='resolved'&&!t.rating
+    document.getElementById('ratingCard').style.display=showRating?'block':'none'
+    if(showRating) setStar(0)
   })
-  .catch(()=>{ document.getElementById('replyList').innerHTML='<div class="empty"><div class="empty-ico">⚠️</div><p>Could not load ticket.</p></div>' })
+  .catch(function(){ document.getElementById('replyList').innerHTML='<div class="empty"><div class="empty-ico">⚠️</div><p>Could not load ticket.</p></div>' })
 }
 
 function backToList(){
@@ -436,86 +475,125 @@ function backToList(){
 function sendReply(){
   var msg=document.getElementById('replyInput').value.trim()
   if(!msg){ toast('Please write a reply','err'); return }
-  fetch(API+'/support/tickets/'+currentTicketId+'/reply',{
-    method:'POST',headers:hdrs(),body:JSON.stringify({message:msg})
+  fetch(API+'/support/tickets/'+currentTicketId+'/reply',{method:'POST',headers:hdrs(),body:JSON.stringify({message:msg})})
+  .then(function(r){ return r.json() })
+  .then(function(d){
+    if(d.status==='success'){ document.getElementById('replyInput').value=''; toast('Reply sent','ok'); openTicket(currentTicketId) }
+    else toast(d.error||'Failed','err')
   })
-  .then(r=>r.json())
-  .then(d=>{
-    if(d.status==='success'){
-      document.getElementById('replyInput').value=''
-      toast('Reply sent','ok')
-      openTicket(currentTicketId)
-    } else { toast(d.error||'Failed','err') }
-  })
-  .catch(()=>toast('Cannot reach server','err'))
+  .catch(function(){ toast('Cannot reach server','err') })
 }
 
 /* ── RATING ── */
 function setStar(n){
   selectedRating=n
-  document.querySelectorAll('.star').forEach(s=>{
-    var v=parseInt(s.dataset.v)
-    s.classList.toggle('on', v<=n)
-  })
+  document.querySelectorAll('.star').forEach(function(s){ s.classList.toggle('on',parseInt(s.dataset.v)<=n) })
 }
-
 function submitRating(){
   if(!selectedRating){ toast('Please select a star rating','err'); return }
   var note=document.getElementById('ratingNote').value.trim()
-  fetch(API+'/support/tickets/'+currentTicketId+'/rate',{
-    method:'POST',headers:hdrs(),body:JSON.stringify({rating:selectedRating,note:note})
+  fetch(API+'/support/tickets/'+currentTicketId+'/rate',{method:'POST',headers:hdrs(),body:JSON.stringify({rating:selectedRating,note:note})})
+  .then(function(r){ return r.json() })
+  .then(function(d){
+    if(d.status==='success'){ toast('Thank you for your feedback!','ok'); document.getElementById('ratingCard').style.display='none' }
+    else toast(d.error||'Rating failed','err')
   })
-  .then(r=>r.json())
-  .then(d=>{
-    if(d.status==='success'){
-      toast('Thank you for your feedback!','ok')
-      document.getElementById('ratingCard').style.display='none'
-    } else { toast(d.error||'Rating failed','err') }
-  })
-  .catch(()=>toast('Cannot reach server','err'))
+  .catch(function(){ toast('Cannot reach server','err') })
 }
 
-/* ── FAQ ── */
+/* ══ FAQ ══ */
 function loadFaq(){
   if(allFaq.length){ renderFaq(allFaq); return }
+  document.getElementById('faqList').innerHTML='<div class="spinner"></div>'
   fetch(API+'/support/faq')
-  .then(r=>r.json())
-  .then(d=>{
-    allFaq=d.faq||[]
+  .then(function(r){ return r.json() })
+  .then(function(d){
+    allFaq = (d.faq && d.faq.length) ? d.faq : FALLBACK_FAQ
+    buildCatPills()
     renderFaq(allFaq)
+    updateFaqStats(allFaq)
+    document.getElementById('faqStats').style.display='grid'
   })
-  .catch(()=>{ document.getElementById('faqList').innerHTML='<div class="empty"><div class="empty-ico">⚠️</div><p>Could not load FAQ.</p></div>' })
+  .catch(function(){
+    // Server unreachable — use fallback
+    allFaq = FALLBACK_FAQ
+    buildCatPills()
+    renderFaq(allFaq)
+    updateFaqStats(allFaq)
+    document.getElementById('faqStats').style.display='grid'
+  })
+}
+
+function buildCatPills(){
+  var cats=['All']
+  allFaq.forEach(function(f){ if(cats.indexOf(f.category)===-1) cats.push(f.category) })
+  document.getElementById('faqCatPills').innerHTML=cats.map(function(c){
+    var ico=(c==='All'?'🔎':(CAT_ICO[c]||'📌'))
+    return '<span class="faq-cat-pill'+(c===activeCategory?' active':'')+'" onclick="setCat(\''+c+'\')">'+ico+' '+esc(c)+'</span>'
+  }).join('')
+  document.getElementById('faqCatCount').textContent=cats.length-1
+}
+
+function setCat(cat){
+  activeCategory=cat
+  document.querySelectorAll('.faq-cat-pill').forEach(function(p){
+    p.classList.toggle('active', p.textContent.trim().endsWith(cat) || (cat==='All' && p.textContent.includes('🔎')))
+  })
+  filterFaq()
 }
 
 function filterFaq(){
   var q=document.getElementById('faqSearch').value.toLowerCase()
-  var filtered=allFaq.filter(f=>f.question.toLowerCase().includes(q)||f.answer.toLowerCase().includes(q))
+  var filtered=allFaq.filter(function(f){
+    var matchQ=!q||f.question.toLowerCase().includes(q)||f.answer.toLowerCase().includes(q)
+    var matchC=activeCategory==='All'||f.category===activeCategory
+    return matchQ&&matchC
+  })
   renderFaq(filtered)
+  updateFaqStats(filtered)
+}
+
+function updateFaqStats(items){
+  document.getElementById('faqTotal').textContent=allFaq.length
+  document.getElementById('faqSearchCount').textContent=items.length
 }
 
 function renderFaq(items){
   if(!items.length){
-    document.getElementById('faqList').innerHTML='<div class="empty"><div class="empty-ico">🔍</div><p>No results found.</p></div>'
+    document.getElementById('faqList').innerHTML='<div class="empty"><div class="empty-ico">🔍</div><p>No results found.<br>Try a different search term.</p></div>'
     return
   }
-  var bycat={}
-  items.forEach(f=>{ if(!bycat[f.category]) bycat[f.category]=[]; bycat[f.category].push(f) })
-  document.getElementById('faqList').innerHTML=Object.entries(bycat).map(([cat,faqs])=>
-    '<div class="faq-cat">'+esc(cat)+'</div>'+
-    faqs.map((f,i)=>`
-      <div class="faq-item" id="faq-${f.id}">
-        <div class="faq-q" onclick="toggleFaq(${f.id})">
-          <span>${esc(f.question)}</span>
-          <span class="faq-arrow">▼</span>
-        </div>
-        <div class="faq-a"><div class="faq-a-text">${esc(f.answer)}</div></div>
-      </div>`).join('')
-  ).join('')
+
+  /* Group by category, preserving sort_order within each group */
+  var bycat={}, catOrder=[]
+  items.forEach(function(f){
+    if(!bycat[f.category]){ bycat[f.category]=[]; catOrder.push(f.category) }
+    bycat[f.category].push(f)
+  })
+
+  document.getElementById('faqList').innerHTML=catOrder.map(function(cat){
+    var ico=CAT_ICO[cat]||'📌'
+    var items=bycat[cat].map(function(f){
+      return '<div class="faq-item" id="faq-'+f.id+'">'
+        +'<div class="faq-q" onclick="toggleFaq('+f.id+')">'
+        +'<span class="faq-q-text">'+esc(f.question)+'</span>'
+        +'<span class="faq-arrow">▼</span>'
+        +'</div>'
+        +'<div class="faq-a"><div class="faq-a-inner">'+esc(f.answer)+'</div></div>'
+        +'</div>'
+    }).join('')
+    return '<div class="faq-cat-label">'+ico+' '+esc(cat)+'</div>'+items
+  }).join('')
 }
 
 function toggleFaq(id){
   var el=document.getElementById('faq-'+id)
-  if(el) el.classList.toggle('open')
+  if(!el) return
+  var wasOpen=el.classList.contains('open')
+  // Close all first
+  document.querySelectorAll('.faq-item.open').forEach(function(x){ x.classList.remove('open') })
+  // Toggle clicked one
+  if(!wasOpen) el.classList.add('open')
 }
 
 /* ── INIT ── */

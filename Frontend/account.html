@@ -722,6 +722,14 @@ body.account-body {
     <div id="supportListView">
       <div id="supportTicketList"><div class="spinner"></div></div>
     </div>
+    <!-- FAQ Quick Answers -->
+    <div id="supportFaqView" style="margin-top:18px">
+      <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.25);margin-bottom:12px;display:flex;align-items:center;gap:8px">
+        <span>Quick Answers</span>
+        <span style="flex:1;height:1px;background:rgba(255,255,255,0.05);display:block"></span>
+      </div>
+      <div id="suppFaqList"><div class="spinner"></div></div>
+    </div>
 
     <!-- Ticket detail -->
     <div id="supportDetailView" style="display:none;flex-direction:column;gap:14px">
@@ -1148,8 +1156,9 @@ function showSupportView(view){
   document.getElementById('supportNewView').style.display=view==='new'?'flex':'none'
   document.getElementById('supportListView').style.display=view==='list'?'block':'none'
   document.getElementById('supportDetailView').style.display=view==='detail'?'flex':'none'
+  document.getElementById('supportFaqView').style.display=view==='list'?'block':'none'
   document.getElementById('supportNewBtn').style.display=view==='new'?'none':'inline-flex'
-  if(view==='list') loadSupportTickets()
+  if(view==='list'){ loadSupportTickets(); loadSupportFaq() }
 }
 
 function loadSupportTickets(){
@@ -1220,6 +1229,36 @@ function sendSupportReply(){
 
 function fmtNum(n){ if(!n&&n!==0) return '—'; if(n>=1e6) return (n/1e6).toFixed(1)+'M'; if(n>=1e3) return (n/1e3).toFixed(1)+'K'; return Number(n).toLocaleString() }
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
+var suppFaqLoaded = false
+function loadSupportFaq(){
+  if(suppFaqLoaded) return
+  var hdrs2=window.Auth?window.Auth.headers():{}
+  fetch(API+'/support/faq',{headers:hdrs2})
+    .then(function(r){ return r.json() })
+    .then(function(d){
+      var faqs=d.faq||[]
+      suppFaqLoaded=true
+      if(!faqs.length){ document.getElementById('suppFaqList').innerHTML=''; return }
+      // Group by category
+      var bycat={}
+      faqs.forEach(function(f){ if(!bycat[f.category]) bycat[f.category]=[]; bycat[f.category].push(f) })
+      var html=''
+      Object.entries(bycat).forEach(function(entry){
+        var cat=entry[0], items=entry[1]
+        html+='<div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,140,0,0.6);margin:14px 0 7px">'+esc(cat)+'</div>'
+        items.forEach(function(f){
+          html+='<div style="border:1px solid rgba(255,255,255,0.06);border-radius:9px;overflow:hidden;margin-bottom:6px">'
+            +'<div onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display===\'block\'?\'none\':\'block\';this.querySelector(\'.faq-chev\').style.transform=this.nextElementSibling.style.display===\'block\'?\'rotate(180deg)\':\'\';" style="display:flex;align-items:center;justify-content:space-between;padding:11px 14px;cursor:pointer;font-size:12.5px;font-weight:600;color:rgba(255,255,255,0.8);background:rgba(255,255,255,0.03);user-select:none">'
+            +'<span>'+esc(f.question)+'</span>'
+            +'<span class="faq-chev" style="font-size:10px;opacity:0.4;transition:transform 0.2s">▼</span>'
+            +'</div>'
+            +'<div style="display:none;padding:12px 14px;font-size:12px;color:rgba(255,255,255,0.5);line-height:1.7;background:rgba(255,255,255,0.015)">'+esc(f.answer)+'</div>'
+            +'</div>'
+        })
+      })
+      document.getElementById('suppFaqList').innerHTML=html
+    }).catch(function(){ document.getElementById('suppFaqList').innerHTML='' })
+}
 </script>
 </body>
 </html>
