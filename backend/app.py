@@ -2229,7 +2229,8 @@ def delete_ticket(ticket_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     finally:
-        cursor.close(); db.close()
+        cursor.close();
+        db.close()
 
 # ─────────────────────────────────────────
 # RUN
