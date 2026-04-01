@@ -19,8 +19,6 @@ html,body{height:100%;overflow:hidden}
 body{font-family:var(--font);background:#060b18;color:var(--text-1);display:flex;flex-direction:column;position:relative}
 body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 60% at 20% 10%,rgba(255,100,0,0.12) 0%,transparent 60%),radial-gradient(ellipse 60% 70% at 80% 80%,rgba(59,100,255,0.1) 0%,transparent 60%),radial-gradient(ellipse 50% 40% at 50% 50%,rgba(168,85,247,0.07) 0%,transparent 60%);pointer-events:none;z-index:0}
 body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(255,255,255,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.02) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
-
-/* TOPBAR */
 .topbar{position:relative;z-index:100;height:60px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 32px;background:rgba(6,11,24,0.8);backdrop-filter:blur(20px);border-bottom:1px solid var(--glass-border)}
 .top-left{display:flex;align-items:center;gap:14px}
 .logo{font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:3px;background:linear-gradient(90deg,#ff8c00,#ffcc66,#ff8c00);background-size:200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:logoShimmer 4s linear infinite}
@@ -33,11 +31,7 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
 .top-time{font-family:var(--mono);font-size:11px;color:var(--text-3);padding:6px 14px;border-radius:var(--r-sm);background:var(--glass-bg);border:1px solid var(--glass-border);letter-spacing:1px}
 .refresh-badge{font-size:10px;color:var(--green);font-family:var(--mono);padding:4px 10px;border-radius:20px;background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.18);display:flex;align-items:center;gap:5px}
 .refresh-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
-
-/* LAYOUT */
 .layout{display:flex;flex:1;overflow:hidden;min-height:0;position:relative;z-index:1}
-
-/* SIDEBAR */
 .sidebar{width:230px;flex-shrink:0;display:flex;flex-direction:column;background:rgba(6,11,24,0.75);backdrop-filter:blur(24px);border-right:1px solid var(--glass-border);position:relative}
 .sidebar::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent)}
 .sb-profile{padding:22px 18px 16px;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;gap:13px}
@@ -65,24 +59,18 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
 .live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s infinite}
 .sb-clock{font-family:var(--mono);font-size:10px;color:var(--text-3)}
 @keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 8px var(--green)}50%{opacity:.3;box-shadow:none}}
-
-/* CANVAS */
 .canvas{flex:1;overflow-y:auto;overflow-x:hidden;padding:28px 36px 48px;display:flex;flex-direction:column;gap:24px;min-width:0}
 .canvas::-webkit-scrollbar{width:4px}
 .canvas::-webkit-scrollbar-thumb{background:rgba(255,140,0,0.2);border-radius:4px}
 .sec{display:none;flex-direction:column;gap:22px;animation:fadeIn 0.3s ease}
 .sec.active{display:flex}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-
-/* PAGE HEADER */
 .pg-head{display:flex;align-items:flex-start;justify-content:space-between;padding-bottom:20px;border-bottom:1px solid rgba(255,255,255,0.05)}
 .pg-head-l{display:flex;align-items:center;gap:16px}
 .pg-icon{width:48px;height:48px;border-radius:var(--r);flex-shrink:0;background:var(--glass-bg);border:1px solid var(--glass-border);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;font-size:20px}
 .pg-title{font-size:22px;font-weight:700;color:var(--text-1);letter-spacing:-0.5px}
 .pg-sub{font-size:12px;color:var(--text-3);margin-top:3px;font-weight:400}
 .pg-actions{display:flex;align-items:center;gap:8px}
-
-/* GLASS CARD */
 .glass{background:var(--glass-bg);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:var(--r-lg);padding:24px 26px;position:relative;overflow:hidden;transition:border-color 0.2s}
 .glass:hover{border-color:rgba(255,255,255,0.16)}
 .glass::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.12),transparent)}
@@ -90,8 +78,6 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
 .glass-head h2{font-size:14px;font-weight:600;color:var(--text-1)}
 .glass-head-ico{width:30px;height:30px;border-radius:9px;background:rgba(255,140,0,0.1);border:1px solid rgba(255,140,0,0.2);display:flex;align-items:center;justify-content:center;font-size:13px}
 .glass-head-r{margin-left:auto;display:flex;align-items:center;gap:8px}
-
-/* KPI */
 .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
 .kpi-card{background:var(--glass-bg);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:var(--r-lg);padding:22px;position:relative;overflow:hidden;cursor:default;transition:all 0.25s}
 .kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.12),transparent)}
@@ -115,14 +101,11 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
 .kpi-value.orange{color:var(--accent)}.kpi-value.green{color:var(--green)}.kpi-value.blue{color:var(--blue)}.kpi-value.purple{color:var(--purple)}.kpi-value.red{color:var(--red)}.kpi-value.yellow{color:var(--yellow)}
 .kpi-sub{font-size:11px;color:var(--text-3);margin-top:6px}
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px}
 .col-7-3{display:grid;grid-template-columns:7fr 3fr;gap:18px}
 .chart-box{height:200px;position:relative}
 .chart-box canvas{width:100%!important;height:200px!important}
 .donut-box{height:180px;position:relative;display:flex;align-items:center;justify-content:center}
 .donut-box canvas{width:180px!important;height:180px!important}
-
-/* INNER TABS (for User Management) */
 .inner-tabs{display:flex;gap:4px;padding:4px;background:rgba(255,255,255,0.04);border:1px solid var(--glass-border);border-radius:12px;margin-bottom:22px;width:fit-content}
 .inner-tab{padding:8px 20px;border-radius:9px;font-size:12.5px;font-weight:600;cursor:pointer;transition:all 0.18s;color:var(--text-3);border:none;background:transparent;font-family:var(--font);display:flex;align-items:center;gap:7px}
 .inner-tab:hover{color:var(--text-1);background:rgba(255,255,255,0.05)}
@@ -130,8 +113,6 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
 .inner-tab .tab-count{font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:8px;background:rgba(255,140,0,0.12);color:#ffcc66}
 .inner-sec{display:none;flex-direction:column;gap:16px;animation:fadeIn 0.25s ease}
 .inner-sec.active{display:flex}
-
-/* BUTTONS */
 .btn{padding:9px 20px;border-radius:var(--r-sm);font-size:12px;font-weight:600;letter-spacing:0.3px;cursor:pointer;transition:all 0.2s;border:none;font-family:var(--font);display:inline-flex;align-items:center;gap:7px}
 .btn-primary{background:linear-gradient(135deg,#ff8c00,#e05500);color:white;box-shadow:0 3px 14px rgba(255,140,0,0.3)}
 .btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 22px rgba(255,140,0,0.5)}
@@ -142,8 +123,6 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
 .btn-success{background:rgba(0,229,160,0.1);color:var(--green);border:1px solid rgba(0,229,160,0.22)}
 .btn-success:hover{background:rgba(0,229,160,0.2)}
 .btn-sm{padding:6px 14px;font-size:11px;border-radius:8px}
-
-/* BADGES */
 .badge{font-size:9px;font-weight:700;letter-spacing:0.8px;padding:3px 9px;border-radius:20px;text-transform:uppercase;display:inline-block;white-space:nowrap}
 .b-green{background:rgba(0,229,160,0.1);color:var(--green);border:1px solid rgba(0,229,160,0.22)}
 .b-orange{background:rgba(255,140,0,0.1);color:var(--accent);border:1px solid rgba(255,140,0,0.22)}
@@ -151,8 +130,6 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
 .b-blue{background:rgba(77,159,255,0.1);color:var(--blue);border:1px solid rgba(77,159,255,0.22)}
 .b-purple{background:rgba(168,85,247,0.1);color:var(--purple);border:1px solid rgba(168,85,247,0.22)}
 .b-gray{background:rgba(255,255,255,0.07);color:var(--text-2);border:1px solid rgba(255,255,255,0.09)}
-
-/* TABLE */
 .tbl-wrap{overflow-x:auto;border-radius:12px;border:1px solid var(--glass-border);max-height:480px;overflow-y:auto}
 .tbl-wrap::-webkit-scrollbar{width:3px;height:3px}
 .tbl-wrap::-webkit-scrollbar-thumb{background:rgba(255,140,0,0.2);border-radius:3px}
@@ -163,8 +140,6 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
 .gtable tbody tr:last-child td{border-bottom:none}
 .gtable tbody tr:hover{background:rgba(255,255,255,0.03)}
 .gtable td strong{color:var(--text-1);font-weight:600}
-
-/* USER ROW */
 .u-row{display:flex;align-items:center;gap:10px}
 .u-av{width:32px;height:32px;border-radius:10px;flex-shrink:0;background:linear-gradient(135deg,#ff8c00,#e05500);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:white}
 .u-name{font-size:13px;font-weight:600;color:var(--text-1)}
@@ -174,8 +149,6 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
 .ic-edit{background:rgba(77,159,255,0.1);color:var(--blue)}.ic-edit:hover{background:rgba(77,159,255,0.22)}
 .ic-ban{background:rgba(255,209,102,0.1);color:var(--yellow)}.ic-ban:hover{background:rgba(255,209,102,0.22)}
 .ic-del{background:rgba(255,77,109,0.08);color:var(--red)}.ic-del:hover{background:rgba(255,77,109,0.2)}
-
-/* SEARCH */
 .sbar{display:flex;gap:10px;margin-bottom:18px}
 .sw{position:relative;flex:1}
 .sw-ico{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--text-3);font-size:14px;pointer-events:none}
@@ -184,23 +157,17 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
 .sinput:focus{border-color:rgba(255,140,0,0.4);background:rgba(255,140,0,0.04)}
 .fsel{padding:10px 14px;background:var(--glass-bg);backdrop-filter:blur(10px);border:1px solid var(--glass-border);border-radius:var(--r-sm);color:var(--text-2);font-size:12px;font-family:var(--font);outline:none;cursor:pointer}
 .fsel option{background:#0f1623}
-
-/* PAGINATION */
 .pag{display:flex;align-items:center;justify-content:space-between;margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.05)}
 .pag-info{font-size:12px;color:var(--text-3)}
 .pag-btns{display:flex;gap:5px}
 .pag-btn{width:32px;height:32px;border-radius:8px;border:1px solid var(--glass-border);background:var(--glass-bg);color:var(--text-2);cursor:pointer;font-size:12px;transition:all 0.15s;display:flex;align-items:center;justify-content:center;font-family:var(--mono)}
 .pag-btn:hover{background:var(--glass-hover);color:var(--text-1)}
 .pag-btn.on{background:rgba(255,140,0,0.15);border-color:rgba(255,140,0,0.3);color:#ffcc66}
-
-/* TOAST */
 .toast{position:fixed;bottom:26px;right:26px;z-index:9999;padding:13px 20px;border-radius:var(--r);font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:10px;min-width:230px;backdrop-filter:blur(20px);box-shadow:0 12px 40px rgba(0,0,0,0.6);transform:translateY(90px);opacity:0;transition:all 0.35s cubic-bezier(0.34,1.56,0.64,1);pointer-events:none}
 .toast.show{transform:translateY(0);opacity:1}
 .toast.ok{background:rgba(0,229,160,0.12);border:1px solid rgba(0,229,160,0.3);color:var(--green)}
 .toast.err{background:rgba(255,77,109,0.12);border:1px solid rgba(255,77,109,0.3);color:var(--red)}
 .toast.info{background:rgba(255,140,0,0.12);border:1px solid rgba(255,140,0,0.3);color:#ffcc66}
-
-/* MODAL */
 .modal-ov{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
 .modal-ov.open{display:flex}
 .modal{background:rgba(10,15,30,0.92);backdrop-filter:blur(30px);border:1px solid var(--glass-border);border-radius:20px;padding:32px;max-width:460px;width:92%;display:flex;flex-direction:column;gap:18px;box-shadow:0 32px 80px rgba(0,0,0,0.7);position:relative}
@@ -216,29 +183,21 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
 .msel{width:100%;padding:11px 14px;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:var(--r-sm);color:var(--text-2);font-size:13px;font-family:var(--font);outline:none;cursor:pointer}
 .msel option{background:#0f1623}
 .mgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-
-/* SPINNER / EMPTY */
 .spinner{width:30px;height:30px;border-radius:50%;border:2.5px solid rgba(255,255,255,0.07);border-top-color:var(--accent);animation:spin 0.7s linear infinite;margin:48px auto}
 @keyframes spin{to{transform:rotate(360deg)}}
 .empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:52px 24px;text-align:center}
 .empty-ico{font-size:42px;opacity:0.25}
 .empty p{font-size:13px;color:var(--text-3);line-height:1.7}
-
-/* STAT ROW */
 .stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
 .stat-mini{padding:16px;border-radius:var(--r);text-align:center;background:var(--glass-bg);border:1px solid var(--glass-border);backdrop-filter:blur(10px)}
 .stat-mini-val{font-family:var(--mono);font-size:22px;font-weight:500;line-height:1;margin-bottom:5px}
 .stat-mini-lbl{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-3)}
-
-/* ACTIVITY */
 .act-item{display:flex;align-items:center;gap:13px;padding:11px 14px;border-radius:var(--r-sm);background:var(--glass-bg);border:1px solid rgba(255,255,255,0.05);transition:background 0.15s}
 .act-item:hover{background:var(--glass-hover)}
 .act-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .act-label{font-size:12.5px;color:var(--text-1);font-weight:600;flex:1}
 .act-sub{font-size:11px;color:var(--text-3);margin-left:4px;font-weight:400}
 .act-time{font-family:var(--mono);font-size:10px;color:var(--text-3);white-space:nowrap}
-
-/* SETTINGS */
 .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:15px 18px;border-radius:var(--r-sm);background:var(--glass-bg);border:1px solid var(--glass-border);backdrop-filter:blur(10px);margin-bottom:10px}
 .toggle-row:last-child{margin-bottom:0}
 .tl-info-name{font-size:13px;font-weight:500;color:var(--text-1)}
@@ -258,8 +217,6 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
 .danger-item:last-child{margin-bottom:0}
 .danger-item h4{font-size:13px;font-weight:700;color:var(--red);margin-bottom:3px}
 .danger-item p{font-size:11.5px;color:var(--text-3);margin:0}
-
-/* ANNOUNCEMENTS */
 .ann-card{padding:16px 18px;border-radius:var(--r-sm);background:var(--glass-bg);border:1px solid var(--glass-border);margin-bottom:10px;transition:background 0.15s}
 .ann-card:last-child{margin-bottom:0}
 .ann-card:hover{background:var(--glass-hover)}
@@ -267,13 +224,9 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
 .ann-title{font-size:13px;font-weight:600;color:var(--text-1);flex:1}
 .ann-body{font-size:12px;color:var(--text-3);line-height:1.65}
 .ann-meta{font-family:var(--mono);font-size:10px;color:var(--text-3);margin-top:8px}
-
-/* SPARKLINE */
 .sparkline{display:flex;align-items:flex-end;gap:3px;height:32px;margin-top:10px}
 .spark-bar{flex:1;border-radius:3px 3px 0 0;min-width:4px;transition:opacity 0.2s}
 .kpi-card:hover .spark-bar{opacity:0.8}
-
-/* PROG */
 .prog-item{margin-bottom:14px}
 .prog-item:last-child{margin-bottom:0}
 .prog-row{display:flex;justify-content:space-between;margin-bottom:7px}
@@ -281,25 +234,38 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
 .prog-val{font-family:var(--mono);font-size:11px;color:var(--text-3)}
 .prog-bar{height:6px;border-radius:6px;background:rgba(255,255,255,0.06);overflow:hidden}
 .prog-fill{height:100%;border-radius:6px;transition:width 1.2s cubic-bezier(0.4,0,0.2,1)}
-
-/* ACCESS DENIED */
 .access-denied{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:18px;text-align:center;padding:40px}
 .access-denied .big-ico{font-size:64px;opacity:0.4;margin-bottom:4px}
 .access-denied h2{font-size:24px;font-weight:800;color:var(--red)}
 .access-denied p{font-size:14px;color:var(--text-3);max-width:420px;line-height:1.7}
-
-/* FILE TYPE BADGES */
 .ft{font-size:9px;font-weight:700;letter-spacing:0.8px;padding:3px 8px;border-radius:16px;text-transform:uppercase;display:inline-block}
 .ft-csv{background:rgba(0,229,160,0.1);color:var(--green);border:1px solid rgba(0,229,160,0.22)}
 .ft-xlsx,.ft-xls{background:rgba(77,159,255,0.1);color:var(--blue);border:1px solid rgba(77,159,255,0.22)}
 .ft-json{background:rgba(245,158,11,0.1);color:#fbbf24;border:1px solid rgba(245,158,11,0.22)}
 .ft-sql{background:rgba(139,92,246,0.1);color:#a78bfa;border:1px solid rgba(139,92,246,0.22)}
 .ft-other{background:rgba(255,255,255,0.07);color:var(--text-2);border:1px solid rgba(255,255,255,0.09)}
+
+/* ══ QUICK REPLY TEMPLATES ══ */
+.qr-section{margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,0.05)}
+.qr-label{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-3);margin-bottom:10px;display:flex;align-items:center;gap:7px}
+.qr-label::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.05)}
+.qr-pills{display:flex;flex-wrap:wrap;gap:7px}
+.qr-pill{padding:6px 13px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,0.09);background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.5);transition:all 0.18s;font-family:var(--font)}
+.qr-pill:hover{background:rgba(255,140,0,0.1);border-color:rgba(255,140,0,0.3);color:#ffcc66;transform:translateY(-1px)}
+
+/* ══ FAQ HINT BANNER ══ */
+.faq-hint{padding:12px 16px;border-radius:10px;background:rgba(77,159,255,0.07);border:1px solid rgba(77,159,255,0.18);margin-bottom:14px;display:none}
+.faq-hint-label{font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--blue);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.faq-hint-item{padding:8px 12px;border-radius:8px;background:rgba(77,159,255,0.06);border:1px solid rgba(77,159,255,0.1);margin-bottom:6px;cursor:pointer;transition:background 0.15s}
+.faq-hint-item:last-child{margin-bottom:0}
+.faq-hint-item:hover{background:rgba(77,159,255,0.14)}
+.faq-hint-q{font-size:12px;font-weight:600;color:var(--text-1);margin-bottom:3px}
+.faq-hint-a{font-size:11px;color:var(--text-3);line-height:1.5}
+.faq-hint-use{font-size:10px;color:var(--blue);font-weight:600;margin-top:4px}
 </style>
 </head>
 <body>
 
-<!-- TOAST -->
 <div class="toast" id="toast"><span id="toastIco">✓</span><span id="toastMsg"></span></div>
 
 <!-- MODAL: Edit User -->
@@ -365,7 +331,6 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
 </div>
 
 <div class="layout">
-
   <!-- SIDEBAR -->
   <div class="sidebar">
     <div class="sb-profile">
@@ -403,10 +368,7 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
     <!-- DASHBOARD -->
     <div class="sec active" id="sec-overview">
       <div class="pg-head">
-        <div class="pg-head-l">
-          <div class="pg-icon">📊</div>
-          <div><div class="pg-title">Dashboard</div><div class="pg-sub">Platform overview — auto-refreshes every 30s</div></div>
-        </div>
+        <div class="pg-head-l"><div class="pg-icon">📊</div><div><div class="pg-title">Dashboard</div><div class="pg-sub">Platform overview — auto-refreshes every 30s</div></div></div>
         <div class="pg-actions">
           <button class="btn btn-glass btn-sm" onclick="loadAll()">↻ Refresh Now</button>
           <button class="btn btn-primary btn-sm" onclick="exportReport()">↓ Export Report</button>
@@ -436,9 +398,7 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
 
     <!-- ANALYTICS -->
     <div class="sec" id="sec-analytics">
-      <div class="pg-head">
-        <div class="pg-head-l"><div class="pg-icon">📈</div><div><div class="pg-title">Analytics</div><div class="pg-sub">Deep platform insights and usage patterns</div></div></div>
-      </div>
+      <div class="pg-head"><div class="pg-head-l"><div class="pg-icon">📈</div><div><div class="pg-title">Analytics</div><div class="pg-sub">Deep platform insights and usage patterns</div></div></div></div>
       <div class="kpi-grid">
         <div class="kpi-card kpi-o"><div class="kpi-label">New Users (7d)</div><div class="kpi-value orange" id="anaNewUsers">—</div><div class="kpi-sub">this week</div></div>
         <div class="kpi-card kpi-b"><div class="kpi-label">New Datasets (7d)</div><div class="kpi-value blue" id="anaNewDs">—</div><div class="kpi-sub">this week</div></div>
@@ -458,13 +418,8 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
     <!-- USER MANAGEMENT -->
     <div class="sec" id="sec-management">
       <div class="pg-head">
-        <div class="pg-head-l">
-          <div class="pg-icon" style="background:rgba(0,229,160,0.08);border-color:rgba(0,229,160,0.15)">👥</div>
-          <div><div class="pg-title">User Management</div><div class="pg-sub">Manage users, datasets and saved charts</div></div>
-        </div>
-        <div class="pg-actions" id="mgmtActions">
-          <button class="btn btn-glass btn-sm" onclick="exportUsersCSV()">↓ Export Users CSV</button>
-        </div>
+        <div class="pg-head-l"><div class="pg-icon" style="background:rgba(0,229,160,0.08);border-color:rgba(0,229,160,0.15)">👥</div><div><div class="pg-title">User Management</div><div class="pg-sub">Manage users, datasets and saved charts</div></div></div>
+        <div class="pg-actions" id="mgmtActions"><button class="btn btn-glass btn-sm" onclick="exportUsersCSV()">↓ Export Users CSV</button></div>
       </div>
       <div class="inner-tabs">
         <button class="inner-tab active" id="itab-users" onclick="showInnerTab('users')">👥 Users <span class="tab-count" id="tabCntUsers">—</span></button>
@@ -483,12 +438,7 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
             <select class="fsel" id="roleFilter" onchange="filterUsers()"><option value="">All Roles</option><option value="admin">Admin</option><option value="user">User</option></select>
             <select class="fsel" id="statusFilter" onchange="filterUsers()"><option value="">All Status</option><option value="active">Active</option><option value="suspended">Suspended</option></select>
           </div>
-          <div class="tbl-wrap">
-            <table class="gtable">
-              <thead><tr><th>User</th><th>Role</th><th>Status</th><th>Uploads</th><th>Joined</th><th>Last Login</th><th>Actions</th></tr></thead>
-              <tbody id="usersBody"><tr><td colspan="7"><div class="spinner"></div></td></tr></tbody>
-            </table>
-          </div>
+          <div class="tbl-wrap"><table class="gtable"><thead><tr><th>User</th><th>Role</th><th>Status</th><th>Uploads</th><th>Joined</th><th>Last Login</th><th>Actions</th></tr></thead><tbody id="usersBody"><tr><td colspan="7"><div class="spinner"></div></td></tr></tbody></table></div>
           <div class="pag" id="usersPag"></div>
         </div>
       </div>
@@ -498,12 +448,7 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
             <div class="sw"><span class="sw-ico">🔍</span><input class="sinput" id="dsSearch" placeholder="Search by filename or user..." oninput="filterDatasets()"></div>
             <select class="fsel" id="dsTypeFilter" onchange="filterDatasets()"><option value="">All Types</option><option value="csv">CSV</option><option value="xlsx">XLSX</option><option value="json">JSON</option><option value="sql">SQL</option></select>
           </div>
-          <div class="tbl-wrap">
-            <table class="gtable">
-              <thead><tr><th>File</th><th>Type</th><th>User</th><th>Rows</th><th>Cols</th><th>Missing</th><th>Uploaded</th><th>Actions</th></tr></thead>
-              <tbody id="datasetsBody"><tr><td colspan="8"><div class="spinner"></div></td></tr></tbody>
-            </table>
-          </div>
+          <div class="tbl-wrap"><table class="gtable"><thead><tr><th>File</th><th>Type</th><th>User</th><th>Rows</th><th>Cols</th><th>Missing</th><th>Uploaded</th><th>Actions</th></tr></thead><tbody id="datasetsBody"><tr><td colspan="8"><div class="spinner"></div></td></tr></tbody></table></div>
           <div class="pag" id="datasetsPag"></div>
         </div>
       </div>
@@ -513,12 +458,7 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
             <div class="sw"><span class="sw-ico">🔍</span><input class="sinput" id="chartSearch" placeholder="Search by chart name or user..." oninput="filterCharts()"></div>
             <select class="fsel" id="chartTypeFilter" onchange="filterCharts()"><option value="">All Types</option><option value="bar">Bar</option><option value="line">Line</option><option value="pie">Pie</option><option value="scatter">Scatter</option><option value="doughnut">Doughnut</option></select>
           </div>
-          <div class="tbl-wrap">
-            <table class="gtable">
-              <thead><tr><th>Chart Name</th><th>Type</th><th>User</th><th>Created</th><th>Actions</th></tr></thead>
-              <tbody id="chartsBody"><tr><td colspan="5"><div class="spinner"></div></td></tr></tbody>
-            </table>
-          </div>
+          <div class="tbl-wrap"><table class="gtable"><thead><tr><th>Chart Name</th><th>Type</th><th>User</th><th>Created</th><th>Actions</th></tr></thead><tbody id="chartsBody"><tr><td colspan="5"><div class="spinner"></div></td></tr></tbody></table></div>
           <div class="pag" id="chartsPag"></div>
         </div>
       </div>
@@ -531,16 +471,13 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
         <div class="pg-actions"><button class="btn btn-primary btn-sm" onclick="openModal('annModal')">+ New Announcement</button></div>
       </div>
       <div class="two-col">
-        <div class="glass">
-          <div class="glass-head"><div class="glass-head-ico">📢</div><h2>Sent Announcements</h2></div>
-          <div id="annList"><div class="empty"><div class="empty-ico">📢</div><p>No announcements yet.<br>Create one to notify all users.</p></div></div>
-        </div>
+        <div class="glass"><div class="glass-head"><div class="glass-head-ico">📢</div><h2>Sent Announcements</h2></div><div id="annList"><div class="empty"><div class="empty-ico">📢</div><p>No announcements yet.</p></div></div></div>
         <div class="glass">
           <div class="glass-head"><div class="glass-head-ico" style="background:rgba(77,159,255,0.1);border-color:rgba(77,159,255,0.2)">📊</div><h2>Broadcast Stats</h2></div>
           <div style="display:flex;flex-direction:column;gap:14px">
             <div class="stat-mini" style="text-align:left;display:flex;align-items:center;justify-content:space-between;padding:18px"><div><div class="stat-mini-lbl" style="margin-bottom:6px">Total Sent</div><div class="stat-mini-val" style="color:var(--accent)" id="annTotal">0</div></div><div style="font-size:28px;opacity:0.3">📢</div></div>
             <div class="stat-mini" style="text-align:left;display:flex;align-items:center;justify-content:space-between;padding:18px"><div><div class="stat-mini-lbl" style="margin-bottom:6px">This Month</div><div class="stat-mini-val" style="color:var(--blue)" id="annMonth">0</div></div><div style="font-size:28px;opacity:0.3">📅</div></div>
-            <div style="background:rgba(255,140,0,0.07);border:1px solid rgba(255,140,0,0.15);border-radius:var(--r-sm);padding:16px 18px"><div style="font-size:11px;color:var(--text-3);margin-bottom:6px;font-weight:600;letter-spacing:0.5px">INFO</div><div style="font-size:12px;color:var(--text-2);line-height:1.6">Announcements are saved to the database and visible to all active users in real-time.</div></div>
+            <div style="background:rgba(255,140,0,0.07);border:1px solid rgba(255,140,0,0.15);border-radius:var(--r-sm);padding:16px 18px"><div style="font-size:11px;color:var(--text-3);margin-bottom:6px;font-weight:600">INFO</div><div style="font-size:12px;color:var(--text-2);line-height:1.6">Announcements are saved to the database and visible to all active users in real-time.</div></div>
           </div>
         </div>
       </div>
@@ -553,12 +490,9 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
           <div class="pg-icon" style="background:rgba(255,209,102,0.08);border-color:rgba(255,209,102,0.15)">🎫</div>
           <div><div class="pg-title">Manage Tickets</div><div class="pg-sub">All user support tickets — reply, resolve, close</div></div>
         </div>
-        <div class="pg-actions">
-          <button class="btn btn-glass btn-sm" onclick="loadAdminTickets()">↻ Refresh</button>
-        </div>
+        <div class="pg-actions"><button class="btn btn-glass btn-sm" onclick="loadAdminTickets()">↻ Refresh</button></div>
       </div>
 
-      <!-- Ticket Stats -->
       <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
         <div class="kpi-card kpi-r"><div class="kpi-label">Open</div><div class="kpi-value red" id="tktOpen">—</div></div>
         <div class="kpi-card kpi-b"><div class="kpi-label">In Progress</div><div class="kpi-value blue" id="tktInProg">—</div></div>
@@ -572,18 +506,10 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
           <div class="sbar">
             <div class="sw"><span class="sw-ico">🔍</span><input class="sinput" id="tktSearch" placeholder="Search tickets..." oninput="filterAdminTickets()"></div>
             <select class="fsel" id="tktStatusFilter" onchange="filterAdminTickets()">
-              <option value="">All Status</option>
-              <option value="open">Open</option>
-              <option value="in_progress">In Progress</option>
-              <option value="resolved">Resolved</option>
-              <option value="closed">Closed</option>
+              <option value="">All Status</option><option value="open">Open</option><option value="in_progress">In Progress</option><option value="resolved">Resolved</option><option value="closed">Closed</option>
             </select>
             <select class="fsel" id="tktPriFilter" onchange="filterAdminTickets()">
-              <option value="">All Priority</option>
-              <option value="urgent">Urgent</option>
-              <option value="high">High</option>
-              <option value="medium">Medium</option>
-              <option value="low">Low</option>
+              <option value="">All Priority</option><option value="urgent">Urgent</option><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option>
             </select>
           </div>
           <div class="tbl-wrap">
@@ -596,9 +522,11 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
         </div>
       </div>
 
-      <!-- Ticket detail -->
+      <!-- ══ Ticket detail (with Quick Reply + FAQ Hints) ══ -->
       <div id="adminTicketDetail" style="display:none;flex-direction:column;gap:16px">
         <span style="color:var(--accent);cursor:pointer;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px" onclick="backToAdminTickets()">← Back to tickets</span>
+
+        <!-- Ticket info card -->
         <div class="glass">
           <div class="glass-head">
             <div class="glass-head-ico">🎫</div>
@@ -615,12 +543,40 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
             <button class="btn btn-danger btn-sm" style="margin-left:auto" onclick="deleteAdminTicket()">🗑 Delete</button>
           </div>
         </div>
+
+        <!-- Conversation + Quick Reply card -->
         <div class="glass">
           <div class="glass-head"><div class="glass-head-ico">💬</div><h2>Conversation</h2></div>
-          <div id="adminReplyList" style="display:flex;flex-direction:column;gap:10px"></div>
-          <div style="margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.05)">
-            <textarea class="mi" id="adminReplyInput" rows="3" placeholder="Write your reply as support team..." style="width:100%;margin-bottom:10px;resize:vertical"></textarea>
-            <button class="btn btn-primary btn-sm" onclick="sendAdminReply()">Send Reply</button>
+          <div id="adminReplyList" style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px"></div>
+
+          <!-- FAQ hint banner — shows matched FAQs based on ticket subject/category -->
+          <div class="faq-hint" id="faqHintBanner">
+            <div class="faq-hint-label">💡 Related FAQ answers — click to use as reply</div>
+            <div id="faqHintItems"></div>
+          </div>
+
+          <!-- Quick reply template pills -->
+          <div class="qr-section">
+            <div class="qr-label">⚡ Quick Reply Templates</div>
+            <div class="qr-pills">
+              <span class="qr-pill" onclick="useTemplate('acknowledge')">👋 Acknowledge</span>
+              <span class="qr-pill" onclick="useTemplate('investigating')">🔍 Investigating</span>
+              <span class="qr-pill" onclick="useTemplate('needInfo')">📋 Need More Info</span>
+              <span class="qr-pill" onclick="useTemplate('fixed')">✅ Issue Fixed</span>
+              <span class="qr-pill" onclick="useTemplate('password')">🔑 Password Help</span>
+              <span class="qr-pill" onclick="useTemplate('upload')">📂 Upload Help</span>
+              <span class="qr-pill" onclick="useTemplate('session')">⏱ Session Help</span>
+              <span class="qr-pill" onclick="useTemplate('notBug')">ℹ️ Not a Bug</span>
+              <span class="qr-pill" onclick="useTemplate('closeTicket')">🔒 Closing Ticket</span>
+            </div>
+          </div>
+
+          <!-- Reply textarea -->
+          <textarea class="mi" id="adminReplyInput" rows="4" placeholder="Write your reply as support team... or pick a template above ↑" style="width:100%;margin-bottom:12px;resize:vertical;min-height:100px"></textarea>
+          <div style="display:flex;gap:9px;align-items:center;flex-wrap:wrap">
+            <button class="btn btn-primary btn-sm" onclick="sendAdminReply()">📤 Send Reply</button>
+            <button class="btn btn-success btn-sm" onclick="sendAndResolve()">✅ Send & Resolve</button>
+            <button class="btn btn-glass btn-sm" onclick="document.getElementById('adminReplyInput').value=''">✕ Clear</button>
           </div>
         </div>
       </div>
@@ -667,7 +623,7 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
 <script>
 const API='http://127.0.0.1:5000'
 const PER=15
-let allUsers=[],allActivity=[],allDatasets=[],allCharts=[]
+let allUsers=[],allActivity=[],allDatasets=[],allCharts=[],allFaqCache=[]
 let uPage=1,dsPage=1,cPage=1
 let _confirmCb=null,annList=[],editingId=null,chartsInst={}
 let refreshTimer=30,refreshInterval=null
@@ -691,7 +647,6 @@ setInterval(()=>{
   if(a)a.textContent=t; if(b)b.textContent=t
 },1000)
 
-/* ── Auto Refresh ── */
 function startAutoRefresh(){
   refreshTimer=30
   refreshInterval=setInterval(()=>{
@@ -702,7 +657,6 @@ function startAutoRefresh(){
   },1000)
 }
 
-/* ── Toast ── */
 let _tt=null
 function toast(msg,type){
   const el=document.getElementById('toast')
@@ -712,7 +666,6 @@ function toast(msg,type){
   if(_tt)clearTimeout(_tt); _tt=setTimeout(()=>el.classList.remove('show'),3500)
 }
 
-/* ── Tab ── */
 function showTab(name){
   document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'))
   document.querySelectorAll('.nav-item').forEach(s=>s.classList.remove('active'))
@@ -725,7 +678,6 @@ function showTab(name){
   if(name==='tickets') loadAdminTickets()
 }
 
-/* ── Inner Tab ── */
 function showInnerTab(name){
   document.querySelectorAll('.inner-sec').forEach(s=>s.classList.remove('active'))
   document.querySelectorAll('.inner-tab').forEach(t=>t.classList.remove('active'))
@@ -734,7 +686,6 @@ function showInnerTab(name){
   if(tab)tab.classList.add('active')
 }
 
-/* ── Modal ── */
 function openModal(id){ document.getElementById(id).classList.add('open') }
 function closeModal(id){ document.getElementById(id).classList.remove('open') }
 function confirmAction(title,body,cb){
@@ -745,14 +696,12 @@ function confirmAction(title,body,cb){
 document.getElementById('confirmBtn').onclick=()=>{ closeModal('confirmModal'); if(_confirmCb)_confirmCb() }
 document.querySelectorAll('.modal-ov').forEach(o=>o.addEventListener('click',function(e){ if(e.target===this)this.classList.remove('open') }))
 
-/* ── Sparkline ── */
 function buildSparkline(elId,vals,color){
   const el=document.getElementById(elId); if(!el)return
   const max=Math.max(...vals,1)
   el.innerHTML=vals.map(v=>`<div class="spark-bar" style="height:${Math.round(v/max*100)}%;background:${color};opacity:${0.3+v/max*0.7}"></div>`).join('')
 }
 
-/* ══ LOAD DATA ══ */
 async function loadAll(){
   await Promise.all([loadStats(),loadUsers(),loadActivity()])
   refreshTimer=30
@@ -816,8 +765,7 @@ async function loadDatasets(){
   if(allDatasets.length){ renderDatasets(); return }
   try{
     const d=await fetch(API+'/admin/datasets',{headers:hdrs()}).then(r=>r.json())
-    allDatasets=d.datasets||[]
-    renderDatasets()
+    allDatasets=d.datasets||[]; renderDatasets()
     document.getElementById('tabCntDatasets').textContent=allDatasets.length
   }catch(e){ document.getElementById('datasetsBody').innerHTML='<tr><td colspan="8"><div class="empty"><div class="empty-ico">⚠️</div><p>Could not load datasets.</p></div></td></tr>' }
 }
@@ -826,13 +774,114 @@ async function loadAdminCharts(){
   if(allCharts.length){ renderAdminCharts(); return }
   try{
     const d=await fetch(API+'/admin/charts',{headers:hdrs()}).then(r=>r.json())
-    allCharts=d.charts||[]
-    renderAdminCharts()
+    allCharts=d.charts||[]; renderAdminCharts()
     document.getElementById('tabCntCharts').textContent=allCharts.length
   }catch(e){ document.getElementById('chartsBody').innerHTML='<tr><td colspan="5"><div class="empty"><div class="empty-ico">⚠️</div><p>Could not load charts.</p></div></td></tr>' }
 }
 
-/* ══ OVERVIEW CHARTS ══ */
+/* ── Load FAQ cache for hints ── */
+async function loadFaqCache(){
+  if(allFaqCache.length) return
+  try{
+    const d=await fetch(API+'/support/faq').then(r=>r.json())
+    allFaqCache=d.faq||[]
+  }catch(e){
+    // Use fallback if server unavailable
+    allFaqCache=[
+      {question:'How do I upload a dataset?',answer:'Go to the Dashboard and click "Select Dataset". Supported formats: CSV, Excel, JSON, SQL. Max 15 MB.',category:'Getting Started'},
+      {question:'What file formats are supported?',answer:'CSV, TXT, Excel (.xlsx/.xls), JSON and SQL files. Password-protected Excel files are not supported.',category:'Getting Started'},
+      {question:'How does the AI analyst work?',answer:'After uploading, click "Analyze with AI". The AI reads your data and answers questions about patterns, trends and anomalies.',category:'AI Features'},
+      {question:'How do I save a chart?',answer:'Build a chart in the Visualize page, then click "Save Chart". Charts appear under Account → Saved Charts.',category:'Charts'},
+      {question:'How long does my session last?',answer:'Sessions last 8 hours. Extend from Account → Session → "Extend Session +8h".',category:'Account'},
+      {question:'How do I change my password?',answer:'Go to Account → Password, enter your current password and new password, then click Save.',category:'Account'},
+      {question:'Why is my data not showing?',answer:'Ensure Flask backend is running (python app.py). If running but data is missing, try re-uploading from the Dashboard.',category:'Troubleshooting'},
+      {question:'How do I delete my account?',answer:'Go to Account → Danger Zone → "Delete Account". This permanently removes all your data.',category:'Account'},
+      {question:'Is my data private?',answer:'Yes. Your data is stored only in your local database. Raw data is never sent to third-party services.',category:'Privacy'},
+      {question:'Can I export my charts?',answer:'Yes. Use Download PNG or Download JPG on the Visualize page, or export as PDF from the Report page.',category:'Charts'}
+    ]
+  }
+}
+
+/* ── Show FAQ hints matching ticket subject/category ── */
+function showFaqHints(subject, category){
+  if(!allFaqCache.length) return
+  const q=(subject||'').toLowerCase()
+  const cat=(category||'').toLowerCase()
+
+  // Keywords map for matching
+  const keywords={
+    password:['password','pw','forgot','reset','login','signin','sign in'],
+    upload:['upload','file','dataset','csv','excel','format','import'],
+    chart:['chart','graph','visual','save chart','download'],
+    session:['session','logout','expire','timeout','8 hour'],
+    account:['account','delete','profile','name'],
+    ai:['ai','analyst','analyze','chat','question'],
+    data:['data','showing','not show','missing','error']
+  }
+
+  const matched=[]
+  allFaqCache.forEach(faq=>{
+    const fq=faq.question.toLowerCase()+' '+faq.answer.toLowerCase()
+    // Match by ticket subject keywords
+    let score=0
+    Object.values(keywords).flat().forEach(kw=>{ if(q.includes(kw)&&fq.includes(kw)) score++ })
+    // Match by category
+    if(cat&&faq.category&&faq.category.toLowerCase().includes(cat)) score+=2
+    if(score>0) matched.push({faq,score})
+  })
+
+  matched.sort((a,b)=>b.score-a.score)
+  const top=matched.slice(0,3)
+
+  const banner=document.getElementById('faqHintBanner')
+  const items=document.getElementById('faqHintItems')
+
+  if(!top.length){ banner.style.display='none'; return }
+
+  banner.style.display='block'
+  items.innerHTML=top.map(({faq})=>`
+    <div class="faq-hint-item" onclick="useFaqAsReply(${JSON.stringify(faq.answer).replace(/'/g,'&#39;')})">
+      <div class="faq-hint-q">${esc(faq.question)}</div>
+      <div class="faq-hint-a">${esc(faq.answer.substring(0,120))}${faq.answer.length>120?'…':''}</div>
+      <div class="faq-hint-use">↑ Click to use as reply</div>
+    </div>`).join('')
+}
+
+function useFaqAsReply(answer){
+  document.getElementById('adminReplyInput').value=answer
+  document.getElementById('adminReplyInput').focus()
+  toast('FAQ answer loaded into reply box','info')
+}
+
+/* ══ QUICK REPLY TEMPLATES ══ */
+const TEMPLATES={
+  acknowledge: `Hi there,\n\nThank you for reaching out to InsightFlow Support. I've received your ticket and I'm looking into it right now.\n\nI'll get back to you with an update shortly.\n\nBest regards,\nInsightFlow Support Team`,
+
+  investigating: `Hi,\n\nThank you for reporting this. I'm currently investigating the issue you've described and will provide an update as soon as possible.\n\nIf you can share any additional details (error messages, steps to reproduce), that would help us resolve this faster.\n\nBest regards,\nInsightFlow Support Team`,
+
+  needInfo: `Hi,\n\nThank you for contacting support. To help resolve your issue, I need a bit more information:\n\n1. What browser and operating system are you using?\n2. Can you describe the exact steps you took before the issue occurred?\n3. Are there any error messages shown?\n\nLooking forward to your reply.\n\nBest regards,\nInsightFlow Support Team`,
+
+  fixed: `Hi,\n\nGreat news — the issue you reported has been resolved! ✅\n\nHere's what was done: [describe fix]\n\nPlease try again and let us know if everything is working correctly. If you experience any further issues, don't hesitate to reply to this ticket.\n\nBest regards,\nInsightFlow Support Team`,
+
+  password: `Hi,\n\nTo change your password in InsightFlow:\n\n1. Go to Account Settings (top right menu)\n2. Click on the "Password" tab in the sidebar\n3. Enter your current password\n4. Enter and confirm your new password\n5. Click "Update Password"\n\nIf you've forgotten your current password, use the "Forgot Password" link on the login page.\n\nLet me know if you need any further help!\n\nBest regards,\nInsightFlow Support Team`,
+
+  upload: `Hi,\n\nHere's how to upload a dataset in InsightFlow:\n\n1. Go to the Dashboard\n2. Click "Select Dataset" or drag and drop your file\n3. Supported formats: CSV, Excel (.xlsx/.xls), JSON, SQL, TXT\n4. Maximum file size: 15 MB\n5. Password-protected Excel files are not supported — remove the password first\n\nOnce uploaded, the AI Analyst will be ready to analyze your data.\n\nLet me know if you run into any issues!\n\nBest regards,\nInsightFlow Support Team`,
+
+  session: `Hi,\n\nInsightFlow sessions last 8 hours from the time you log in.\n\nTo extend your session without logging out:\n1. Go to Account Settings\n2. Click the "Session" tab in the sidebar\n3. Click "Extend Session +8h"\n\nYour session will be extended for another 8 hours from that point.\n\nHope that helps!\n\nBest regards,\nInsightFlow Support Team`,
+
+  notBug: `Hi,\n\nThank you for reporting this. After investigating, this appears to be the expected behavior of the system rather than a bug.\n\n[Explain why this is expected behavior]\n\nIf you'd like this behavior changed, feel free to submit a Feature Request ticket and our team will consider it for a future update.\n\nBest regards,\nInsightFlow Support Team`,
+
+  closeTicket: `Hi,\n\nI'm closing this ticket as the issue appears to have been resolved. 🎉\n\nIf you experience this issue again or have any other questions, please feel free to open a new support ticket — we're always happy to help!\n\nThank you for using InsightFlow.\n\nBest regards,\nInsightFlow Support Team`
+}
+
+function useTemplate(key){
+  const tpl=TEMPLATES[key]
+  if(!tpl){ toast('Template not found','err'); return }
+  document.getElementById('adminReplyInput').value=tpl
+  document.getElementById('adminReplyInput').focus()
+  toast('Template loaded','info')
+}
+
 function renderOverviewCharts(stats){
   const chartDefs={backgroundColor:'transparent',plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(6,11,24,0.95)',titleColor:'#ffcc66',bodyColor:'#c8d2f0',padding:12,cornerRadius:10,borderColor:'rgba(255,255,255,0.08)',borderWidth:1}},scales:{x:{ticks:{color:'rgba(160,175,210,0.5)',font:{size:10,family:'JetBrains Mono'}},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'rgba(160,175,210,0.5)',font:{size:10,family:'JetBrains Mono'},maxTicksLimit:5},grid:{color:'rgba(255,255,255,0.04)'}}}}
   const rc=document.getElementById('regChart').getContext('2d')
@@ -850,22 +899,18 @@ function renderOverviewCharts(stats){
   document.getElementById('ftLegend').innerHTML=types.map((t,i)=>`<div style="display:flex;align-items:center;gap:8px"><div style="width:8px;height:8px;border-radius:50%;background:${ftColors[i]}"></div><span style="font-size:11px;color:var(--text-2);flex:1">${t}</span><span style="font-family:var(--mono);font-size:11px;color:var(--text-3)">${fmtNum(ftData[i])}</span></div>`).join('')
 }
 
-/* ══ ANALYTICS ══ */
 function renderAnalytics(){
   const chartDefs={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(6,11,24,0.95)',padding:12,cornerRadius:10,titleColor:'#ffcc66',bodyColor:'#c8d2f0',borderColor:'rgba(255,255,255,0.08)',borderWidth:1}},scales:{x:{ticks:{color:'rgba(160,175,210,0.5)',font:{size:10}},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'rgba(160,175,210,0.5)',font:{size:10},maxTicksLimit:5},grid:{color:'rgba(255,255,255,0.04)'}}}}
   const ulc=document.getElementById('uploadTimeChart').getContext('2d')
   if(chartsInst.ul)chartsInst.ul.destroy()
   const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
-  const ulData=months.map(()=>Math.floor(Math.random()*10))
-  ulData[new Date().getMonth()]+=allDatasets.length||1
+  const ulData=months.map(()=>Math.floor(Math.random()*10)); ulData[new Date().getMonth()]+=allDatasets.length||1
   chartsInst.ul=new Chart(ulc,{type:'line',data:{labels:months,datasets:[{data:ulData,borderColor:'#4d9fff',backgroundColor:'rgba(77,159,255,0.08)',fill:true,tension:0.45,pointRadius:4,pointHoverRadius:6,pointBackgroundColor:'#4d9fff',borderWidth:2}]},options:{...chartDefs}})
   const cc=document.getElementById('chatChart').getContext('2d')
   if(chartsInst.cc)chartsInst.cc.destroy()
-  const userMsgs=allActivity.filter(a=>a.action==='chat_sent').length||Math.floor(parseInt(document.getElementById('kpiChats').textContent)||4/2)
-  const aiMsgs=userMsgs
-  chartsInst.cc=new Chart(cc,{type:'bar',data:{labels:['User Messages','AI Responses'],datasets:[{data:[userMsgs,aiMsgs],backgroundColor:['rgba(255,140,0,0.6)','rgba(77,159,255,0.6)'],borderColor:['#ff8c00','#4d9fff'],borderWidth:1.5,borderRadius:8}]},options:{...chartDefs}})
-  const ftCounts={}
-  allDatasets.forEach(d=>{ const t=(d.file_type||'other').toUpperCase(); ftCounts[t]=(ftCounts[t]||0)+1 })
+  const userMsgs=allActivity.filter(a=>a.action==='chat_sent').length||4
+  chartsInst.cc=new Chart(cc,{type:'bar',data:{labels:['User Messages','AI Responses'],datasets:[{data:[userMsgs,userMsgs],backgroundColor:['rgba(255,140,0,0.6)','rgba(77,159,255,0.6)'],borderColor:['#ff8c00','#4d9fff'],borderWidth:1.5,borderRadius:8}]},options:{...chartDefs}})
+  const ftCounts={}; allDatasets.forEach(d=>{ const t=(d.file_type||'other').toUpperCase(); ftCounts[t]=(ftCounts[t]||0)+1 })
   if(!Object.keys(ftCounts).length)ftCounts['CSV']=1
   const total=Object.values(ftCounts).reduce((a,b)=>a+b,0)||1
   const colors={'CSV':'#ff8c00','XLSX':'#4d9fff','JSON':'#ffd166','SQL':'#a855f7','TXT':'#00e5a0','OTHER':'rgba(255,255,255,0.25)'}
@@ -875,7 +920,6 @@ function renderAnalytics(){
   if(!allDatasets.length)loadDatasets()
 }
 
-/* ══ RECENT ══ */
 function renderRecentUsers(){
   const el=document.getElementById('recentUsers'); if(!el)return
   if(!allUsers.length){ el.innerHTML='<div class="empty"><div class="empty-ico">👥</div><p>No users yet.</p></div>'; return }
@@ -892,7 +936,6 @@ function renderRecentActivity(){
   }).join('')
 }
 
-/* ══ USERS TABLE ══ */
 function renderUsers(filtered=null){
   const data=filtered||allUsers,tbody=document.getElementById('usersBody')
   if(!data.length){ tbody.innerHTML='<tr><td colspan="7"><div class="empty"><div class="empty-ico">👥</div><p>No users found.</p></div></td></tr>'; document.getElementById('usersPag').innerHTML=''; return }
@@ -944,13 +987,11 @@ function exportUsersCSV(){
   dlCSV(rows,'insightflow_users.csv'); toast('Exported','ok')
 }
 
-/* ══ DATASETS TABLE ══ */
 function renderDatasets(filtered=null){
   const data=filtered||allDatasets,tbody=document.getElementById('datasetsBody')
   if(!data.length){ tbody.innerHTML='<tr><td colspan="8"><div class="empty"><div class="empty-ico">🗂️</div><p>No datasets found.</p></div></td></tr>'; document.getElementById('datasetsPag').innerHTML=''; return }
   const s=(dsPage-1)*PER,slice=data.slice(s,s+PER)
-  tbody.innerHTML=slice.map(d=>{
-    const t=(d.file_type||'other').toLowerCase()
+  tbody.innerHTML=slice.map(d=>{ const t=(d.file_type||'other').toLowerCase()
     return `<tr><td><strong>${esc(d.file_name||'—')}</strong></td><td><span class="ft ft-${esc(t)}">${esc(t.toUpperCase())}</span></td><td><div style="font-size:11px"><div style="color:var(--text-1);font-weight:600">${esc(d.user_name||'—')}</div><div style="color:var(--text-3)">${esc(d.user_email||'—')}</div></div></td><td><strong>${fmtNum(d.total_rows)}</strong></td><td>${d.total_cols||'—'}</td><td>${d.missing_vals>0?'<span style="color:var(--red)">'+d.missing_vals+'</span>':'<span style="color:var(--green)">0</span>'}</td><td style="color:var(--text-3);font-size:11px">${fmtDT(d.uploaded_at)}</td><td><button class="ic-btn ic-del" onclick="deleteDataset(${d.id})" title="Delete">🗑</button></td></tr>`
   }).join('')
   pag('datasetsPag',data.length,dsPage,p=>{ dsPage=p; renderDatasets(filtered) })
@@ -969,7 +1010,6 @@ function deleteDataset(id){
   })
 }
 
-/* ══ ADMIN CHARTS TABLE ══ */
 function renderAdminCharts(filtered=null){
   const data=filtered||allCharts,tbody=document.getElementById('chartsBody')
   if(!data.length){ tbody.innerHTML='<tr><td colspan="5"><div class="empty"><div class="empty-ico">📊</div><p>No saved charts found.</p></div></td></tr>'; document.getElementById('chartsPag').innerHTML=''; return }
@@ -991,7 +1031,6 @@ function deleteAdminChart(id){
   })
 }
 
-/* ══ PAGINATION ══ */
 function pag(elId,total,cur,cb){
   const el=document.getElementById(elId); if(!el)return
   const pages=Math.ceil(total/PER); if(pages<=1){ el.innerHTML=''; return }
@@ -1009,32 +1048,25 @@ async function loadAnnFromStorage(){
     const d=await fetch(API+'/admin/announcements',{headers:hdrs()}).then(r=>r.json())
     if(d.error){ toast('Announcements: '+d.error,'err'); return }
     annList=d.announcements||[]
-  }catch(e){
-    try{ const s=localStorage.getItem('insightflow_admin_ann'); if(s) annList=JSON.parse(s) }catch(e2){}
-  }
+  }catch(e){ try{ const s=localStorage.getItem('insightflow_admin_ann'); if(s) annList=JSON.parse(s) }catch(e2){} }
   renderAnn()
 }
-
 function sendAnn(){
-  const title=document.getElementById('annTitle').value.trim()
-  const body=document.getElementById('annBody').value.trim()
+  const title=document.getElementById('annTitle').value.trim(), body=document.getElementById('annBody').value.trim()
   if(!title||!body){ toast('Title and message are required','err'); return }
   fetch(API+'/admin/announcements',{method:'POST',headers:hdrs(),body:JSON.stringify({title,message:body,type:document.getElementById('annType').value,target:document.getElementById('annTarget').value})})
   .then(r=>r.json()).then(d=>{
-    if(d.status==='success'){ closeModal('annModal'); document.getElementById('annTitle').value=''; document.getElementById('annBody').value=''; toast('Announcement broadcast to all users ✓','ok'); loadAnnFromStorage() }
+    if(d.status==='success'){ closeModal('annModal'); document.getElementById('annTitle').value=''; document.getElementById('annBody').value=''; toast('Announcement broadcast ✓','ok'); loadAnnFromStorage() }
     else toast(d.message||d.error||'Broadcast failed','err')
-  }).catch(()=>toast('Server error — check Flask is running','err'))
+  }).catch(()=>toast('Server error','err'))
 }
-
 function renderAnn(){
   document.getElementById('annTotal').textContent=annList.length
   document.getElementById('annMonth').textContent=annList.filter(a=>new Date(a.created_at||a.sent||Date.now()).getMonth()===new Date().getMonth()).length
-  const el=document.getElementById('annList')
-  const tc={info:'b-blue',warning:'b-orange',success:'b-green'}
-  if(!annList.length){ el.innerHTML='<div class="empty"><div class="empty-ico">📢</div><p>No announcements yet.<br>Create one to notify all users.</p></div>'; return }
-  el.innerHTML=annList.map(a=>`<div class="ann-card"><div class="ann-head"><span class="badge ${tc[a.type]||'b-gray'}">${esc((a.type||'info').toUpperCase())}</span><div class="ann-title">${esc(a.title)}</div><button onclick="delAnn(${a.id})" style="background:none;border:none;cursor:pointer;color:var(--text-3);font-size:14px;padding:0;transition:color 0.15s" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--text-3)'">✕</button></div><div class="ann-body">${esc(a.message||a.body||'')}</div><div class="ann-meta">${fmtDT(a.created_at||a.sent)} · ${(a.target||'all')==='all'?'All users':'Active users'} ${a.is_active!==undefined?(a.is_active?'<span style="color:var(--green)">● Active</span>':'<span style="color:var(--red)">○ Inactive</span>'):''}</div></div>`).join('')
+  const el=document.getElementById('annList'), tc={info:'b-blue',warning:'b-orange',success:'b-green'}
+  if(!annList.length){ el.innerHTML='<div class="empty"><div class="empty-ico">📢</div><p>No announcements yet.</p></div>'; return }
+  el.innerHTML=annList.map(a=>`<div class="ann-card"><div class="ann-head"><span class="badge ${tc[a.type]||'b-gray'}">${esc((a.type||'info').toUpperCase())}</span><div class="ann-title">${esc(a.title)}</div><button onclick="delAnn(${a.id})" style="background:none;border:none;cursor:pointer;color:var(--text-3);font-size:14px;padding:0" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--text-3)'">✕</button></div><div class="ann-body">${esc(a.message||a.body||'')}</div><div class="ann-meta">${fmtDT(a.created_at||a.sent)} · ${(a.target||'all')==='all'?'All users':'Active users'} ${a.is_active!==undefined?(a.is_active?'<span style="color:var(--green)">● Active</span>':'<span style="color:var(--red)">○ Inactive</span>'):''}</div></div>`).join('')
 }
-
 function delAnn(id){
   if(!confirm('Delete this announcement?')) return
   fetch(API+'/admin/announcements/'+id,{method:'DELETE',headers:hdrs()}).then(r=>r.json()).then(d=>{
@@ -1047,10 +1079,10 @@ function delAnn(id){
 var allAdminTickets=[], tktPage=1, currentAdminTicketId=null
 
 async function loadAdminTickets(){
+  await loadFaqCache() // pre-load FAQ for hints
   try{
     const d=await fetch(API+'/admin/tickets',{headers:hdrs()}).then(r=>r.json())
-    allAdminTickets=d.tickets||[]
-    renderAdminTickets()
+    allAdminTickets=d.tickets||[]; renderAdminTickets()
     const stats=await fetch(API+'/admin/support/stats',{headers:hdrs()}).then(r=>r.json())
     document.getElementById('tktOpen').textContent=stats.open||0
     document.getElementById('tktInProg').textContent=stats.in_progress||0
@@ -1096,6 +1128,8 @@ async function openAdminTicket(id){
   document.getElementById('adminTicketList').style.display='none'
   document.getElementById('adminTicketDetail').style.display='flex'
   document.getElementById('adminReplyList').innerHTML='<div class="spinner"></div>'
+  document.getElementById('adminReplyInput').value=''
+  document.getElementById('faqHintBanner').style.display='none'
   try{
     const d=await fetch(API+'/support/tickets/'+id,{headers:hdrs()}).then(r=>r.json())
     const t=d.ticket, replies=d.replies||[]
@@ -1104,11 +1138,15 @@ async function openAdminTicket(id){
     document.getElementById('tktDetailDesc').textContent=t.description
     const priColor={urgent:'b-red',high:'b-orange',medium:'b-orange',low:'b-green'}
     const statusColor={open:'b-red',in_progress:'b-blue',resolved:'b-green',closed:'b-gray'}
-    document.getElementById('tktDetailBadges').innerHTML='<span class="badge '+priColor[t.priority]+'">'+t.priority+'</span>'+'<span class="badge '+statusColor[t.status]+'">'+t.status.replace('_',' ')+'</span>'
+    document.getElementById('tktDetailBadges').innerHTML='<span class="badge '+priColor[t.priority]+'">'+t.priority+'</span><span class="badge '+statusColor[t.status]+'">'+t.status.replace('_',' ')+'</span>'
+
+    // Show FAQ hints based on subject + category
+    showFaqHints(t.subject+' '+t.description, t.category)
+
     if(!replies.length){
       document.getElementById('adminReplyList').innerHTML='<div style="text-align:center;padding:22px;color:var(--text-3);font-size:13px">No replies yet.</div>'
     } else {
-      document.getElementById('adminReplyList').innerHTML=replies.map(r=>`<div style="padding:13px 16px;border-radius:11px;${r.sender_role==='admin'?'background:rgba(77,159,255,0.08);border:1px solid rgba(77,159,255,0.15)':'background:rgba(255,140,0,0.08);border:1px solid rgba(255,140,0,0.15)'}"><div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:${r.sender_role==='admin'?'var(--blue)':'var(--accent)'};margin-bottom:5px">${r.sender_role==='admin'?'Support Team':'User'}</div><div style="font-size:13px;color:var(--text-2);line-height:1.6">${esc(r.message)}</div><div style="font-size:10px;color:var(--text-3);margin-top:4px">${fmtDT(r.created_at)}</div></div>`).join('')
+      document.getElementById('adminReplyList').innerHTML=replies.map(r=>`<div style="padding:13px 16px;border-radius:11px;margin-bottom:8px;${r.sender_role==='admin'?'background:rgba(77,159,255,0.08);border:1px solid rgba(77,159,255,0.15)':'background:rgba(255,140,0,0.08);border:1px solid rgba(255,140,0,0.15)'}"><div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:${r.sender_role==='admin'?'var(--blue)':'var(--accent)'};margin-bottom:5px">${r.sender_role==='admin'?'Support Team':'User'}</div><div style="font-size:13px;color:var(--text-2);line-height:1.6">${esc(r.message)}</div><div style="font-size:10px;color:var(--text-3);margin-top:4px">${fmtDT(r.created_at)}</div></div>`).join('')
     }
   }catch(e){ toast('Could not load ticket','err') }
 }
@@ -1126,6 +1164,23 @@ async function sendAdminReply(){
     const d=await fetch(API+'/support/tickets/'+currentAdminTicketId+'/reply',{method:'POST',headers:hdrs(),body:JSON.stringify({message:msg})}).then(r=>r.json())
     if(d.status==='success'){ document.getElementById('adminReplyInput').value=''; toast('Reply sent','ok'); openAdminTicket(currentAdminTicketId) }
     else toast(d.error||'Failed','err')
+  }catch(e){ toast('Server error','err') }
+}
+
+/* Send reply AND immediately mark as resolved */
+async function sendAndResolve(){
+  const msg=document.getElementById('adminReplyInput').value.trim()
+  if(!msg){ toast('Please write a reply before resolving','err'); return }
+  try{
+    // Send reply first
+    const r=await fetch(API+'/support/tickets/'+currentAdminTicketId+'/reply',{method:'POST',headers:hdrs(),body:JSON.stringify({message:msg})}).then(r=>r.json())
+    if(r.status!=='success'){ toast(r.error||'Reply failed','err'); return }
+    // Then resolve
+    await fetch(API+'/support/tickets/'+currentAdminTicketId+'/status',{method:'PUT',headers:hdrs(),body:JSON.stringify({status:'resolved'})})
+    document.getElementById('adminReplyInput').value=''
+    toast('Reply sent & ticket resolved ✅','ok')
+    openAdminTicket(currentAdminTicketId)
+    loadAdminTickets()
   }catch(e){ toast('Server error','err') }
 }
 
@@ -1154,19 +1209,12 @@ function promptPromote(){
   const email=prompt('Enter the email address to promote to Admin:'); if(!email)return
   fetch(API+'/admin/promote',{method:'POST',headers:hdrs(),body:JSON.stringify({email,role:'admin'})}).then(r=>r.json()).then(d=>{ if(d.status==='success'){ toast(d.message,'ok'); loadUsers() } else toast(d.error||'Failed','err') }).catch(()=>toast('Server error','err'))
 }
-function clearAllChats(){
-  fetch(API+'/admin/chats/clear-all',{method:'DELETE',headers:hdrs()}).then(r=>r.json()).then(d=>{ if(d.status==='success'){ toast('All chats cleared','ok'); loadStats() } else toast(d.error||'Failed','err') }).catch(()=>toast('Server error','err'))
-}
-function clearAllActivity(){
-  fetch(API+'/admin/activity/clear-all',{method:'DELETE',headers:hdrs()}).then(r=>r.json()).then(d=>{ if(d.status==='success'){ allActivity=[]; renderRecentActivity(); toast('Activity logs cleared','ok'); loadStats() } else toast(d.error||'Failed','err') }).catch(()=>toast('Server error','err'))
-}
-
-/* ══ MISC ══ */
+function clearAllChats(){ fetch(API+'/admin/chats/clear-all',{method:'DELETE',headers:hdrs()}).then(r=>r.json()).then(d=>{ if(d.status==='success'){ toast('All chats cleared','ok'); loadStats() } else toast(d.error||'Failed','err') }).catch(()=>toast('Server error','err')) }
+function clearAllActivity(){ fetch(API+'/admin/activity/clear-all',{method:'DELETE',headers:hdrs()}).then(r=>r.json()).then(d=>{ if(d.status==='success'){ allActivity=[]; renderRecentActivity(); toast('Activity logs cleared','ok'); loadStats() } else toast(d.error||'Failed','err') }).catch(()=>toast('Server error','err')) }
 function exportReport(){
   const rows=['InsightFlow Admin Report','Generated: '+new Date().toLocaleString(),'','Metric,Value','Total Users,'+document.getElementById('kpiUsers').textContent,'Total Datasets,'+document.getElementById('kpiDs').textContent,'Chat Messages,'+document.getElementById('kpiChats').textContent,'Saved Charts,'+document.getElementById('kpiCharts').textContent,'Activity Events,'+document.getElementById('kpiActivity').textContent,'Avg Rows/Upload,'+document.getElementById('kpiAvgRows').textContent,'Total Rows Analyzed,'+document.getElementById('kpiTotalRows').textContent]
   dlCSV(rows,'insightflow_admin_report.csv'); toast('Report exported','ok')
 }
-
 function adminLogout(){
   if(!confirm('Log out of the admin panel?'))return
   try{ if(window.Auth)window.Auth.logout(); else{ localStorage.clear(); window.location.replace('login.html') } }
@@ -1184,9 +1232,7 @@ window.addEventListener('DOMContentLoaded',async function(){
       if(d.role!=='admin'){ document.querySelector('.layout').innerHTML='<div class="access-denied"><div class="big-ico">🚫</div><h2>Access Denied</h2><p>You do not have admin privileges.</p><a href="dashboard.html" class="btn btn-glass" style="margin-top:10px">← Back to Dashboard</a></div>'; return }
     }catch(e){ document.querySelector('.layout').innerHTML='<div class="access-denied"><div class="big-ico">⚠️</div><h2>Cannot Connect</h2><p>Could not reach the server. Make sure Flask is running on port 5000.</p></div>'; return }
   }
-  loadAll()
-  loadAnnFromStorage()
-  startAutoRefresh()
+  loadAll(); loadAnnFromStorage(); startAutoRefresh()
 })
 </script>
 </body>
