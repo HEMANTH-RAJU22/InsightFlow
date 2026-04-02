@@ -84,18 +84,11 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
 .kpi-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;opacity:0.5;transition:opacity 0.2s}
 .kpi-card:hover{transform:translateY(-3px);border-color:rgba(255,255,255,0.18)}
 .kpi-card:hover::after{opacity:1}
-.kpi-o::after{background:linear-gradient(90deg,#ff8c00,transparent)}
-.kpi-g::after{background:linear-gradient(90deg,#00e5a0,transparent)}
-.kpi-b::after{background:linear-gradient(90deg,#4d9fff,transparent)}
-.kpi-p::after{background:linear-gradient(90deg,#a855f7,transparent)}
-.kpi-r::after{background:linear-gradient(90deg,#ff4d6d,transparent)}
-.kpi-y::after{background:linear-gradient(90deg,#ffd166,transparent)}
+.kpi-o::after{background:linear-gradient(90deg,#ff8c00,transparent)}.kpi-g::after{background:linear-gradient(90deg,#00e5a0,transparent)}.kpi-b::after{background:linear-gradient(90deg,#4d9fff,transparent)}.kpi-p::after{background:linear-gradient(90deg,#a855f7,transparent)}.kpi-r::after{background:linear-gradient(90deg,#ff4d6d,transparent)}.kpi-y::after{background:linear-gradient(90deg,#ffd166,transparent)}
 .kpi-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px}
 .kpi-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px}
 .kpi-trend{font-size:10px;font-weight:700;padding:3px 8px;border-radius:10px;display:flex;align-items:center;gap:3px}
-.kpi-trend.up{background:rgba(0,229,160,0.12);color:var(--green)}
-.kpi-trend.dn{background:rgba(255,77,109,0.12);color:var(--red)}
-.kpi-trend.neutral{background:rgba(255,255,255,0.07);color:var(--text-2)}
+.kpi-trend.up{background:rgba(0,229,160,0.12);color:var(--green)}.kpi-trend.dn{background:rgba(255,77,109,0.12);color:var(--red)}.kpi-trend.neutral{background:rgba(255,255,255,0.07);color:var(--text-2)}
 .kpi-label{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--text-3);margin-bottom:6px}
 .kpi-value{font-family:var(--mono);font-size:30px;font-weight:500;line-height:1;letter-spacing:-1px}
 .kpi-value.orange{color:var(--accent)}.kpi-value.green{color:var(--green)}.kpi-value.blue{color:var(--blue)}.kpi-value.purple{color:var(--purple)}.kpi-value.red{color:var(--red)}.kpi-value.yellow{color:var(--yellow)}
@@ -262,6 +255,39 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
 .faq-hint-q{font-size:12px;font-weight:600;color:var(--text-1);margin-bottom:3px}
 .faq-hint-a{font-size:11px;color:var(--text-3);line-height:1.5}
 .faq-hint-use{font-size:10px;color:var(--blue);font-weight:600;margin-top:4px}
+
+/* ══ USER INFO PANEL (inside ticket) ══ */
+.user-info-panel{
+  margin-top:14px;padding:18px 20px;
+  background:rgba(77,159,255,0.06);
+  border:1px solid rgba(77,159,255,0.18);
+  border-radius:12px;display:none;
+  animation:fadeIn 0.3s ease;
+}
+.user-info-header{
+  display:flex;align-items:center;gap:12px;
+  padding-bottom:14px;margin-bottom:14px;
+  border-bottom:1px solid rgba(77,159,255,0.12);
+}
+.user-info-avatar{
+  width:46px;height:46px;border-radius:12px;flex-shrink:0;
+  background:linear-gradient(135deg,#ff8c00,#e05500);
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;font-weight:800;color:white;
+}
+.user-info-title{font-size:15px;font-weight:700;color:var(--text-1)}
+.user-info-sub{font-size:11px;color:var(--text-3);margin-top:2px}
+.user-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.user-info-field{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:10px 12px}
+.user-info-field-label{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-3);margin-bottom:5px}
+.user-info-field-val{font-size:12.5px;font-weight:600;color:var(--text-1)}
+.security-warning{
+  padding:12px 14px;border-radius:9px;
+  background:rgba(255,77,109,0.08);border:1px solid rgba(255,77,109,0.2);
+  margin-bottom:12px;
+}
+.security-warning-title{font-size:10px;font-weight:700;color:var(--red);margin-bottom:5px;display:flex;align-items:center;gap:5px}
+.security-warning-body{font-size:11px;color:rgba(255,77,109,0.7);line-height:1.6}
 </style>
 </head>
 <body>
@@ -342,15 +368,9 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
       <div class="nav-item active" id="tab-overview" onclick="showTab('overview')"><div class="nav-icon">📊</div><span>Dashboard</span></div>
       <div class="nav-item" id="tab-analytics" onclick="showTab('analytics')"><div class="nav-icon">📈</div><span>Analytics</span></div>
       <div class="sb-section">Management</div>
-      <div class="nav-item" id="tab-management" onclick="showTab('management')">
-        <div class="nav-icon">👥</div><span>User Management</span>
-        <span class="nav-badge" id="sbUserCnt">—</span>
-      </div>
+      <div class="nav-item" id="tab-management" onclick="showTab('management')"><div class="nav-icon">👥</div><span>User Management</span><span class="nav-badge" id="sbUserCnt">—</span></div>
       <div class="nav-item" id="tab-announcements" onclick="showTab('announcements')"><div class="nav-icon">🔔</div><span>Announcements</span></div>
-      <div class="nav-item" id="tab-tickets" onclick="showTab('tickets')">
-        <div class="nav-icon">🎫</div><span>Manage Tickets</span>
-        <span class="nav-badge" id="sbTicketCnt">—</span>
-      </div>
+      <div class="nav-item" id="tab-tickets" onclick="showTab('tickets')"><div class="nav-icon">🎫</div><span>Manage Tickets</span><span class="nav-badge" id="sbTicketCnt">—</span></div>
       <div class="sb-section">System</div>
       <div class="nav-item" id="tab-settings" onclick="showTab('settings')"><div class="nav-icon">⚙️</div><span>Settings</span></div>
       <div class="sb-div"></div>
@@ -369,10 +389,7 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
     <div class="sec active" id="sec-overview">
       <div class="pg-head">
         <div class="pg-head-l"><div class="pg-icon">📊</div><div><div class="pg-title">Dashboard</div><div class="pg-sub">Platform overview — auto-refreshes every 30s</div></div></div>
-        <div class="pg-actions">
-          <button class="btn btn-glass btn-sm" onclick="loadAll()">↻ Refresh Now</button>
-          <button class="btn btn-primary btn-sm" onclick="exportReport()">↓ Export Report</button>
-        </div>
+        <div class="pg-actions"><button class="btn btn-glass btn-sm" onclick="loadAll()">↻ Refresh Now</button><button class="btn btn-primary btn-sm" onclick="exportReport()">↓ Export Report</button></div>
       </div>
       <div class="kpi-grid">
         <div class="kpi-card kpi-o"><div class="kpi-top"><div class="kpi-icon" style="background:rgba(255,140,0,0.12)">👥</div><div class="kpi-trend up" id="kpiUserTrend">—</div></div><div class="kpi-label">Total Users</div><div class="kpi-value orange" id="kpiUsers">—</div><div class="kpi-sub">registered accounts</div><div class="sparkline" id="sparkUsers"></div></div>
@@ -419,7 +436,7 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
     <div class="sec" id="sec-management">
       <div class="pg-head">
         <div class="pg-head-l"><div class="pg-icon" style="background:rgba(0,229,160,0.08);border-color:rgba(0,229,160,0.15)">👥</div><div><div class="pg-title">User Management</div><div class="pg-sub">Manage users, datasets and saved charts</div></div></div>
-        <div class="pg-actions" id="mgmtActions"><button class="btn btn-glass btn-sm" onclick="exportUsersCSV()">↓ Export Users CSV</button></div>
+        <div class="pg-actions"><button class="btn btn-glass btn-sm" onclick="exportUsersCSV()">↓ Export Users CSV</button></div>
       </div>
       <div class="inner-tabs">
         <button class="inner-tab active" id="itab-users" onclick="showInnerTab('users')">👥 Users <span class="tab-count" id="tabCntUsers">—</span></button>
@@ -486,13 +503,9 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
     <!-- MANAGE TICKETS -->
     <div class="sec" id="sec-tickets">
       <div class="pg-head">
-        <div class="pg-head-l">
-          <div class="pg-icon" style="background:rgba(255,209,102,0.08);border-color:rgba(255,209,102,0.15)">🎫</div>
-          <div><div class="pg-title">Manage Tickets</div><div class="pg-sub">All user support tickets — reply, resolve, close</div></div>
-        </div>
+        <div class="pg-head-l"><div class="pg-icon" style="background:rgba(255,209,102,0.08);border-color:rgba(255,209,102,0.15)">🎫</div><div><div class="pg-title">Manage Tickets</div><div class="pg-sub">All user support tickets — reply, resolve, close</div></div></div>
         <div class="pg-actions"><button class="btn btn-glass btn-sm" onclick="loadAdminTickets()">↻ Refresh</button></div>
       </div>
-
       <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
         <div class="kpi-card kpi-r"><div class="kpi-label">Open</div><div class="kpi-value red" id="tktOpen">—</div></div>
         <div class="kpi-card kpi-b"><div class="kpi-label">In Progress</div><div class="kpi-value blue" id="tktInProg">—</div></div>
@@ -505,12 +518,8 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
         <div class="glass">
           <div class="sbar">
             <div class="sw"><span class="sw-ico">🔍</span><input class="sinput" id="tktSearch" placeholder="Search tickets..." oninput="filterAdminTickets()"></div>
-            <select class="fsel" id="tktStatusFilter" onchange="filterAdminTickets()">
-              <option value="">All Status</option><option value="open">Open</option><option value="in_progress">In Progress</option><option value="resolved">Resolved</option><option value="closed">Closed</option>
-            </select>
-            <select class="fsel" id="tktPriFilter" onchange="filterAdminTickets()">
-              <option value="">All Priority</option><option value="urgent">Urgent</option><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option>
-            </select>
+            <select class="fsel" id="tktStatusFilter" onchange="filterAdminTickets()"><option value="">All Status</option><option value="open">Open</option><option value="in_progress">In Progress</option><option value="resolved">Resolved</option><option value="closed">Closed</option></select>
+            <select class="fsel" id="tktPriFilter" onchange="filterAdminTickets()"><option value="">All Priority</option><option value="urgent">Urgent</option><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select>
           </div>
           <div class="tbl-wrap">
             <table class="gtable">
@@ -522,7 +531,7 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
         </div>
       </div>
 
-      <!-- ══ Ticket detail (with Quick Reply + FAQ Hints) ══ -->
+      <!-- Ticket detail -->
       <div id="adminTicketDetail" style="display:none;flex-direction:column;gap:16px">
         <span style="color:var(--accent);cursor:pointer;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px" onclick="backToAdminTickets()">← Back to tickets</span>
 
@@ -535,12 +544,75 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
           </div>
           <div style="font-size:11px;color:var(--text-3);margin-bottom:12px" id="tktDetailMeta"></div>
           <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:14px 16px;font-size:13px;color:var(--text-2);line-height:1.7" id="tktDetailDesc"></div>
-          <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap">
+
+          <!-- Status + action buttons -->
+          <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;align-items:center">
             <button class="btn btn-glass btn-sm" onclick="setTicketStatus('open')">🔴 Open</button>
             <button class="btn btn-glass btn-sm" onclick="setTicketStatus('in_progress')">🔵 In Progress</button>
             <button class="btn btn-success btn-sm" onclick="setTicketStatus('resolved')">✅ Resolved</button>
             <button class="btn btn-glass btn-sm" onclick="setTicketStatus('closed')">⬜ Closed</button>
+            <!-- ★ NEW: Retrieve User Info button -->
+            <button class="btn btn-sm" onclick="retrieveTicketUser()"
+              style="background:rgba(77,159,255,0.12);color:var(--blue);border:1px solid rgba(77,159,255,0.28)">
+              🔍 Retrieve User Info
+            </button>
             <button class="btn btn-danger btn-sm" style="margin-left:auto" onclick="deleteAdminTicket()">🗑 Delete</button>
+          </div>
+
+          <!-- ★ NEW: User Info Panel — shown when admin clicks Retrieve User Info -->
+          <div class="user-info-panel" id="userInfoPanel">
+            <div class="user-info-header">
+              <div class="user-info-avatar" id="uipAvatar">?</div>
+              <div style="flex:1;min-width:0">
+                <div class="user-info-title" id="uipName">—</div>
+                <div class="user-info-sub" id="uipEmail">—</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:5px;align-items:flex-end">
+                <span id="uipRoleBadge" class="badge b-blue">User</span>
+                <span id="uipStatusBadge" class="badge b-green">Active</span>
+              </div>
+            </div>
+
+            <div class="user-info-grid">
+              <div class="user-info-field">
+                <div class="user-info-field-label">Joined</div>
+                <div class="user-info-field-val" id="uipJoined">—</div>
+              </div>
+              <div class="user-info-field">
+                <div class="user-info-field-label">Last Login</div>
+                <div class="user-info-field-val" id="uipLastLogin">—</div>
+              </div>
+              <div class="user-info-field">
+                <div class="user-info-field-label">Total Uploads</div>
+                <div class="user-info-field-val" style="color:var(--accent)" id="uipUploads">—</div>
+              </div>
+              <div class="user-info-field">
+                <div class="user-info-field-label">Total Rows Analyzed</div>
+                <div class="user-info-field-val" style="color:var(--blue)" id="uipRows">—</div>
+              </div>
+            </div>
+
+            <!-- Recent uploads -->
+            <div style="margin-bottom:14px">
+              <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-3);margin-bottom:8px">Recent Uploads</div>
+              <div id="uipUploadsDetail" style="display:flex;flex-direction:column;gap:5px"></div>
+            </div>
+
+            <!-- Security warning -->
+            <div class="security-warning">
+              <div class="security-warning-title">⚠️ Security Policy</div>
+              <div class="security-warning-body">
+                Never share passwords in support tickets. Use the <strong>"Send Password Help"</strong> template to guide the user to reset their own password via the Forgot Password flow. Sending raw passwords exposes accounts to interception.
+              </div>
+            </div>
+
+            <!-- Quick actions -->
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn btn-glass btn-sm" onclick="useTemplate('password')" style="font-size:11px">📤 Send Password Help</button>
+              <button class="btn btn-glass btn-sm" onclick="copyTicketUserEmail()" style="font-size:11px">📋 Copy Email</button>
+              <button class="btn btn-glass btn-sm" onclick="promoteFromTicket()" style="font-size:11px">⬆ Promote Admin</button>
+              <button class="btn btn-danger btn-sm" onclick="suspendFromTicket()" style="font-size:11px">🚫 Suspend / Activate</button>
+            </div>
           </div>
         </div>
 
@@ -549,13 +621,13 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
           <div class="glass-head"><div class="glass-head-ico">💬</div><h2>Conversation</h2></div>
           <div id="adminReplyList" style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px"></div>
 
-          <!-- FAQ hint banner — shows matched FAQs based on ticket subject/category -->
+          <!-- FAQ hint banner -->
           <div class="faq-hint" id="faqHintBanner">
             <div class="faq-hint-label">💡 Related FAQ answers — click to use as reply</div>
             <div id="faqHintItems"></div>
           </div>
 
-          <!-- Quick reply template pills -->
+          <!-- Quick reply templates -->
           <div class="qr-section">
             <div class="qr-label">⚡ Quick Reply Templates</div>
             <div class="qr-pills">
@@ -571,8 +643,7 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
             </div>
           </div>
 
-          <!-- Reply textarea -->
-          <textarea class="mi" id="adminReplyInput" rows="4" placeholder="Write your reply as support team... or pick a template above ↑" style="width:100%;margin-bottom:12px;resize:vertical;min-height:100px"></textarea>
+          <textarea class="mi" id="adminReplyInput" rows="4" placeholder="Write your reply... or pick a template above ↑" style="width:100%;margin-bottom:12px;resize:vertical;min-height:100px"></textarea>
           <div style="display:flex;gap:9px;align-items:center;flex-wrap:wrap">
             <button class="btn btn-primary btn-sm" onclick="sendAdminReply()">📤 Send Reply</button>
             <button class="btn btn-success btn-sm" onclick="sendAndResolve()">✅ Send & Resolve</button>
@@ -627,8 +698,8 @@ let allUsers=[],allActivity=[],allDatasets=[],allCharts=[],allFaqCache=[]
 let uPage=1,dsPage=1,cPage=1
 let _confirmCb=null,annList=[],editingId=null,chartsInst={}
 let refreshTimer=30,refreshInterval=null
+let _currentTicketEmail=null, _currentTicketUserId=null
 
-/* ── Helpers ── */
 function hdrs(){ try{ var t=localStorage.getItem('insightflow_jwt'); return t?{'Content-Type':'application/json','Authorization':'Bearer '+t}:{'Content-Type':'application/json'} }catch(e){ return {'Content-Type':'application/json'} } }
 function getRole(){ try{ var t=localStorage.getItem('insightflow_jwt'); if(!t) return null; var p=JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); return p.role||'user' }catch(e){ return null } }
 function getEmail(){ try{ var t=localStorage.getItem('insightflow_jwt'); if(!t) return null; var p=JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); return p.email||p.sub||null }catch(e){ return null } }
@@ -640,73 +711,25 @@ function av(name){ return '<div class="u-av">'+esc((name||'?').charAt(0).toUpper
 function dlCSV(rows,fn){ const blob=new Blob([rows.join('\n')],{type:'text/csv'}),url=URL.createObjectURL(blob),a=document.createElement('a'); a.href=url; a.download=fn; a.click(); URL.revokeObjectURL(url) }
 function randomSparkline(n,max){ return Array.from({length:n},()=>Math.floor(Math.random()*max)) }
 
-/* ── Clock ── */
-setInterval(()=>{
-  const t=new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'})
-  const a=document.getElementById('sbClock'),b=document.getElementById('topClock')
-  if(a)a.textContent=t; if(b)b.textContent=t
-},1000)
+setInterval(()=>{ const t=new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'}); const a=document.getElementById('sbClock'),b=document.getElementById('topClock'); if(a)a.textContent=t; if(b)b.textContent=t },1000)
 
-function startAutoRefresh(){
-  refreshTimer=30
-  refreshInterval=setInterval(()=>{
-    refreshTimer--
-    const el=document.getElementById('refreshCountdown')
-    if(el) el.textContent=refreshTimer+'s'
-    if(refreshTimer<=0){ loadAll(); refreshTimer=30 }
-  },1000)
-}
+function startAutoRefresh(){ refreshTimer=30; refreshInterval=setInterval(()=>{ refreshTimer--; const el=document.getElementById('refreshCountdown'); if(el)el.textContent=refreshTimer+'s'; if(refreshTimer<=0){loadAll();refreshTimer=30} },1000) }
 
 let _tt=null
-function toast(msg,type){
-  const el=document.getElementById('toast')
-  document.getElementById('toastIco').textContent=type==='ok'?'✓':type==='err'?'✕':'ℹ'
-  document.getElementById('toastMsg').textContent=msg
-  el.className='toast '+(type||'info')+' show'
-  if(_tt)clearTimeout(_tt); _tt=setTimeout(()=>el.classList.remove('show'),3500)
-}
+function toast(msg,type){ const el=document.getElementById('toast'); document.getElementById('toastIco').textContent=type==='ok'?'✓':type==='err'?'✕':'ℹ'; document.getElementById('toastMsg').textContent=msg; el.className='toast '+(type||'info')+' show'; if(_tt)clearTimeout(_tt); _tt=setTimeout(()=>el.classList.remove('show'),3500) }
 
-function showTab(name){
-  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'))
-  document.querySelectorAll('.nav-item').forEach(s=>s.classList.remove('active'))
-  const sec=document.getElementById('sec-'+name),tab=document.getElementById('tab-'+name)
-  if(sec)sec.classList.add('active')
-  if(tab)tab.classList.add('active')
-  document.getElementById('mainCanvas').scrollTop=0
-  if(name==='analytics')renderAnalytics()
-  if(name==='management'){ loadDatasets(); loadAdminCharts() }
-  if(name==='tickets') loadAdminTickets()
-}
-
-function showInnerTab(name){
-  document.querySelectorAll('.inner-sec').forEach(s=>s.classList.remove('active'))
-  document.querySelectorAll('.inner-tab').forEach(t=>t.classList.remove('active'))
-  const sec=document.getElementById('isec-'+name),tab=document.getElementById('itab-'+name)
-  if(sec)sec.classList.add('active')
-  if(tab)tab.classList.add('active')
-}
+function showTab(name){ document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active')); document.querySelectorAll('.nav-item').forEach(s=>s.classList.remove('active')); const sec=document.getElementById('sec-'+name),tab=document.getElementById('tab-'+name); if(sec)sec.classList.add('active'); if(tab)tab.classList.add('active'); document.getElementById('mainCanvas').scrollTop=0; if(name==='analytics')renderAnalytics(); if(name==='management'){loadDatasets();loadAdminCharts()} if(name==='tickets')loadAdminTickets() }
+function showInnerTab(name){ document.querySelectorAll('.inner-sec').forEach(s=>s.classList.remove('active')); document.querySelectorAll('.inner-tab').forEach(t=>t.classList.remove('active')); const sec=document.getElementById('isec-'+name),tab=document.getElementById('itab-'+name); if(sec)sec.classList.add('active'); if(tab)tab.classList.add('active') }
 
 function openModal(id){ document.getElementById(id).classList.add('open') }
 function closeModal(id){ document.getElementById(id).classList.remove('open') }
-function confirmAction(title,body,cb){
-  document.getElementById('confirmTitle').textContent=title
-  document.getElementById('confirmBody').textContent=body
-  _confirmCb=cb; openModal('confirmModal')
-}
+function confirmAction(title,body,cb){ document.getElementById('confirmTitle').textContent=title; document.getElementById('confirmBody').textContent=body; _confirmCb=cb; openModal('confirmModal') }
 document.getElementById('confirmBtn').onclick=()=>{ closeModal('confirmModal'); if(_confirmCb)_confirmCb() }
 document.querySelectorAll('.modal-ov').forEach(o=>o.addEventListener('click',function(e){ if(e.target===this)this.classList.remove('open') }))
 
-function buildSparkline(elId,vals,color){
-  const el=document.getElementById(elId); if(!el)return
-  const max=Math.max(...vals,1)
-  el.innerHTML=vals.map(v=>`<div class="spark-bar" style="height:${Math.round(v/max*100)}%;background:${color};opacity:${0.3+v/max*0.7}"></div>`).join('')
-}
+function buildSparkline(elId,vals,color){ const el=document.getElementById(elId); if(!el)return; const max=Math.max(...vals,1); el.innerHTML=vals.map(v=>`<div class="spark-bar" style="height:${Math.round(v/max*100)}%;background:${color};opacity:${0.3+v/max*0.7}"></div>`).join('') }
 
-async function loadAll(){
-  await Promise.all([loadStats(),loadUsers(),loadActivity()])
-  refreshTimer=30
-  const el=document.getElementById('refreshCountdown'); if(el)el.textContent='30s'
-}
+async function loadAll(){ await Promise.all([loadStats(),loadUsers(),loadActivity()]); refreshTimer=30; const el=document.getElementById('refreshCountdown'); if(el)el.textContent='30s' }
 
 async function loadStats(){
   try{
@@ -753,130 +776,152 @@ async function loadUsers(){
   }catch(e){ console.error('loadUsers',e) }
 }
 
-async function loadActivity(){
-  try{
-    const d=await fetch(API+'/admin/activity',{headers:hdrs()}).then(r=>r.json())
-    if(d.error)return
-    allActivity=d.activity||[]; renderRecentActivity()
-  }catch(e){}
-}
+async function loadActivity(){ try{ const d=await fetch(API+'/admin/activity',{headers:hdrs()}).then(r=>r.json()); if(d.error)return; allActivity=d.activity||[]; renderRecentActivity() }catch(e){} }
+async function loadDatasets(){ if(allDatasets.length){renderDatasets();return} try{ const d=await fetch(API+'/admin/datasets',{headers:hdrs()}).then(r=>r.json()); allDatasets=d.datasets||[]; renderDatasets(); document.getElementById('tabCntDatasets').textContent=allDatasets.length }catch(e){} }
+async function loadAdminCharts(){ if(allCharts.length){renderAdminCharts();return} try{ const d=await fetch(API+'/admin/charts',{headers:hdrs()}).then(r=>r.json()); allCharts=d.charts||[]; renderAdminCharts(); document.getElementById('tabCntCharts').textContent=allCharts.length }catch(e){} }
 
-async function loadDatasets(){
-  if(allDatasets.length){ renderDatasets(); return }
-  try{
-    const d=await fetch(API+'/admin/datasets',{headers:hdrs()}).then(r=>r.json())
-    allDatasets=d.datasets||[]; renderDatasets()
-    document.getElementById('tabCntDatasets').textContent=allDatasets.length
-  }catch(e){ document.getElementById('datasetsBody').innerHTML='<tr><td colspan="8"><div class="empty"><div class="empty-ico">⚠️</div><p>Could not load datasets.</p></div></td></tr>' }
-}
-
-async function loadAdminCharts(){
-  if(allCharts.length){ renderAdminCharts(); return }
-  try{
-    const d=await fetch(API+'/admin/charts',{headers:hdrs()}).then(r=>r.json())
-    allCharts=d.charts||[]; renderAdminCharts()
-    document.getElementById('tabCntCharts').textContent=allCharts.length
-  }catch(e){ document.getElementById('chartsBody').innerHTML='<tr><td colspan="5"><div class="empty"><div class="empty-ico">⚠️</div><p>Could not load charts.</p></div></td></tr>' }
-}
-
-/* ── Load FAQ cache for hints ── */
 async function loadFaqCache(){
   if(allFaqCache.length) return
-  try{
-    const d=await fetch(API+'/support/faq').then(r=>r.json())
-    allFaqCache=d.faq||[]
-  }catch(e){
-    // Use fallback if server unavailable
+  try{ const d=await fetch(API+'/support/faq').then(r=>r.json()); allFaqCache=d.faq||[] }catch(e){
     allFaqCache=[
-      {question:'How do I upload a dataset?',answer:'Go to the Dashboard and click "Select Dataset". Supported formats: CSV, Excel, JSON, SQL. Max 15 MB.',category:'Getting Started'},
+      {question:'How do I upload a dataset?',answer:'Go to the Dashboard and click "Select Dataset". Supported: CSV, Excel, JSON, SQL. Max 15 MB.',category:'Getting Started'},
       {question:'What file formats are supported?',answer:'CSV, TXT, Excel (.xlsx/.xls), JSON and SQL files. Password-protected Excel files are not supported.',category:'Getting Started'},
       {question:'How does the AI analyst work?',answer:'After uploading, click "Analyze with AI". The AI reads your data and answers questions about patterns, trends and anomalies.',category:'AI Features'},
       {question:'How do I save a chart?',answer:'Build a chart in the Visualize page, then click "Save Chart". Charts appear under Account → Saved Charts.',category:'Charts'},
       {question:'How long does my session last?',answer:'Sessions last 8 hours. Extend from Account → Session → "Extend Session +8h".',category:'Account'},
       {question:'How do I change my password?',answer:'Go to Account → Password, enter your current password and new password, then click Save.',category:'Account'},
-      {question:'Why is my data not showing?',answer:'Ensure Flask backend is running (python app.py). If running but data is missing, try re-uploading from the Dashboard.',category:'Troubleshooting'},
+      {question:'Why is my data not showing?',answer:'Ensure Flask backend is running (python app.py). Try re-uploading from the Dashboard.',category:'Troubleshooting'},
       {question:'How do I delete my account?',answer:'Go to Account → Danger Zone → "Delete Account". This permanently removes all your data.',category:'Account'},
       {question:'Is my data private?',answer:'Yes. Your data is stored only in your local database. Raw data is never sent to third-party services.',category:'Privacy'},
-      {question:'Can I export my charts?',answer:'Yes. Use Download PNG or Download JPG on the Visualize page, or export as PDF from the Report page.',category:'Charts'}
+      {question:'Can I export my charts?',answer:'Yes. Use Download PNG or Download JPG on the Visualize page.',category:'Charts'}
     ]
   }
 }
 
-/* ── Show FAQ hints matching ticket subject/category ── */
 function showFaqHints(subject, category){
   if(!allFaqCache.length) return
-  const q=(subject||'').toLowerCase()
-  const cat=(category||'').toLowerCase()
-
-  // Keywords map for matching
-  const keywords={
-    password:['password','pw','forgot','reset','login','signin','sign in'],
-    upload:['upload','file','dataset','csv','excel','format','import'],
-    chart:['chart','graph','visual','save chart','download'],
-    session:['session','logout','expire','timeout','8 hour'],
-    account:['account','delete','profile','name'],
-    ai:['ai','analyst','analyze','chat','question'],
-    data:['data','showing','not show','missing','error']
-  }
-
+  const q=(subject||'').toLowerCase(), cat=(category||'').toLowerCase()
+  const keywords={password:['password','pw','forgot','reset','login'],upload:['upload','file','dataset','csv','excel'],chart:['chart','graph','visual'],session:['session','logout','expire','timeout'],account:['account','delete','profile'],ai:['ai','analyst','analyze','chat'],data:['data','showing','not show','missing']}
   const matched=[]
   allFaqCache.forEach(faq=>{
     const fq=faq.question.toLowerCase()+' '+faq.answer.toLowerCase()
-    // Match by ticket subject keywords
     let score=0
     Object.values(keywords).flat().forEach(kw=>{ if(q.includes(kw)&&fq.includes(kw)) score++ })
-    // Match by category
     if(cat&&faq.category&&faq.category.toLowerCase().includes(cat)) score+=2
     if(score>0) matched.push({faq,score})
   })
-
   matched.sort((a,b)=>b.score-a.score)
   const top=matched.slice(0,3)
-
-  const banner=document.getElementById('faqHintBanner')
-  const items=document.getElementById('faqHintItems')
-
+  const banner=document.getElementById('faqHintBanner'), items=document.getElementById('faqHintItems')
   if(!top.length){ banner.style.display='none'; return }
-
   banner.style.display='block'
-  items.innerHTML=top.map(({faq})=>`
-    <div class="faq-hint-item" onclick="useFaqAsReply(${JSON.stringify(faq.answer).replace(/'/g,'&#39;')})">
-      <div class="faq-hint-q">${esc(faq.question)}</div>
-      <div class="faq-hint-a">${esc(faq.answer.substring(0,120))}${faq.answer.length>120?'…':''}</div>
-      <div class="faq-hint-use">↑ Click to use as reply</div>
-    </div>`).join('')
+  items.innerHTML=top.map(({faq})=>`<div class="faq-hint-item" onclick="useFaqAsReply('${faq.answer.replace(/'/g,"\\'")}')"><div class="faq-hint-q">${esc(faq.question)}</div><div class="faq-hint-a">${esc(faq.answer.substring(0,120))}${faq.answer.length>120?'…':''}</div><div class="faq-hint-use">↑ Click to use as reply</div></div>`).join('')
 }
 
-function useFaqAsReply(answer){
-  document.getElementById('adminReplyInput').value=answer
-  document.getElementById('adminReplyInput').focus()
-  toast('FAQ answer loaded into reply box','info')
+function useFaqAsReply(answer){ document.getElementById('adminReplyInput').value=answer; document.getElementById('adminReplyInput').focus(); toast('FAQ answer loaded','info') }
+
+/* ══ RETRIEVE USER INFO (from ticket) ══ */
+async function retrieveTicketUser(){
+  const panel = document.getElementById('userInfoPanel')
+  if(panel.style.display==='block'){ panel.style.display='none'; return }
+
+  if(!_currentTicketEmail){ toast('No user email on this ticket','err'); return }
+  panel.style.display='block'
+
+  // Find user in cache
+  const u = allUsers.find(x=>x.email===_currentTicketEmail)
+  if(!u){ toast('User not in cache — refreshing...','info'); await loadUsers(); return retrieveTicketUser() }
+
+  _currentTicketUserId = u.id
+  document.getElementById('uipAvatar').textContent=(u.name||'?').charAt(0).toUpperCase()
+  document.getElementById('uipName').textContent=u.name||'—'
+  document.getElementById('uipEmail').textContent=u.email||'—'
+  document.getElementById('uipJoined').textContent=fmtDate(u.created_at)
+  document.getElementById('uipLastLogin').textContent=fmtDT(u.last_login)
+  document.getElementById('uipUploads').textContent=u.upload_count||0
+
+  const roleBadge=document.getElementById('uipRoleBadge')
+  roleBadge.textContent=u.role==='admin'?'Admin':'User'
+  roleBadge.className='badge '+(u.role==='admin'?'b-red':'b-blue')
+
+  const statusBadge=document.getElementById('uipStatusBadge')
+  const isActive=(u.status||'active')==='active'
+  statusBadge.textContent=isActive?'Active':'Suspended'
+  statusBadge.className='badge '+(isActive?'b-green':'b-red')
+
+  // Get datasets for this user
+  try{
+    // Use cached allDatasets if available, else fetch
+    let ds = allDatasets.length ? allDatasets : (await fetch(API+'/admin/datasets',{headers:hdrs()}).then(r=>r.json())).datasets||[]
+    if(!allDatasets.length) allDatasets=ds
+    const userDs=ds.filter(d=>d.user_email===_currentTicketEmail)
+    const totalRows=userDs.reduce((s,d)=>s+(d.total_rows||0),0)
+    document.getElementById('uipRows').textContent=fmtNum(totalRows)
+
+    const detail=document.getElementById('uipUploadsDetail')
+    if(!userDs.length){
+      detail.innerHTML='<div style="font-size:12px;color:var(--text-3);padding:6px 0">No uploads yet.</div>'
+    } else {
+      detail.innerHTML=userDs.slice(0,4).map(d=>{
+        const t=(d.file_type||'other').toLowerCase()
+        return `<div style="display:flex;align-items:center;gap:9px;padding:7px 10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:8px">
+          <span class="ft ft-${esc(t)}">${esc(t.toUpperCase())}</span>
+          <div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;color:var(--text-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(d.file_name||'—')}</div>
+          <div style="font-size:10px;color:var(--text-3)">${fmtNum(d.total_rows)} rows · ${fmtDate(d.uploaded_at)}</div></div>
+          ${d.missing_vals>0?`<span style="font-size:10px;color:var(--red)">⚠ ${d.missing_vals}</span>`:'<span style="font-size:10px;color:var(--green)">✓</span>'}
+        </div>`
+      }).join('')+(userDs.length>4?`<div style="font-size:11px;color:var(--text-3);padding:5px 0 0">+${userDs.length-4} more uploads</div>`:'')
+    }
+  }catch(e){ document.getElementById('uipRows').textContent='—' }
+}
+
+function copyTicketUserEmail(){
+  if(!_currentTicketEmail){ toast('No email available','err'); return }
+  navigator.clipboard.writeText(_currentTicketEmail)
+    .then(()=>toast('Copied: '+_currentTicketEmail,'ok'))
+    .catch(()=>toast(_currentTicketEmail,'info'))
+}
+
+function promoteFromTicket(){
+  if(!_currentTicketEmail){ toast('No email','err'); return }
+  if(!confirm('Promote '+_currentTicketEmail+' to Admin?')) return
+  fetch(API+'/admin/promote',{method:'POST',headers:hdrs(),body:JSON.stringify({email:_currentTicketEmail,role:'admin'})})
+    .then(r=>r.json()).then(d=>{ if(d.status==='success'){toast(d.message,'ok');loadUsers()} else toast(d.error||'Failed','err') })
+    .catch(()=>toast('Server error','err'))
+}
+
+function suspendFromTicket(){
+  if(!_currentTicketUserId){ toast('Load user info first','err'); return }
+  const u=allUsers.find(x=>x.id===_currentTicketUserId)
+  if(!u){ toast('User not found','err'); return }
+  const ns=(u.status||'active')==='active'?'suspended':'active'
+  if(!confirm((ns==='suspended'?'Suspend':'Activate')+' user '+u.email+'?')) return
+  fetch(API+'/admin/users/'+u.id,{method:'PUT',headers:hdrs(),body:JSON.stringify({status:ns})})
+    .then(r=>r.json()).then(d=>{
+      if(d.status==='success'){
+        u.status=ns; toast('User '+ns,'ok')
+        const sb=document.getElementById('uipStatusBadge')
+        sb.textContent=ns==='active'?'Active':'Suspended'
+        sb.className='badge '+(ns==='active'?'b-green':'b-red')
+      } else toast(d.error||'Failed','err')
+    }).catch(()=>toast('Server error','err'))
 }
 
 /* ══ QUICK REPLY TEMPLATES ══ */
 const TEMPLATES={
-  acknowledge: `Hi there,\n\nThank you for reaching out to InsightFlow Support. I've received your ticket and I'm looking into it right now.\n\nI'll get back to you with an update shortly.\n\nBest regards,\nInsightFlow Support Team`,
-
-  investigating: `Hi,\n\nThank you for reporting this. I'm currently investigating the issue you've described and will provide an update as soon as possible.\n\nIf you can share any additional details (error messages, steps to reproduce), that would help us resolve this faster.\n\nBest regards,\nInsightFlow Support Team`,
-
-  needInfo: `Hi,\n\nThank you for contacting support. To help resolve your issue, I need a bit more information:\n\n1. What browser and operating system are you using?\n2. Can you describe the exact steps you took before the issue occurred?\n3. Are there any error messages shown?\n\nLooking forward to your reply.\n\nBest regards,\nInsightFlow Support Team`,
-
-  fixed: `Hi,\n\nGreat news — the issue you reported has been resolved! ✅\n\nHere's what was done: [describe fix]\n\nPlease try again and let us know if everything is working correctly. If you experience any further issues, don't hesitate to reply to this ticket.\n\nBest regards,\nInsightFlow Support Team`,
-
-  password: `Hi,\n\nTo change your password in InsightFlow:\n\n1. Go to Account Settings (top right menu)\n2. Click on the "Password" tab in the sidebar\n3. Enter your current password\n4. Enter and confirm your new password\n5. Click "Update Password"\n\nIf you've forgotten your current password, use the "Forgot Password" link on the login page.\n\nLet me know if you need any further help!\n\nBest regards,\nInsightFlow Support Team`,
-
-  upload: `Hi,\n\nHere's how to upload a dataset in InsightFlow:\n\n1. Go to the Dashboard\n2. Click "Select Dataset" or drag and drop your file\n3. Supported formats: CSV, Excel (.xlsx/.xls), JSON, SQL, TXT\n4. Maximum file size: 15 MB\n5. Password-protected Excel files are not supported — remove the password first\n\nOnce uploaded, the AI Analyst will be ready to analyze your data.\n\nLet me know if you run into any issues!\n\nBest regards,\nInsightFlow Support Team`,
-
-  session: `Hi,\n\nInsightFlow sessions last 8 hours from the time you log in.\n\nTo extend your session without logging out:\n1. Go to Account Settings\n2. Click the "Session" tab in the sidebar\n3. Click "Extend Session +8h"\n\nYour session will be extended for another 8 hours from that point.\n\nHope that helps!\n\nBest regards,\nInsightFlow Support Team`,
-
-  notBug: `Hi,\n\nThank you for reporting this. After investigating, this appears to be the expected behavior of the system rather than a bug.\n\n[Explain why this is expected behavior]\n\nIf you'd like this behavior changed, feel free to submit a Feature Request ticket and our team will consider it for a future update.\n\nBest regards,\nInsightFlow Support Team`,
-
-  closeTicket: `Hi,\n\nI'm closing this ticket as the issue appears to have been resolved. 🎉\n\nIf you experience this issue again or have any other questions, please feel free to open a new support ticket — we're always happy to help!\n\nThank you for using InsightFlow.\n\nBest regards,\nInsightFlow Support Team`
+  acknowledge:`Hi there,\n\nThank you for reaching out to InsightFlow Support. I've received your ticket and I'm looking into it right now.\n\nI'll get back to you with an update shortly.\n\nBest regards,\nInsightFlow Support Team`,
+  investigating:`Hi,\n\nThank you for reporting this. I'm currently investigating the issue you've described and will provide an update as soon as possible.\n\nIf you can share any additional details (error messages, steps to reproduce), that would help us resolve this faster.\n\nBest regards,\nInsightFlow Support Team`,
+  needInfo:`Hi,\n\nThank you for contacting support. To help resolve your issue, I need a bit more information:\n\n1. What browser and operating system are you using?\n2. Can you describe the exact steps you took before the issue occurred?\n3. Are there any error messages shown?\n\nLooking forward to your reply.\n\nBest regards,\nInsightFlow Support Team`,
+  fixed:`Hi,\n\nGreat news — the issue you reported has been resolved! ✅\n\nPlease try again and let us know if everything is working correctly. If you experience any further issues, don't hesitate to reply to this ticket.\n\nBest regards,\nInsightFlow Support Team`,
+  password:`Hi,\n\nTo change or recover your password in InsightFlow:\n\n1. Go to the Login page\n2. Click "Forgot Password?"\n3. Enter your registered email address\n4. Follow the instructions to set a new password\n\nAlternatively, if you're logged in:\n1. Go to Account Settings\n2. Click the "Password" tab\n3. Enter your current and new password\n4. Click "Update Password"\n\nLet me know if you need any further help!\n\nBest regards,\nInsightFlow Support Team`,
+  upload:`Hi,\n\nHere's how to upload a dataset in InsightFlow:\n\n1. Go to the Dashboard\n2. Click "Select Dataset"\n3. Supported formats: CSV, Excel (.xlsx/.xls), JSON, SQL, TXT\n4. Maximum file size: 15 MB\n5. Password-protected Excel files are not supported — remove the password first\n\nOnce uploaded, the AI Analyst will be ready to analyze your data.\n\nBest regards,\nInsightFlow Support Team`,
+  session:`Hi,\n\nInsightFlow sessions last 8 hours from the time you log in.\n\nTo extend your session:\n1. Go to Account Settings\n2. Click the "Session" tab\n3. Click "Extend Session +8h"\n\nBest regards,\nInsightFlow Support Team`,
+  notBug:`Hi,\n\nThank you for reporting this. After investigating, this appears to be the expected behavior of the system rather than a bug.\n\nIf you'd like this behavior changed, feel free to submit a Feature Request ticket and our team will consider it for a future update.\n\nBest regards,\nInsightFlow Support Team`,
+  closeTicket:`Hi,\n\nI'm closing this ticket as the issue appears to have been resolved. 🎉\n\nIf you experience this issue again or have any other questions, please feel free to open a new support ticket — we're always happy to help!\n\nThank you for using InsightFlow.\n\nBest regards,\nInsightFlow Support Team`
 }
 
 function useTemplate(key){
-  const tpl=TEMPLATES[key]
-  if(!tpl){ toast('Template not found','err'); return }
+  const tpl=TEMPLATES[key]; if(!tpl){ toast('Template not found','err'); return }
   document.getElementById('adminReplyInput').value=tpl
   document.getElementById('adminReplyInput').focus()
   toast('Template loaded','info')
@@ -930,10 +975,7 @@ function renderRecentActivity(){
   if(!allActivity.length){ el.innerHTML='<div class="empty"><div class="empty-ico">📋</div><p>No activity yet.</p></div>'; return }
   const colMap={login:'#00e5a0',login_failed:'#ff4d6d',logout:'#ffd166',upload:'#4d9fff',register:'#a855f7',password_reset:'#06b6d4'}
   const lblMap={login:'Logged in',login_failed:'Failed login',logout:'Logged out',upload:'Dataset uploaded',register:'Account created',password_reset:'Password reset'}
-  el.innerHTML=allActivity.slice(0,6).map(a=>{
-    const col=colMap[a.action]||'#778'
-    return `<div class="act-item"><div class="act-dot" style="background:${col};box-shadow:0 0 6px ${col}66"></div><div class="act-label">${lblMap[a.action]||a.action}<span class="act-sub">${a.user_email?'— '+esc(a.user_email):''}</span></div><div class="act-time">${fmtDT(a.created_at)}</div></div>`
-  }).join('')
+  el.innerHTML=allActivity.slice(0,6).map(a=>{ const col=colMap[a.action]||'#778'; return `<div class="act-item"><div class="act-dot" style="background:${col};box-shadow:0 0 6px ${col}66"></div><div class="act-label">${lblMap[a.action]||a.action}<span class="act-sub">${a.user_email?'— '+esc(a.user_email):''}</span></div><div class="act-time">${fmtDT(a.created_at)}</div></div>` }).join('')
 }
 
 function renderUsers(filtered=null){
@@ -974,7 +1016,7 @@ function toggleBan(id){
   }).catch(()=>toast('Server error','err'))
 }
 function deleteUser(id){
-  confirmAction('Delete this user?','All their data (datasets, chats, charts) will be permanently removed.',()=>{
+  confirmAction('Delete this user?','All their data will be permanently removed.',()=>{
     fetch(API+'/admin/users/'+id,{method:'DELETE',headers:hdrs()}).then(r=>r.json()).then(d=>{
       if(d.status==='success'){ allUsers=allUsers.filter(x=>x.id!==id); toast('User deleted','ok'); renderUsers(); loadStats() }
       else toast(d.error||'Failed','err')
@@ -1044,42 +1086,32 @@ function pag(elId,total,cur,cb){
 
 /* ══ ANNOUNCEMENTS ══ */
 async function loadAnnFromStorage(){
-  try{
-    const d=await fetch(API+'/admin/announcements',{headers:hdrs()}).then(r=>r.json())
-    if(d.error){ toast('Announcements: '+d.error,'err'); return }
-    annList=d.announcements||[]
-  }catch(e){ try{ const s=localStorage.getItem('insightflow_admin_ann'); if(s) annList=JSON.parse(s) }catch(e2){} }
+  try{ const d=await fetch(API+'/admin/announcements',{headers:hdrs()}).then(r=>r.json()); if(d.error){ toast('Announcements: '+d.error,'err'); return }; annList=d.announcements||[] }catch(e){ try{ const s=localStorage.getItem('insightflow_admin_ann'); if(s) annList=JSON.parse(s) }catch(e2){} }
   renderAnn()
 }
 function sendAnn(){
   const title=document.getElementById('annTitle').value.trim(), body=document.getElementById('annBody').value.trim()
   if(!title||!body){ toast('Title and message are required','err'); return }
   fetch(API+'/admin/announcements',{method:'POST',headers:hdrs(),body:JSON.stringify({title,message:body,type:document.getElementById('annType').value,target:document.getElementById('annTarget').value})})
-  .then(r=>r.json()).then(d=>{
-    if(d.status==='success'){ closeModal('annModal'); document.getElementById('annTitle').value=''; document.getElementById('annBody').value=''; toast('Announcement broadcast ✓','ok'); loadAnnFromStorage() }
-    else toast(d.message||d.error||'Broadcast failed','err')
-  }).catch(()=>toast('Server error','err'))
+  .then(r=>r.json()).then(d=>{ if(d.status==='success'){ closeModal('annModal'); document.getElementById('annTitle').value=''; document.getElementById('annBody').value=''; toast('Announcement broadcast ✓','ok'); loadAnnFromStorage() } else toast(d.message||d.error||'Broadcast failed','err') }).catch(()=>toast('Server error','err'))
 }
 function renderAnn(){
   document.getElementById('annTotal').textContent=annList.length
-  document.getElementById('annMonth').textContent=annList.filter(a=>new Date(a.created_at||a.sent||Date.now()).getMonth()===new Date().getMonth()).length
+  document.getElementById('annMonth').textContent=annList.filter(a=>new Date(a.created_at||Date.now()).getMonth()===new Date().getMonth()).length
   const el=document.getElementById('annList'), tc={info:'b-blue',warning:'b-orange',success:'b-green'}
   if(!annList.length){ el.innerHTML='<div class="empty"><div class="empty-ico">📢</div><p>No announcements yet.</p></div>'; return }
   el.innerHTML=annList.map(a=>`<div class="ann-card"><div class="ann-head"><span class="badge ${tc[a.type]||'b-gray'}">${esc((a.type||'info').toUpperCase())}</span><div class="ann-title">${esc(a.title)}</div><button onclick="delAnn(${a.id})" style="background:none;border:none;cursor:pointer;color:var(--text-3);font-size:14px;padding:0" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--text-3)'">✕</button></div><div class="ann-body">${esc(a.message||a.body||'')}</div><div class="ann-meta">${fmtDT(a.created_at||a.sent)} · ${(a.target||'all')==='all'?'All users':'Active users'} ${a.is_active!==undefined?(a.is_active?'<span style="color:var(--green)">● Active</span>':'<span style="color:var(--red)">○ Inactive</span>'):''}</div></div>`).join('')
 }
 function delAnn(id){
   if(!confirm('Delete this announcement?')) return
-  fetch(API+'/admin/announcements/'+id,{method:'DELETE',headers:hdrs()}).then(r=>r.json()).then(d=>{
-    if(d.status==='success'){ annList=annList.filter(a=>a.id!==id); renderAnn(); toast('Announcement removed','ok') }
-    else toast(d.error||'Delete failed','err')
-  }).catch(()=>toast('Server error','err'))
+  fetch(API+'/admin/announcements/'+id,{method:'DELETE',headers:hdrs()}).then(r=>r.json()).then(d=>{ if(d.status==='success'){ annList=annList.filter(a=>a.id!==id); renderAnn(); toast('Announcement removed','ok') } else toast(d.error||'Delete failed','err') }).catch(()=>toast('Server error','err'))
 }
 
 /* ══ TICKETS ══ */
 var allAdminTickets=[], tktPage=1, currentAdminTicketId=null
 
 async function loadAdminTickets(){
-  await loadFaqCache() // pre-load FAQ for hints
+  await loadFaqCache()
   try{
     const d=await fetch(API+'/admin/tickets',{headers:hdrs()}).then(r=>r.json())
     allAdminTickets=d.tickets||[]; renderAdminTickets()
@@ -1116,31 +1148,39 @@ function filterAdminTickets(){
   const q=document.getElementById('tktSearch').value.toLowerCase()
   const s=document.getElementById('tktStatusFilter').value
   const p=document.getElementById('tktPriFilter').value
-  const f=allAdminTickets.filter(t=>{
-    const mq=!q||t.subject.toLowerCase().includes(q)||t.user_email.toLowerCase().includes(q)||t.user_name.toLowerCase().includes(q)
-    return mq&&(!s||t.status===s)&&(!p||t.priority===p)
-  })
+  const f=allAdminTickets.filter(t=>{ const mq=!q||t.subject.toLowerCase().includes(q)||t.user_email.toLowerCase().includes(q)||t.user_name.toLowerCase().includes(q); return mq&&(!s||t.status===s)&&(!p||t.priority===p) })
   tktPage=1; renderAdminTickets(f)
 }
 
 async function openAdminTicket(id){
   currentAdminTicketId=id
+  _currentTicketEmail=null; _currentTicketUserId=null
   document.getElementById('adminTicketList').style.display='none'
   document.getElementById('adminTicketDetail').style.display='flex'
   document.getElementById('adminReplyList').innerHTML='<div class="spinner"></div>'
   document.getElementById('adminReplyInput').value=''
   document.getElementById('faqHintBanner').style.display='none'
+  document.getElementById('userInfoPanel').style.display='none'
   try{
     const d=await fetch(API+'/support/tickets/'+id,{headers:hdrs()}).then(r=>r.json())
     const t=d.ticket, replies=d.replies||[]
+
+    // Store email for user info retrieval
+    // Store email — from ticket detail or fall back to cached list
+      _currentTicketEmail = t.user_email || null
+      if (!_currentTicketEmail) {
+        const cached = allAdminTickets.find(x => x.id === id)
+        if (cached) _currentTicketEmail = cached.user_email || null
+      }
+
     document.getElementById('tktDetailSubj').textContent='#'+t.id+' — '+t.subject
     document.getElementById('tktDetailMeta').textContent='User: '+(t.user_email||'—')+' · Category: '+t.category+' · Created: '+fmtDT(t.created_at)
     document.getElementById('tktDetailDesc').textContent=t.description
+
     const priColor={urgent:'b-red',high:'b-orange',medium:'b-orange',low:'b-green'}
     const statusColor={open:'b-red',in_progress:'b-blue',resolved:'b-green',closed:'b-gray'}
     document.getElementById('tktDetailBadges').innerHTML='<span class="badge '+priColor[t.priority]+'">'+t.priority+'</span><span class="badge '+statusColor[t.status]+'">'+t.status.replace('_',' ')+'</span>'
 
-    // Show FAQ hints based on subject + category
     showFaqHints(t.subject+' '+t.description, t.category)
 
     if(!replies.length){
@@ -1152,9 +1192,10 @@ async function openAdminTicket(id){
 }
 
 function backToAdminTickets(){
-  currentAdminTicketId=null
+  currentAdminTicketId=null; _currentTicketEmail=null; _currentTicketUserId=null
   document.getElementById('adminTicketDetail').style.display='none'
   document.getElementById('adminTicketList').style.display='block'
+  document.getElementById('userInfoPanel').style.display='none'
 }
 
 async function sendAdminReply(){
@@ -1167,58 +1208,63 @@ async function sendAdminReply(){
   }catch(e){ toast('Server error','err') }
 }
 
-/* Send reply AND immediately mark as resolved */
 async function sendAndResolve(){
   const msg=document.getElementById('adminReplyInput').value.trim()
   if(!msg){ toast('Please write a reply before resolving','err'); return }
   try{
-    // Send reply first
     const r=await fetch(API+'/support/tickets/'+currentAdminTicketId+'/reply',{method:'POST',headers:hdrs(),body:JSON.stringify({message:msg})}).then(r=>r.json())
     if(r.status!=='success'){ toast(r.error||'Reply failed','err'); return }
-    // Then resolve
     await fetch(API+'/support/tickets/'+currentAdminTicketId+'/status',{method:'PUT',headers:hdrs(),body:JSON.stringify({status:'resolved'})})
     document.getElementById('adminReplyInput').value=''
     toast('Reply sent & ticket resolved ✅','ok')
-    openAdminTicket(currentAdminTicketId)
-    loadAdminTickets()
+    openAdminTicket(currentAdminTicketId); loadAdminTickets()
   }catch(e){ toast('Server error','err') }
 }
 
 async function setTicketStatus(status){
   try{
     const d=await fetch(API+'/support/tickets/'+currentAdminTicketId+'/status',{method:'PUT',headers:hdrs(),body:JSON.stringify({status})}).then(r=>r.json())
-    if(d.status==='success'){ toast('Status updated to '+status,'ok'); openAdminTicket(currentAdminTicketId); loadAdminTickets() }
+    if(d.status==='success'){ toast('Status → '+status,'ok'); openAdminTicket(currentAdminTicketId); loadAdminTickets() }
     else toast(d.error||'Failed','err')
   }catch(e){ toast('Server error','err') }
 }
 
 async function deleteAdminTicket(){
   if(!confirm('Delete this ticket permanently?')) return
-  try{
-    await fetch(API+'/support/tickets/'+currentAdminTicketId,{method:'DELETE',headers:hdrs()})
-    toast('Ticket deleted','ok'); backToAdminTickets(); loadAdminTickets()
-  }catch(e){ toast('Server error','err') }
+  try{ await fetch(API+'/support/tickets/'+currentAdminTicketId,{method:'DELETE',headers:hdrs()}); toast('Ticket deleted','ok'); backToAdminTickets(); loadAdminTickets() }catch(e){ toast('Server error','err') }
 }
 
 /* ══ SETTINGS ══ */
 function saveSettings(){
-  try{ localStorage.setItem('insightflow_admin_cfg',JSON.stringify({name:document.getElementById('cfg-name').value,api:document.getElementById('cfg-api').value,jwt:document.getElementById('cfg-jwt').value,size:document.getElementById('cfg-size').value,rate:document.getElementById('cfg-rate').value,model:document.getElementById('cfg-model').value})) }catch(e){}
-  toast('Settings saved successfully','ok')
-}
-function promptPromote(){
-  const email=prompt('Enter the email address to promote to Admin:'); if(!email)return
-  fetch(API+'/admin/promote',{method:'POST',headers:hdrs(),body:JSON.stringify({email,role:'admin'})}).then(r=>r.json()).then(d=>{ if(d.status==='success'){ toast(d.message,'ok'); loadUsers() } else toast(d.error||'Failed','err') }).catch(()=>toast('Server error','err'))
-}
-function clearAllChats(){ fetch(API+'/admin/chats/clear-all',{method:'DELETE',headers:hdrs()}).then(r=>r.json()).then(d=>{ if(d.status==='success'){ toast('All chats cleared','ok'); loadStats() } else toast(d.error||'Failed','err') }).catch(()=>toast('Server error','err')) }
-function clearAllActivity(){ fetch(API+'/admin/activity/clear-all',{method:'DELETE',headers:hdrs()}).then(r=>r.json()).then(d=>{ if(d.status==='success'){ allActivity=[]; renderRecentActivity(); toast('Activity logs cleared','ok'); loadStats() } else toast(d.error||'Failed','err') }).catch(()=>toast('Server error','err')) }
-function exportReport(){
-  const rows=['InsightFlow Admin Report','Generated: '+new Date().toLocaleString(),'','Metric,Value','Total Users,'+document.getElementById('kpiUsers').textContent,'Total Datasets,'+document.getElementById('kpiDs').textContent,'Chat Messages,'+document.getElementById('kpiChats').textContent,'Saved Charts,'+document.getElementById('kpiCharts').textContent,'Activity Events,'+document.getElementById('kpiActivity').textContent,'Avg Rows/Upload,'+document.getElementById('kpiAvgRows').textContent,'Total Rows Analyzed,'+document.getElementById('kpiTotalRows').textContent]
-  dlCSV(rows,'insightflow_admin_report.csv'); toast('Report exported','ok')
-}
-function adminLogout(){
-  if(!confirm('Log out of the admin panel?'))return
-  try{ if(window.Auth)window.Auth.logout(); else{ localStorage.clear(); window.location.replace('login.html') } }
-  catch(e){ localStorage.clear(); window.location.replace('login.html') }
+  try{ localStorage.setItem('insightflow_admin_cfg', JSON.stringify({
+    name: document.getElementById('cfg-name').value,
+    api:  document.getElementById('cfg-api').value,
+    jwt:  document.getElementById('cfg-jwt').value,
+    size: document.getElementById('cfg-size').value,
+    rate: document.getElementById('cfg-rate').value,
+    model:document.getElementById('cfg-model').value
+  }))} catch(e){}
+
+  const maint = document.getElementById('tog-maint').checked
+  fetch(API+'/admin/maintenance', {
+    method: 'POST',
+    headers: hdrs(),
+    body: JSON.stringify({enabled: maint})
+  })
+  .then(r => r.json())
+  .then(d => {
+    if(d.status === 'success'){
+      toast(
+        maint
+          ? '⚠️ Maintenance ON — all users blocked from login'
+          : '✅ Maintenance OFF — platform open',
+        maint ? 'info' : 'ok'
+      )
+    } else {
+      toast('Settings saved locally','ok')
+    }
+  })
+  .catch(()=> toast('Settings saved (server unreachable)','info'))
 }
 
 /* ══ INIT ══ */
@@ -1233,7 +1279,71 @@ window.addEventListener('DOMContentLoaded',async function(){
     }catch(e){ document.querySelector('.layout').innerHTML='<div class="access-denied"><div class="big-ico">⚠️</div><h2>Cannot Connect</h2><p>Could not reach the server. Make sure Flask is running on port 5000.</p></div>'; return }
   }
   loadAll(); loadAnnFromStorage(); startAutoRefresh()
+  // Load maintenance state
+  // Load maintenance toggle state from server
+  fetch(API+'/admin/maintenance', {headers: hdrs()})
+    .then(r => r.json())
+    .then(d => {
+      const tog = document.getElementById('tog-maint')
+      if(tog) tog.checked = d.maintenance || false
+      if(d.maintenance){
+        toast('⚠️ Maintenance mode is currently ON','info')
+      }
+    }).catch(()=>{})
 })
+function promptPromote(){
+  const email = prompt('Enter email to promote to Admin:')
+  if(!email) return
+  fetch(API+'/admin/promote', {method:'POST', headers:hdrs(), body:JSON.stringify({email, role:'admin'})})
+    .then(r=>r.json())
+    .then(d=>{ if(d.status==='success'){ toast(d.message,'ok'); loadUsers() } else toast(d.error||'Failed','err') })
+    .catch(()=>toast('Server error','err'))
+}
+
+function clearAllChats(){
+  fetch(API+'/admin/chats/clear-all', {method:'DELETE', headers:hdrs()})
+    .then(r=>r.json())
+    .then(d=>{ if(d.status==='success'){ toast('All chats cleared','ok'); loadStats() } else toast(d.error||'Failed','err') })
+    .catch(()=>toast('Server error','err'))
+}
+
+function clearAllActivity(){
+  fetch(API+'/admin/activity/clear-all', {method:'DELETE', headers:hdrs()})
+    .then(r=>r.json())
+    .then(d=>{ if(d.status==='success'){ allActivity=[]; renderRecentActivity(); toast('Activity logs cleared','ok'); loadStats() } else toast(d.error||'Failed','err') })
+    .catch(()=>toast('Server error','err'))
+}
+
+function exportReport(){
+  const rows = [
+    'InsightFlow Admin Report',
+    'Generated: '+new Date().toLocaleString(),
+    '',
+    'Metric,Value',
+    'Total Users,'+document.getElementById('kpiUsers').textContent,
+    'Total Datasets,'+document.getElementById('kpiDs').textContent,
+    'Chat Messages,'+document.getElementById('kpiChats').textContent,
+    'Saved Charts,'+document.getElementById('kpiCharts').textContent,
+    'Activity Events,'+document.getElementById('kpiActivity').textContent,
+    'Avg Rows/Upload,'+document.getElementById('kpiAvgRows').textContent,
+    'Total Rows Analyzed,'+document.getElementById('kpiTotalRows').textContent
+  ]
+  dlCSV(rows, 'insightflow_admin_report.csv')
+  toast('Report exported','ok')
+}
+
+function adminLogout(){
+  if(!confirm('Log out of the admin panel?')) return
+  try {
+    localStorage.removeItem('insightflow_jwt')
+    localStorage.removeItem('insightflow_session')
+    localStorage.removeItem('userEmail')
+    window.location.replace('login.html')
+  } catch(e) {
+    window.location.replace('login.html')
+  }
+}
+
 </script>
 </body>
 </html>

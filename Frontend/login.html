@@ -1,248 +1,1124 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script src="auth.js" data-public></script>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>InsightFlow — Login</title>
-<style>
-*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-:root{
-  --bg:#02040a;--o:#ff8c00;--o2:#ff4400;--gold:#ffcc44;
-  --text:#eef2ff;--muted:rgba(238,242,255,.45);--faint:rgba(238,242,255,.18);
-  --border:rgba(255,255,255,.08);--border-o:rgba(255,140,0,.2);
-  --green:#10b981;--red:#ef4444;
-  --font:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>InsightFlow — Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+:root {
+  --accent: #ff8c00;
+  --accent-soft: rgba(255, 140, 0, 0.15);
+  --accent-glow: rgba(255, 140, 0, 0.35);
+  --glass-bg: rgba(255, 255, 255, 0.055);
+  --glass-border: rgba(255, 255, 255, 0.11);
+  --glass-hover: rgba(255, 255, 255, 0.09);
+  --text-1: #f0f4ff;
+  --text-2: rgba(200, 210, 240, 0.65);
+  --text-3: rgba(160, 175, 210, 0.4);
+  --red: #ff4d6d;
+  --green: #00e5a0;
+  --blue: #4d9fff;
+  --purple: #a855f7;
+  --font: 'Outfit', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+  --r: 14px;
+  --r-sm: 10px;
+  --r-lg: 20px;
 }
-html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);overflow:hidden}
-#bg{position:fixed;inset:0;z-index:0;pointer-events:none}
-.grid-bg{position:fixed;inset:0;z-index:1;pointer-events:none;background-image:linear-gradient(rgba(255,140,0,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,140,0,.03) 1px,transparent 1px);background-size:60px 60px;-webkit-mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black,transparent);mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black,transparent)}
-.page{position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;padding:20px}
-.card{position:relative;width:100%;max-width:440px;max-height:calc(100vh - 40px);display:flex;flex-direction:column;background:rgba(4,8,18,.92);border:1px solid var(--border);border-radius:24px;overflow:hidden;box-shadow:0 0 0 1px rgba(255,140,0,.06),0 32px 80px rgba(0,0,0,.8),inset 0 1px 0 rgba(255,255,255,.04);animation:cardIn .65s cubic-bezier(.22,1,.36,1) both;backdrop-filter:blur(20px)}
-@keyframes cardIn{from{opacity:0;transform:translateY(28px) scale(.96)}to{opacity:1;transform:none}}
-.card::before{content:'';position:absolute;top:0;left:10%;right:10%;height:1px;z-index:2;background:linear-gradient(90deg,transparent,rgba(255,140,0,.6),rgba(255,200,0,.5),rgba(255,140,0,.6),transparent);animation:topGlow 3s ease-in-out infinite}
-@keyframes topGlow{0%,100%{opacity:.6}50%{opacity:1}}
-.card-head{padding:28px 32px 0;flex-shrink:0;animation:fadeUp .5s .08s both}
-@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
-.logo{display:flex;align-items:center;gap:10px;margin-bottom:22px}
-.logo-box{width:34px;height:34px;border-radius:10px;flex-shrink:0;background:linear-gradient(145deg,#ff8c00,#ff2200);display:grid;place-items:center;box-shadow:0 0 0 1px rgba(255,140,0,.3),0 4px 16px rgba(255,140,0,.4),inset 0 1px 0 rgba(255,255,255,.2);position:relative;overflow:hidden}
-.logo-box::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.2),transparent 55%)}
-.logo-box svg{width:17px;height:17px;fill:white;position:relative;z-index:1}
-.logo-name{font-size:16px;font-weight:800;letter-spacing:2px;background:linear-gradient(90deg,#ff8c00,#ffcc44,#ff8c00);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:logoShine 5s linear infinite}
-@keyframes logoShine{0%{background-position:0%}100%{background-position:200%}}
-.card-title{font-size:26px;font-weight:900;color:white;letter-spacing:-.5px;margin-bottom:5px;line-height:1.15}
-.card-sub{font-size:13px;color:var(--muted);font-weight:400;letter-spacing:.1px}
-.tabs{display:flex;gap:3px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:13px;padding:4px;margin:20px 32px 0;flex-shrink:0;animation:fadeUp .5s .14s both}
-.tab{flex:1;padding:9px 12px;border-radius:10px;border:none;cursor:pointer;font-size:13px;font-weight:600;font-family:var(--font);color:var(--faint);background:transparent;transition:.22s;letter-spacing:.1px}
-.tab.active{background:rgba(255,140,0,.1);color:#ff8c00;border:1px solid rgba(255,140,0,.22);box-shadow:0 0 16px rgba(255,140,0,.08)}
-.form-scroll{flex:1;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;scrollbar-width:thin;scrollbar-color:rgba(255,140,0,.15) transparent}
-.form-scroll::-webkit-scrollbar{width:3px}
-.form-scroll::-webkit-scrollbar-thumb{background:rgba(255,140,0,.15);border-radius:2px}
-.form-body{padding:20px 32px 26px;display:flex;flex-direction:column;flex:1;animation:fadeUp .5s .2s both}
-.fg{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
-.fl{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--faint)}
-.fi-wrap{position:relative}
-.fi{width:100%;padding:11px 14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:11px;color:var(--text);font-size:13.5px;font-family:var(--font);transition:.2s;outline:none;letter-spacing:.1px}
-.fi::placeholder{color:rgba(238,242,255,.2)}
-.fi:focus{border-color:rgba(255,140,0,.4);background:rgba(255,140,0,.025);box-shadow:0 0 0 3px rgba(255,140,0,.07)}
-.fi.err{border-color:rgba(239,68,68,.4);background:rgba(239,68,68,.04);box-shadow:0 0 0 3px rgba(239,68,68,.06)}
-.fi.ok{border-color:rgba(16,185,129,.35);box-shadow:0 0 0 3px rgba(16,185,129,.05)}
-.pw-eye{position:absolute;right:13px;top:50%;transform:translateY(-50%);cursor:pointer;opacity:.28;font-size:14px;user-select:none;color:var(--text);transition:opacity .2s}
-.pw-eye:hover{opacity:.65}
-.vmsg{font-size:11px;font-weight:500;max-height:0;overflow:hidden;transition:max-height .18s,padding .18s;border-radius:7px}
-.vmsg.show{max-height:30px;padding:4px 10px;margin-top:3px}
-.vmsg.err{background:rgba(239,68,68,.08);color:#ef4444;border:1px solid rgba(239,68,68,.18)}
-.vmsg.ok{background:rgba(16,185,129,.07);color:#10b981;border:1px solid rgba(16,185,129,.18)}
-.form-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
-.remember{display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
-.remember input[type=checkbox]{width:14px;height:14px;accent-color:#ff8c00;cursor:pointer}
-.remember span{font-size:12px;color:var(--muted);font-weight:400}
-.forgot{font-size:12px;color:#ff8c00;cursor:pointer;opacity:.7;transition:opacity .2s}
-.forgot:hover{opacity:1}
-.sbtn{width:100%;padding:13px;border-radius:12px;border:none;cursor:pointer;font-size:13.5px;font-weight:700;font-family:var(--font);letter-spacing:.3px;background:linear-gradient(135deg,#ff8c00,#ff3300);color:white;box-shadow:0 0 0 1px rgba(255,140,0,.3),0 6px 24px rgba(255,100,0,.4),inset 0 1px 0 rgba(255,255,255,.18);transition:.24s;position:relative;overflow:hidden}
-.sbtn::before{content:'';position:absolute;top:0;left:-80%;width:50%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent);transition:left .5s}
-.sbtn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 0 0 1px rgba(255,140,0,.5),0 10px 36px rgba(255,100,0,.55),inset 0 1px 0 rgba(255,255,255,.2)}
-.sbtn:hover:not(:disabled)::before{left:130%}
-.sbtn:active:not(:disabled){transform:translateY(0)}
-.sbtn:disabled{opacity:.45;cursor:not-allowed;transform:none}
-.btn-text{position:relative;z-index:1}
-.btn-spin{display:none;width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.25);border-top-color:white;animation:spin .6s linear infinite;margin:0 auto;position:relative;z-index:1}
-@keyframes spin{to{transform:rotate(360deg)}}
-.sbtn.loading .btn-text{display:none}
-.sbtn.loading .btn-spin{display:block}
-.ebanner{padding:9px 13px;border-radius:10px;font-size:12px;font-weight:500;background:rgba(239,68,68,.08);color:#ef4444;border:1px solid rgba(239,68,68,.18);display:none;margin-bottom:12px;text-align:center;animation:shake .4s ease}
-.ebanner.show{display:block}
-@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
-.sbanner{padding:9px 13px;border-radius:10px;font-size:12px;font-weight:500;background:rgba(16,185,129,.07);color:#10b981;border:1px solid rgba(16,185,129,.18);display:none;margin-bottom:12px;text-align:center}
-.sbanner.show{display:block}
-.trow{text-align:center;margin-top:14px;font-size:12px;color:var(--faint)}
-.trow span{color:#ff8c00;cursor:pointer;font-weight:600;transition:opacity .2s}
-.trow span:hover{opacity:.8}
-.str-wrap{margin-top:5px}
-.str-bar{height:3px;border-radius:2px;background:rgba(255,255,255,.06);overflow:hidden}
-.str-fill{height:100%;border-radius:2px;transition:width .3s,background .3s;width:0}
-.str-lbl{font-size:10px;color:var(--faint);margin-top:4px;font-weight:500}
-.divider{display:flex;align-items:center;gap:12px;margin:16px 0 14px;font-size:11px;color:var(--faint)}
-.divider::before,.divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.06)}
-.features{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:4px}
-.fpill{font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;padding:4px 10px;border-radius:100px;background:rgba(255,140,0,.07);color:rgba(255,180,60,.7);border:1px solid rgba(255,140,0,.15)}
-.npw-input{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;padding:10px 13px;color:var(--text);font-size:13px;font-family:var(--font);outline:none;transition:border-color .2s,box-shadow .2s}
-.npw-input:focus{border-color:rgba(255,140,0,.35);box-shadow:0 0 0 3px rgba(255,140,0,.06)}
-#resetSection{display:none;position:fixed;inset:0;background:rgba(2,4,10,.95);backdrop-filter:blur(16px);z-index:9999;align-items:center;justify-content:center}
-#resetSection.show{display:flex}
-.reset-card{background:rgba(4,8,18,.95);border:1px solid rgba(255,140,0,.18);border-radius:22px;padding:36px 32px;width:100%;max-width:400px;margin:20px;position:relative;box-shadow:0 40px 100px rgba(0,0,0,.7);animation:cardIn .5s cubic-bezier(.22,1,.36,1) both}
-.reset-card::before{content:'';position:absolute;top:0;left:10%;right:10%;height:1px;border-radius:22px 22px 0 0;background:linear-gradient(90deg,transparent,rgba(255,140,0,.55),transparent)}
-</style>
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: var(--font);
+  background: #060b18;
+  color: var(--text-1);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* ─ BACKGROUND ANIMATION ─ */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: 
+    radial-gradient(ellipse 80% 60% at 20% 10%, rgba(255, 100, 0, 0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 70% at 80% 80%, rgba(59, 100, 255, 0.1) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 50% 50%, rgba(168, 85, 247, 0.07) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+  animation: bgShift 15s ease-in-out infinite;
+}
+
+@keyframes bgShift {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ─ LAYOUT ─ */
+.layout {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  height: 100%;
+  width: 100%;
+  min-height: 0;
+}
+
+.left-panel {
+  flex: 0 0 45%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 48px 56px;
+  background: linear-gradient(135deg, rgba(6, 11, 24, 0.95) 0%, rgba(6, 11, 24, 0.85) 100%);
+  backdrop-filter: blur(40px);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+.left-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 140, 0, 0.4), transparent);
+  pointer-events: none;
+}
+
+.right-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 48px;
+  position: relative;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.right-panel::-webkit-scrollbar {
+  width: 4px;
+}
+
+.right-panel::-webkit-scrollbar-thumb {
+  background: rgba(255, 140, 0, 0.2);
+  border-radius: 4px;
+}
+
+/* ─ LOGO & BRANDING ─ */
+.logo-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+  animation: slideInLeft 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.logo-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ff8c00, #ff3300);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 800;
+  color: white;
+  box-shadow: 0 8px 32px rgba(255, 140, 0, 0.3);
+}
+
+.logo-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.logo-text .name {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  background: linear-gradient(90deg, #ff8c00, #ffcc66, #ff8c00);
+  background-size: 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: logoShimmer 4s linear infinite;
+}
+
+.logo-text .tagline {
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-top: 2px;
+}
+
+@keyframes logoShimmer {
+  0% { background-position: 0%; }
+  100% { background-position: 200%; }
+}
+
+/* ─ HEADING ─ */
+.heading {
+  margin-top: 40px;
+  animation: slideInLeft 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s backwards;
+}
+
+.heading h1 {
+  font-size: 42px;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 12px;
+  color: var(--text-1);
+}
+
+.heading h1 .accent {
+  background: linear-gradient(90deg, var(--accent), #ffcc66);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.heading p {
+  font-size: 14px;
+  color: var(--text-2);
+  line-height: 1.6;
+  max-width: 380px;
+}
+
+/* ─ FEATURES ─ */
+.features {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 32px;
+  animation: slideInLeft 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s backwards;
+}
+
+.feature {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--text-2);
+  line-height: 1.5;
+}
+
+.feature-icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  background: rgba(255, 140, 0, 0.15);
+  border: 1px solid rgba(255, 140, 0, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+/* ─ FOOTER LEFT ─ */
+.footer-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--text-3);
+  animation: slideInLeft 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s backwards;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 8px var(--green); }
+  50% { opacity: 0.3; box-shadow: 0 0 2px var(--green); }
+}
+
+/* ─ RIGHT PANEL FORM ─ */
+.form-wrapper {
+  width: 100%;
+  max-width: 420px;
+  animation: slideInRight 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.form-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-lg);
+  padding: 40px;
+  position: relative;
+  overflow: hidden;
+}
+
+.form-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+  pointer-events: none;
+}
+
+.form-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 140, 0, 0.2), transparent);
+  pointer-events: none;
+}
+
+.form-header {
+  margin-bottom: 28px;
+  animation: fadeIn 0.6s ease-out 0.2s backwards;
+}
+
+.form-header h2 {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: var(--text-1);
+}
+
+.form-header p {
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+.form-group {
+  margin-bottom: 20px;
+  animation: fadeIn 0.6s ease-out backwards;
+}
+
+.form-group:nth-child(1) { animation-delay: 0.25s; }
+.form-group:nth-child(2) { animation-delay: 0.3s; }
+.form-group:nth-child(3) { animation-delay: 0.35s; }
+
+.form-label {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 8px;
+  transition: color 0.3s;
+}
+
+.form-group:focus-within .form-label {
+  color: var(--accent);
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--r-sm);
+  color: var(--text-1);
+  font-size: 13px;
+  font-family: var(--font);
+  outline: none;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  z-index: 1;
+}
+
+.form-input::placeholder {
+  color: var(--text-3);
+}
+
+.form-input:focus {
+  background: rgba(255, 140, 0, 0.05);
+  border-color: rgba(255, 140, 0, 0.4);
+  box-shadow: 0 0 16px rgba(255, 140, 0, 0.15);
+}
+
+.form-input:focus::placeholder {
+  color: var(--text-2);
+}
+
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--text-3);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px 8px;
+  transition: color 0.3s;
+}
+
+.password-toggle:hover {
+  color: var(--accent);
+}
+
+.form-group.password-group {
+  position: relative;
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  animation: fadeIn 0.6s ease-out 0.4s backwards;
+}
+
+.btn {
+  flex: 1;
+  padding: 12px 20px;
+  border-radius: var(--r-sm);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  border: none;
+  font-family: var(--font);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  outline: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateX(-100%);
+  transition: transform 0.3s;
+  z-index: 0;
+}
+
+.btn:hover::before {
+  transform: translateX(100%);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #ff8c00, #e05500);
+  color: white;
+  box-shadow: 0 4px 20px rgba(255, 140, 0, 0.3);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(255, 140, 0, 0.5);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  background: var(--glass-bg);
+  color: var(--text-2);
+  border: 1px solid var(--glass-border);
+}
+
+.btn-secondary:hover {
+  background: var(--glass-hover);
+  color: var(--text-1);
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* ─ LINKS ─ */
+.form-links {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  font-size: 12px;
+  animation: fadeIn 0.6s ease-out 0.45s backwards;
+}
+
+.form-link {
+  color: var(--text-3);
+  text-decoration: none;
+  transition: all 0.3s;
+  position: relative;
+}
+
+.form-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.form-link:hover {
+  color: var(--accent);
+}
+
+.form-link:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* ─ DIVIDER ─ */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+  opacity: 0;
+  animation: fadeIn 0.6s ease-out 0.5s forwards;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.divider span {
+  font-size: 11px;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* ─ SOCIAL BUTTONS ─ */
+.social-buttons {
+  display: flex;
+  gap: 10px;
+  opacity: 0;
+  animation: fadeIn 0.6s ease-out 0.55s forwards;
+}
+
+.social-btn {
+  flex: 1;
+  padding: 11px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--r-sm);
+  color: var(--text-2);
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.social-btn:hover {
+  background: rgba(255, 140, 0, 0.1);
+  border-color: rgba(255, 140, 0, 0.25);
+  color: var(--accent);
+  transform: translateY(-2px);
+}
+
+/* ─ TOAST ─ */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  padding: 14px 20px;
+  border-radius: var(--r);
+  font-size: 12px;
+  font-weight: 600;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 9999;
+  transform: translateY(120px);
+  opacity: 0;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: none;
+}
+
+.toast.show {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.toast.ok {
+  background: rgba(0, 229, 160, 0.12);
+  border: 1px solid rgba(0, 229, 160, 0.3);
+  color: var(--green);
+}
+
+.toast.err {
+  background: rgba(255, 77, 109, 0.12);
+  border: 1px solid rgba(255, 77, 109, 0.3);
+  color: var(--red);
+}
+
+.toast.info {
+  background: rgba(255, 140, 0, 0.12);
+  border: 1px solid rgba(255, 140, 0, 0.3);
+  color: var(--accent);
+}
+
+/* ─ LOADING STATE ─ */
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2.5px solid rgba(255, 255, 255, 0.1);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─ ANIMATIONS ─ */
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ─ RESPONSIVE ─ */
+@media (max-width: 1024px) {
+  .left-panel {
+    flex: 0 0 50%;
+    padding: 40px 36px;
+  }
+  
+  .right-panel {
+    padding: 32px;
+  }
+  
+  .form-wrapper {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .layout {
+    flex-direction: column;
+  }
+  
+  .left-panel {
+    flex: 0 0 auto;
+    padding: 32px 24px;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    min-height: auto;
+  }
+  
+  .heading {
+    margin-top: 20px;
+  }
+  
+  .heading h1 {
+    font-size: 28px;
+  }
+  
+  .features {
+    display: none;
+  }
+  
+  .right-panel {
+    flex: 1;
+    padding: 24px;
+  }
+  
+  .form-wrapper {
+    max-width: 100%;
+  }
+  
+  .form-card {
+    padding: 32px 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    font-size: 14px;
+  }
+  
+  .left-panel {
+    padding: 24px 16px;
+  }
+  
+  .logo-section {
+    margin-bottom: 8px;
+  }
+  
+  .logo-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+  
+  .logo-text .name {
+    font-size: 20px;
+  }
+  
+  .heading h1 {
+    font-size: 22px;
+  }
+  
+  .form-card {
+    padding: 24px 16px;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  .btn {
+    padding: 11px 16px;
+  }
+}
+  </style>
 </head>
 <body>
-<canvas id="bg"></canvas>
-<div class="grid-bg"></div>
-<div class="page">
-  <div class="card">
-    <div class="card-head">
-      <div class="logo">
-        <div class="logo-box">
-          <svg viewBox="0 0 24 24"><rect x="4" y="13" width="3.5" height="7" rx="1"/><rect x="10.3" y="8" width="3.5" height="12" rx="1"/><rect x="16.5" y="4" width="3.5" height="16" rx="1"/></svg>
-        </div>
-        <span class="logo-name">INSIGHTFLOW</span>
-      </div>
-      <div class="card-title" id="cardTitle">Welcome back</div>
-      <div class="card-sub" id="cardSub">Sign in to your InsightFlow account</div>
-    </div>
-    <div class="tabs">
-      <button class="tab active" id="tabLogin" onclick="switchTab('login')">Sign In</button>
-      <button class="tab" id="tabRegister" onclick="switchTab('register')">Create Account</button>
-    </div>
-    <!-- LOGIN -->
-    <div id="loginForm" class="form-scroll">
-      <div class="form-body">
-        <div class="ebanner" id="errBanner"></div>
-        <div class="sbanner" id="okBanner"></div>
-        <div class="fg"><label class="fl">Email Address</label><input class="fi" type="email" id="lEmail" placeholder="you@example.com" oninput="clearField('lEmail')"><div class="vmsg" id="lEmailMsg"></div></div>
-        <div class="fg"><label class="fl">Password</label><div class="fi-wrap"><input class="fi" type="password" id="lPass" placeholder="Enter your password" oninput="clearField('lPass')" onkeydown="if(event.key==='Enter')doLogin()"><span class="pw-eye" onclick="toggleEye('lPass',this)">👁</span></div><div class="vmsg" id="lPassMsg"></div></div>
-        <div class="form-row"><label class="remember"><input type="checkbox" id="rememberMe" onchange="onRememberToggle()"><span>Remember me</span></label><span class="forgot" onclick="showForgot()">Forgot password?</span></div>
-        <button class="sbtn" id="loginBtn" onclick="doLogin()"><span class="btn-text">Sign In →</span><div class="btn-spin"></div></button>
-        <div class="divider">or</div>
-        <div class="features"><span class="fpill">AI Analytics</span><span class="fpill">11 Charts</span><span class="fpill">JWT Secure</span><span class="fpill">Zero Code</span></div>
-        <div class="trow">Don't have an account? <span onclick="switchTab('register')">Create one free</span></div>
-      </div>
-    </div>
-    <!-- REGISTER -->
-    <div id="registerForm" class="form-scroll" style="display:none">
-      <div class="form-body">
-        <div class="ebanner" id="errBanner2"></div>
-        <div class="sbanner" id="okBanner2"></div>
-        <div class="fg"><label class="fl">Full Name</label><input class="fi" type="text" id="rName" placeholder="Your full name" oninput="clearField('rName')"><div class="vmsg" id="rNameMsg"></div></div>
-        <div class="fg"><label class="fl">Email Address</label><input class="fi" type="email" id="rEmail" placeholder="you@example.com" oninput="clearField('rEmail')"><div class="vmsg" id="rEmailMsg"></div></div>
-        <div class="fg"><label class="fl">Password</label><div class="fi-wrap"><input class="fi" type="password" id="rPass" placeholder="At least 6 characters" oninput="checkStrength(this.value);clearField('rPass')" onkeydown="if(event.key==='Enter')doRegister()"><span class="pw-eye" onclick="toggleEye('rPass',this)">👁</span></div><div class="str-wrap"><div class="str-bar"><div class="str-fill" id="strFill"></div></div><div class="str-lbl" id="strLbl">Enter a password</div></div><div class="vmsg" id="rPassMsg"></div></div>
-        <div class="fg" style="margin-bottom:6px"><label class="fl">Confirm Password</label><div class="fi-wrap"><input class="fi" type="password" id="rConf" placeholder="Repeat your password" oninput="clearField('rConf')" onkeydown="if(event.key==='Enter')doRegister()"><span class="pw-eye" onclick="toggleEye('rConf',this)">👁</span></div><div class="vmsg" id="rConfMsg"></div></div>
-        <button class="sbtn" id="registerBtn" onclick="doRegister()" style="margin-top:8px"><span class="btn-text">Create Account →</span><div class="btn-spin"></div></button>
-        <div class="trow">Already have an account? <span onclick="switchTab('login')">Sign in</span></div>
-      </div>
-    </div>
-  </div>
-</div>
-<!-- RESET -->
-<div id="resetSection">
-  <div class="reset-card">
-    <div style="font-size:22px;font-weight:900;color:white;letter-spacing:-.3px;margin-bottom:5px">Reset Password</div>
-    <p style="font-size:13px;color:var(--muted);margin-bottom:24px">Enter your new password below.</p>
-    <div style="margin-bottom:14px"><label style="font-size:10px;font-weight:700;letter-spacing:1.2px;color:var(--faint);text-transform:uppercase;display:block;margin-bottom:5px">New Password</label><input id="resetPw1" type="password" placeholder="Min 6 characters" class="npw-input"></div>
-    <div style="margin-bottom:20px"><label style="font-size:10px;font-weight:700;letter-spacing:1.2px;color:var(--faint);text-transform:uppercase;display:block;margin-bottom:5px">Confirm Password</label><input id="resetPw2" type="password" placeholder="Repeat password" class="npw-input"></div>
-    <div id="resetMsg" class="vmsg" style="margin-bottom:14px"></div>
-    <button data-token="" onclick="submitReset()" class="sbtn"><span class="btn-text">Set New Password</span><div class="btn-spin"></div></button>
-    <div style="text-align:center;margin-top:14px;font-size:12px;color:var(--faint)"><span onclick="document.getElementById('resetSection').classList.remove('show')" style="color:#ff8c00;cursor:pointer;font-weight:600">← Back to Sign In</span></div>
-  </div>
-</div>
-<script>
-var API='http://127.0.0.1:5000'
-;(function(){var cv=document.getElementById('bg'),cx=cv.getContext('2d'),W,H,pts=[],mouse={x:400,y:300},f=0;function sz(){W=cv.width=window.innerWidth;H=cv.height=window.innerHeight}sz();window.addEventListener('resize',sz);window.addEventListener('mousemove',function(e){mouse.x=e.clientX;mouse.y=e.clientY});for(var i=0;i<50;i++)pts.push({x:Math.random()*1600,y:Math.random()*1000,vx:(Math.random()-.5)*.15,vy:(Math.random()-.5)*.15,r:Math.random()*1.1+.3,p:Math.random()*6.28,ps:.008+Math.random()*.012});function draw(){f++;cx.clearRect(0,0,W,H);cx.fillStyle='#02040a';cx.fillRect(0,0,W,H);var g=cx.createRadialGradient(W/2,H/2,0,W/2,H/2,Math.min(W,H)*.7);g.addColorStop(0,'rgba(255,120,0,.055)');g.addColorStop(1,'transparent');cx.fillStyle=g;cx.fillRect(0,0,W,H);var gm=cx.createRadialGradient(mouse.x,mouse.y,0,mouse.x,mouse.y,200);gm.addColorStop(0,'rgba(255,140,0,.04)');gm.addColorStop(1,'transparent');cx.fillStyle=gm;cx.fillRect(0,0,W,H);pts.forEach(function(p){p.x+=p.vx;p.y+=p.vy;p.p+=p.ps;if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0;cx.beginPath();cx.arc(p.x,p.y,p.r*(1+.2*Math.sin(p.p*.7)),0,Math.PI*2);cx.fillStyle='rgba(255,'+(110+60*Math.sin(p.p))+',0,'+(0.1+0.08*Math.sin(p.p))+')';cx.fill()});for(var i=0;i<pts.length;i++)for(var j=i+1;j<pts.length;j++){var dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<100){cx.beginPath();cx.moveTo(pts[i].x,pts[i].y);cx.lineTo(pts[j].x,pts[j].y);cx.strokeStyle='rgba(255,140,0,'+(0.05*(1-d/100)*(0.5+0.5*Math.sin(f*.02)))+')';cx.lineWidth=.5;cx.stroke()}}requestAnimationFrame(draw)}draw()})()
-window.addEventListener('load',function(){var p=new URLSearchParams(window.location.search),t=p.get('reset');if(t){var rs=document.getElementById('resetSection');if(rs){rs.classList.add('show');var b=rs.querySelector('[data-token]');if(b)b.setAttribute('data-token',t)}}})
-function submitReset(){var el=document.getElementById('resetSection'),token=el?el.querySelector('[data-token]').getAttribute('data-token'):'',pw1=document.getElementById('resetPw1').value,pw2=document.getElementById('resetPw2').value,msg=document.getElementById('resetMsg');if(!pw1||pw1.length<6){if(msg){msg.textContent='Password must be at least 6 characters';msg.className='vmsg show err'}return}if(pw1!==pw2){if(msg){msg.textContent='Passwords do not match';msg.className='vmsg show err'}return}fetch(API+'/reset-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:token,password:pw1})}).then(function(r){return r.json()}).then(function(data){if(data.status==='success'){if(msg){msg.textContent='Password reset! Redirecting...';msg.className='vmsg show ok'}setTimeout(function(){window.location.href='login.html'},2000)}else{if(msg){msg.textContent=data.message||'Reset failed.';msg.className='vmsg show err'}}}).catch(function(){if(msg){msg.textContent='Connection error.';msg.className='vmsg show err'}})}
-window.addEventListener('DOMContentLoaded',function(){document.getElementById('lEmail').value='';document.getElementById('rememberMe').checked=false;var tab=sessionStorage.getItem('insightflow_tab');if(tab==='register'){sessionStorage.removeItem('insightflow_tab');switchTab('register')}})
-function onRememberToggle(){var cb=document.getElementById('rememberMe'),email=document.getElementById('lEmail');if(cb.checked){var s=localStorage.getItem('insightflow_remember');if(s)email.value=s}else{email.value='';localStorage.removeItem('insightflow_remember')}}
-function clearField(id){var inp=document.getElementById(id);if(inp)inp.className='fi';var msg=document.getElementById(id+'Msg');if(msg){msg.textContent='';msg.className='vmsg'}hideBanners()}
-function resetForm(formId){var form=document.getElementById(formId);if(!form)return;form.querySelectorAll('.fi').forEach(function(inp){inp.value='';inp.className='fi';inp.disabled=false});form.querySelectorAll('.vmsg').forEach(function(el){el.textContent='';el.className='vmsg'});var fill=document.getElementById('strFill'),lbl=document.getElementById('strLbl');if(fill)fill.style.width='0';if(lbl){lbl.textContent='Enter a password';lbl.style.color=''}}
-function switchTab(tab){var isLogin=tab==='login';resetForm(isLogin?'loginForm':'registerForm');if(isLogin)document.getElementById('rememberMe').checked=false;hideBanners();document.getElementById('loginForm').style.display=isLogin?'flex':'none';document.getElementById('registerForm').style.display=isLogin?'none':'flex';document.getElementById('tabLogin').classList.toggle('active',isLogin);document.getElementById('tabRegister').classList.toggle('active',!isLogin);document.getElementById('cardTitle').textContent=isLogin?'Welcome back':'Create your account';document.getElementById('cardSub').textContent=isLogin?'Sign in to your InsightFlow account':'Start analysing data in minutes'}
-function showErr(msg){var id=document.getElementById('loginForm').style.display!=='none'?'errBanner':'errBanner2',el=document.getElementById(id);if(!el)return;el.textContent=msg;el.className='ebanner show';el.style.animation='none';el.offsetHeight;el.style.animation=''}
-function showOk(msg){var id=document.getElementById('loginForm').style.display!=='none'?'okBanner':'okBanner2',el=document.getElementById(id);if(el){el.textContent=msg;el.className='sbanner show'}}
-function hideBanners(){['errBanner','okBanner','errBanner2','okBanner2'].forEach(function(id){var el=document.getElementById(id);if(el)el.className=el.className.includes('err')?'ebanner':'sbanner'})}
-function setFieldState(id,state,msg){var inp=document.getElementById(id),msgEl=document.getElementById(id+'Msg');if(!inp)return;inp.className='fi'+(state==='err'?' err':state==='ok'?' ok':'');if(msgEl){msgEl.textContent=msg||'';msgEl.className='vmsg'+(msg?' show '+state:'')}}
-function checkStrength(v){var fill=document.getElementById('strFill'),lbl=document.getElementById('strLbl');if(!v){fill.style.width='0';lbl.textContent='Enter a password';lbl.style.color='';return}var s=0;if(v.length>=6)s++;if(v.length>=10)s++;if(/[A-Z]/.test(v))s++;if(/[0-9]/.test(v))s++;if(/[^A-Za-z0-9]/.test(v))s++;var lvl=[{w:'20%',bg:'#ef4444',t:'Too weak'},{w:'40%',bg:'#f97316',t:'Weak'},{w:'60%',bg:'#f59e0b',t:'Fair'},{w:'80%',bg:'#84cc16',t:'Good'},{w:'100%',bg:'#10b981',t:'Strong'}][Math.min(s-1,4)]||{w:'20%',bg:'#ef4444',t:'Too weak'};fill.style.width=lvl.w;fill.style.background=lvl.bg;lbl.textContent=lvl.t;lbl.style.color=lvl.bg}
-function toggleEye(id,btn){var inp=document.getElementById(id);if(inp.type==='password'){inp.type='text';btn.style.opacity='.65'}else{inp.type='password';btn.style.opacity='.28'}}
-function setLoading(btnId,on){var btn=document.getElementById(btnId);if(!btn)return;btn.disabled=on;btn.classList.toggle('loading',on)}
-function doLogin(){
-  hideBanners();
-  var email=document.getElementById('lEmail').value.trim().toLowerCase(),
-      pass=document.getElementById('lPass').value,
-      ok=true;
-  if(!email){
-    setFieldState('lEmail','err','Email is required');
-    ok=false
-  }else if(!/^[^@]+@[^@]+\.[^@]+$/.test(email)){
-    setFieldState('lEmail','err','Enter a valid email');
-    ok=false
-  }
-  if(!pass){
-    setFieldState('lPass','err','Password is required');
-    ok=false
-  }
-  if(!ok)return;
-  setLoading('loginBtn',true);
-  var token='';
-  try{
-    var arr=new Uint8Array(32);
-    window.crypto.getRandomValues(arr);
-    token=Array.from(arr).map(function(b){return b.toString(16).padStart(2,'0')}).join('')
-  }catch(e){}
+
+<div class="layout">
   
-  fetch(API+'/login',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({email:email,password:pass,token:token})
-  }).then(function(r){
-    return r.json()
-  }).then(function(data){
-    setLoading('loginBtn',false);
-    if(data.status==='success'){
-      document.getElementById('rememberMe').checked?localStorage.setItem('insightflow_remember',email):localStorage.removeItem('insightflow_remember');
-      if(window.Auth&&data.token){
-        window.Auth.setSession(data.token)
-      }else{
-        localStorage.setItem('userEmail',data.email)
-      }
-      showOk('Login successful! Redirecting...');
-      
-      // ← UPDATE THIS SECTION BELOW ↓
-      localStorage.setItem('insightflow_jwt', data.token);
-      
-      try {
-        var payload = JSON.parse(atob(data.token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
-        var dest = payload.role === 'admin' ? 'admin.html' : 'dashboard.html';
-      } catch(e) {
-        var dest = 'dashboard.html';
-      }
-      
-      try{sessionStorage.removeItem('insightflow_redirect')}catch(e){}
-      setTimeout(function(){window.location.href=dest},600)
-      // ← UPDATE THIS SECTION ABOVE ↑
-      
-    }else{
-      setFieldState('lPass','err','');
-      showErr(data.message||'Invalid email or password')
-    }
-  }).catch(function(){
-    setLoading('loginBtn',false);
-    showErr('Cannot reach server. Make sure Flask is running.')
-  })
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+    <div>
+      <div class="logo-section">
+        <div class="logo-icon">📊</div>
+        <div class="logo-text">
+          <div class="name">INSIGHTFLOW</div>
+          <div class="tagline">Data Intelligence</div>
+        </div>
+      </div>
+
+      <div class="heading">
+        <h1>Unlock Your Data's <span class="accent">True Potential</span></h1>
+        <p>Upload datasets, analyze patterns in seconds with AI, and make data-driven decisions effortlessly.</p>
+      </div>
+
+      <div class="features">
+        <div class="feature">
+          <div class="feature-icon">⚡</div>
+          <span><strong>Instant Upload</strong> — CSV, Excel, JSON, SQL up to 15 MB</span>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">🤖</div>
+          <span><strong>AI Analysis</strong> — Get insights in plain English</span>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">📈</div>
+          <span><strong>11 Chart Types</strong> — Interactive visualizations</span>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">🔒</div>
+          <span><strong>JWT Secure</strong> — Military-grade encryption</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-left">
+      <div class="status-dot"></div>
+      <span>System online — All services operational</span>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+    <div class="form-wrapper">
+      <div class="form-card">
+        <div class="form-header">
+          <h2 id="formTitle">Sign In</h2>
+          <p id="formSubtitle">Continue to your InsightFlow dashboard</p>
+        </div>
+
+        <!-- LOGIN FORM -->
+        <form id="loginForm" onsubmit="handleLogin(event)">
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input 
+              class="form-input" 
+              id="loginEmail" 
+              type="email" 
+              placeholder="you@example.com" 
+              required
+              autocomplete="email"
+            >
+          </div>
+
+          <div class="form-group password-group">
+            <label class="form-label">Password</label>
+            <input 
+              class="form-input" 
+              id="loginPassword" 
+              type="password" 
+              placeholder="••••••••" 
+              required
+              autocomplete="current-password"
+            >
+            <button type="button" class="password-toggle" onclick="togglePasswordVisibility()">👁</button>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" id="loginBtn">
+              <span id="loginBtnText">Sign In</span>
+            </button>
+            <button type="button" class="btn btn-secondary" onclick="switchToRegister()">Register</button>
+          </div>
+        </form>
+
+        <!-- REGISTER FORM (hidden) -->
+        <form id="registerForm" onsubmit="handleRegister(event)" style="display:none">
+          <div class="form-group">
+            <label class="form-label">Full Name</label>
+            <input 
+              class="form-input" 
+              id="regName" 
+              type="text" 
+              placeholder="John Doe" 
+              required
+              autocomplete="name"
+            >
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input 
+              class="form-input" 
+              id="regEmail" 
+              type="email" 
+              placeholder="you@example.com" 
+              required
+              autocomplete="email"
+            >
+          </div>
+
+          <div class="form-group password-group">
+            <label class="form-label">Password</label>
+            <input 
+              class="form-input" 
+              id="regPassword" 
+              type="password" 
+              placeholder="••••••••" 
+              required
+              autocomplete="new-password"
+            >
+            <button type="button" class="password-toggle" onclick="togglePasswordVisibilityReg()">👁</button>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" style="font-size:9px;color:var(--text-3)">Password must have: 8+ chars, uppercase, number</label>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" id="regBtn">
+              <span id="regBtnText">Create Account</span>
+            </button>
+            <button type="button" class="btn btn-secondary" onclick="switchToLogin()">Back</button>
+          </div>
+        </form>
+
+        <div class="form-links" id="formLinks">
+          <a href="#" class="form-link" onclick="switchToForgot(event)">Forgot password?</a>
+          <a href="dashboard.html" class="form-link">Continue as guest</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- TOAST NOTIFICATION -->
+<div class="toast" id="toast">
+  <span id="toastIco">ℹ</span>
+  <span id="toastMsg">Message</span>
+</div>
+
+<script>
+const API = 'http://127.0.0.1:5000'
+
+// ─ TOAST ─
+let toastTimer = null
+function toast(msg, type = 'info') {
+  const el = document.getElementById('toast')
+  document.getElementById('toastIco').textContent = 
+    type === 'ok' ? '✓' : type === 'err' ? '✕' : 'ℹ'
+  document.getElementById('toastMsg').textContent = msg
+  el.className = 'toast ' + type + ' show'
+  
+  if (toastTimer) clearTimeout(toastTimer)
+  toastTimer = setTimeout(() => {
+    el.classList.remove('show')
+  }, 4000)
 }
-function doRegister(){hideBanners();var name=document.getElementById('rName').value.trim(),email=document.getElementById('rEmail').value.trim().toLowerCase(),pass=document.getElementById('rPass').value,conf=document.getElementById('rConf').value,ok=true;if(!name||name.length<2){setFieldState('rName','err','Name must be at least 2 characters');ok=false}if(!email||!/^[^@]+@[^@]+\.[^@]+$/.test(email)){setFieldState('rEmail','err','Enter a valid email');ok=false}if(!pass||pass.length<6){setFieldState('rPass','err','Password must be at least 6 characters');ok=false}if(pass!==conf){setFieldState('rConf','err','Passwords do not match');ok=false}if(!ok)return;setLoading('registerBtn',true);fetch(API+'/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:name,email:email,password:pass})}).then(function(r){return r.json()}).then(function(data){setLoading('registerBtn',false);if(data.status==='success'){showOk('Account created! Signing you in...');setTimeout(function(){resetForm('registerForm');document.getElementById('lEmail').value=email;document.getElementById('lPass').value=pass;switchTab('login');setTimeout(doLogin,300)},800)}else{showErr(data.message||'Registration failed')}}).catch(function(){setLoading('registerBtn',false);showErr('Cannot reach server. Make sure Flask is running.')})}
-function showForgot(){var tabs=document.querySelector('.tabs'),lf=document.getElementById('loginForm'),hdr=document.getElementById('cardTitle'),sub=document.getElementById('cardSub');if(tabs)tabs.style.display='none';if(lf)lf.style.display='none';if(hdr)hdr.textContent='Forgot Password';if(sub)sub.textContent='Enter your email to retrieve your password';var ex=document.getElementById('forgotPanel');if(ex)ex.remove();var panel=document.createElement('div');panel.id='forgotPanel';panel.className='form-scroll';panel.innerHTML='<div class="form-body" style="justify-content:flex-start"><div class="fg"><label class="fl">Email Address</label><input class="fi" type="email" id="forgotEmail" placeholder="you@example.com" oninput="clearForgotState()"><div class="vmsg" id="forgotMsg"></div></div><button class="sbtn" id="forgotBtn" onclick="submitForgot()" style="margin-bottom:12px"><span class="btn-text">Retrieve Password</span><div class="btn-spin"></div></button><div id="pwReveal"></div><div class="trow" style="margin-top:14px">Remember it? <span onclick="closeForgot()">Back to Sign In</span></div></div>';document.querySelector('.card').appendChild(panel);setTimeout(function(){var e=document.getElementById('forgotEmail');if(e)e.focus()},50)}
-function clearForgotState(){var m=document.getElementById('forgotMsg'),e=document.getElementById('forgotEmail'),r=document.getElementById('pwReveal');if(m){m.textContent='';m.className='vmsg'}if(e)e.className='fi';if(r)r.innerHTML=''}
-function closeForgot(){var panel=document.getElementById('forgotPanel');if(panel)panel.remove();var tabs=document.querySelector('.tabs'),lf=document.getElementById('loginForm'),hdr=document.getElementById('cardTitle'),sub=document.getElementById('cardSub');if(tabs)tabs.style.display='flex';if(lf)lf.style.display='flex';if(hdr)hdr.textContent='Welcome back';if(sub)sub.textContent='Sign in to your InsightFlow account'}
-function submitForgot(){var emailEl=document.getElementById('forgotEmail'),msgEl=document.getElementById('forgotMsg'),btn=document.getElementById('forgotBtn'),reveal=document.getElementById('pwReveal');if(!emailEl||!msgEl)return;var val=emailEl.value.trim().toLowerCase();if(reveal)reveal.innerHTML='';msgEl.className='vmsg';if(!val||!/^[^@]+@[^@]+\.[^@]+$/.test(val)){emailEl.className='fi err';msgEl.className='vmsg show err';msgEl.textContent='Enter a valid email address.';return}emailEl.disabled=true;if(btn){btn.disabled=true;btn.classList.add('loading')}fetch(API+'/forgot-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:val})}).then(function(r){return r.json()}).then(function(data){if(btn){btn.disabled=false;btn.classList.remove('loading')}emailEl.disabled=false;if(data.status==='success'){emailEl.className='fi ok';msgEl.className='vmsg show ok';msgEl.textContent='Email verified! Set your new password below.';if(reveal){reveal.innerHTML='<div style="margin-top:12px;padding:16px;background:rgba(255,140,0,.05);border:1px solid rgba(255,140,0,.15);border-radius:13px"><div style="margin-bottom:10px"><label style="font-size:9px;font-weight:700;letter-spacing:1.2px;color:rgba(255,140,0,.45);text-transform:uppercase;display:block;margin-bottom:5px">New Password</label><input id="newPw1" type="password" placeholder="Min 6 characters" class="npw-input"></div><div style="margin-bottom:12px"><label style="font-size:9px;font-weight:700;letter-spacing:1.2px;color:rgba(255,140,0,.45);text-transform:uppercase;display:block;margin-bottom:5px">Confirm Password</label><input id="newPw2" type="password" placeholder="Repeat password" class="npw-input"></div><div id="newPwMsg" style="font-size:11px;margin-bottom:10px;font-family:var(--font)"></div><button onclick="submitNewPassword(\''+escHtml(val)+'\')" class="sbtn"><span class="btn-text">Set New Password</span><div class="btn-spin"></div></button></div>'}}else{emailEl.className='fi err';msgEl.className='vmsg show err';msgEl.textContent=data.message||'No account found with that email.'}}).catch(function(){if(btn){btn.disabled=false;btn.classList.remove('loading')}emailEl.disabled=false;emailEl.className='fi err';msgEl.className='vmsg show err';msgEl.textContent='Cannot reach server. Make sure Flask is running.'})}
-function submitNewPassword(email){var pw1=document.getElementById('newPw1')?document.getElementById('newPw1').value:'',pw2=document.getElementById('newPw2')?document.getElementById('newPw2').value:'',msg=document.getElementById('newPwMsg');if(!pw1||pw1.length<6){if(msg){msg.textContent='Password must be at least 6 characters';msg.style.color='#ef4444'}return}if(pw1!==pw2){if(msg){msg.textContent='Passwords do not match';msg.style.color='#ef4444'}return}if(msg){msg.textContent='Updating...';msg.style.color='#ff8c00'}fetch(API+'/reset-password-direct',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,password:pw1})}).then(function(r){return r.json()}).then(function(data){if(data.status==='success'){if(msg){msg.textContent='Password updated! Redirecting...';msg.style.color='#10b981'}setTimeout(function(){closeForgot();switchTab('login')},1800)}else{if(msg){msg.textContent=data.message||'Update failed.';msg.style.color='#ef4444'}}}).catch(function(){if(msg){msg.textContent='Connection error.';msg.style.color='#ef4444'}})}
-function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
+
+// ─ PASSWORD VISIBILITY ─
+function togglePasswordVisibility() {
+  const input = document.getElementById('loginPassword')
+  const btn = event.target
+  if (input.type === 'password') {
+    input.type = 'text'
+    btn.textContent = '🙈'
+  } else {
+    input.type = 'password'
+    btn.textContent = '👁'
+  }
+}
+
+function togglePasswordVisibilityReg() {
+  const input = document.getElementById('regPassword')
+  const btn = event.target
+  if (input.type === 'password') {
+    input.type = 'text'
+    btn.textContent = '🙈'
+  } else {
+    input.type = 'password'
+    btn.textContent = '👁'
+  }
+}
+
+// ─ FORM SWITCHING ─
+function switchToRegister() {
+  document.getElementById('loginForm').style.display = 'none'
+  document.getElementById('registerForm').style.display = 'block'
+  document.getElementById('formTitle').textContent = 'Create Account'
+  document.getElementById('formSubtitle').textContent = 'Join InsightFlow and start analyzing'
+  document.getElementById('formLinks').style.display = 'none'
+}
+
+function switchToLogin() {
+  document.getElementById('registerForm').style.display = 'none'
+  document.getElementById('loginForm').style.display = 'block'
+  document.getElementById('formTitle').textContent = 'Sign In'
+  document.getElementById('formSubtitle').textContent = 'Continue to your InsightFlow dashboard'
+  document.getElementById('formLinks').style.display = 'flex'
+}
+
+function switchToForgot(e) {
+  e.preventDefault()
+  const email = document.getElementById('loginEmail').value
+  if (!email) {
+    toast('Enter your email first', 'err')
+    return
+  }
+  const resetUrl = email ? `reset-password.html?email=${encodeURIComponent(email)}` : 'reset-password.html'
+  window.location.href = resetUrl
+}
+
+// ─ LOGIN ─
+async function handleLogin(e) {
+  e.preventDefault()
+  const email = document.getElementById('loginEmail').value.trim().toLowerCase()
+  const password = document.getElementById('loginPassword').value
+  const btn = document.getElementById('loginBtn')
+  const btnText = document.getElementById('loginBtnText')
+
+  if (!email || !password) {
+    toast('Please fill in all fields', 'err')
+    return
+  }
+
+  btn.disabled = true
+  btnText.innerHTML = '<div class="spinner"></div>'
+
+  try {
+    const response = await fetch(`${API}/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    })
+
+    const data = await response.json()
+
+    // Maintenance mode check
+    if (response.status === 503 || data.maintenance) {
+      toast('🔧 System is under maintenance. Please try again later.', 'err')
+      btn.disabled = false
+      btnText.textContent = 'Sign In'
+      return
+    }
+
+    if (data.status === 'success') {
+      localStorage.setItem('insightflow_jwt', data.token)
+      toast('✓ Welcome back, ' + (data.name || 'user') + '!', 'ok')
+
+      setTimeout(() => {
+        try {
+          const payload = JSON.parse(atob(data.token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')))
+          if (payload.role === 'admin') {
+            window.location.href = 'admin.html'
+          } else {
+            window.location.href = 'dashboard.html'
+          }
+        } catch(e) {
+          window.location.href = 'dashboard.html'
+        }
+      }, 1200)
+
+    } else {
+      toast(data.message || 'Login failed', 'err')
+      btn.disabled = false
+      btnText.textContent = 'Sign In'
+    }
+
+  } catch (error) {
+    console.error('Login error:', error)
+    toast('Network error — check Flask is running', 'err')
+    btn.disabled = false
+    btnText.textContent = 'Sign In'
+  }
+}
+
+// ─ REGISTER ─
+async function handleRegister(e) {
+  e.preventDefault()
+  const name = document.getElementById('regName').value.trim()
+  const email = document.getElementById('regEmail').value.trim().toLowerCase()
+  const password = document.getElementById('regPassword').value
+  const btn = document.getElementById('regBtn')
+  const btnText = document.getElementById('regBtnText')
+
+  if (!name || !email || !password) {
+    toast('Please fill in all fields', 'err')
+    return
+  }
+
+  if (password.length < 8) {
+    toast('Password must be at least 8 characters', 'err')
+    return
+  }
+
+  if (!/[A-Z]/.test(password)) {
+    toast('Password must include an uppercase letter', 'err')
+    return
+  }
+
+  if (!/[0-9]/.test(password)) {
+    toast('Password must include a number', 'err')
+    return
+  }
+
+  btn.disabled = true
+  btnText.innerHTML = '<div class="spinner"></div>'
+
+  try {
+    const response = await fetch(`${API}/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, password })
+    })
+
+    const data = await response.json()
+
+    if (data.status === 'success') {
+      toast('✓ Account created! Signing you in...', 'ok')
+      
+      // Auto login
+      setTimeout(() => {
+        handleLogin(new Event('submit', { target: document.getElementById('loginForm') }))
+        document.getElementById('loginEmail').value = email
+        document.getElementById('loginPassword').value = password
+        document.getElementById('loginForm').dispatchEvent(new Event('submit'))
+      }, 800)
+    } else {
+      toast(data.message || 'Registration failed', 'err')
+      btn.disabled = false
+      btnText.textContent = 'Create Account'
+    }
+  } catch (error) {
+    console.error('Register error:', error)
+    toast('Network error — check Flask is running', 'err')
+    btn.disabled = false
+    btnText.textContent = 'Create Account'
+  }
+}
+
+// ─ INIT ─
+window.addEventListener('DOMContentLoaded', () => {
+  const token = localStorage.getItem('insightflow_jwt')
+  if (token) {
+    window.location.href = 'dashboard.html'
+  }
+})
 </script>
+
 </body>
 </html>
