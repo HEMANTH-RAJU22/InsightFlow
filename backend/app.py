@@ -62,7 +62,8 @@ CORS(app, resources={r"/*": {
 
 # ── Handle OPTIONS preflight globally ──
 @app.before_request
-def handle_preflight():
+def handle_preflight_and_maintenance():
+    # Always allow OPTIONS (CORS preflight)
     if request.method == "OPTIONS":
         from flask import make_response
         resp = make_response()
@@ -70,6 +71,36 @@ def handle_preflight():
         resp.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-User-Email"
         resp.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
         return resp
+
+    # Check maintenance mode
+    if maintenance_mode:
+        # Allow admin routes through
+        if any(request.path.startswith(p) for p in MAINTENANCE_WHITELIST):
+            return None
+
+        # Check if the requester is an admin
+        user = get_current_user()
+        if user:
+            db, cursor = get_db()
+            if db:
+                try:
+                    cursor.execute("SELECT role FROM users WHERE email=%s", (user["email"],))
+                    row = cursor.fetchone()
+                    if row and row.get("role") == "admin":
+                        return None  # Admin passes through
+                except Exception:
+                    pass
+                finally:
+                    cursor.close()
+                    db.close()
+
+        # Block everyone else — including login attempts
+        return jsonify({
+            "error": "System is under maintenance. Please try again later.",
+            "maintenance": True,
+            "status": "error",
+            "message": "System is under maintenance. Please try again later."
+        }), 503
 
 # ── Rate Limiter ──
 limiter = Limiter(
@@ -1917,9 +1948,19 @@ def get_ticket(ticket_id):
 
         # Admins can see all tickets, users only their own
         if u.get("role") == "admin":
-            cursor.execute("SELECT * FROM support_tickets WHERE id=%s", (ticket_id,))
+            cursor.execute("""
+                SELECT t.*, u2.email as user_email, u2.name as user_name
+                FROM support_tickets t
+                LEFT JOIN users u2 ON u2.id = t.user_id
+                WHERE t.id=%s
+            """, (ticket_id,))
         else:
-            cursor.execute("SELECT * FROM support_tickets WHERE id=%s AND user_id=%s", (ticket_id, u["id"]))
+            cursor.execute("""
+                SELECT t.*, u2.email as user_email, u2.name as user_name
+                FROM support_tickets t
+                LEFT JOIN users u2 ON u2.id = t.user_id
+                WHERE t.id=%s AND t.user_id=%s
+            """, (ticket_id, u["id"]))
 
         ticket = cursor.fetchone()
         if not ticket:
@@ -2232,6 +2273,42 @@ def delete_ticket(ticket_id):
         cursor.close();
         db.close()
 
+
+# ─────────────────────────────────────────
+# MAINTENANCE MODE
+# ─────────────────────────────────────────
+maintenance_mode = False
+
+# Routes always allowed even in maintenance
+MAINTENANCE_WHITELIST = [
+    "/health",
+    "/admin/maintenance",
+    "/admin/stats",       # so admin dashboard still loads
+    "/admin/users",
+    "/admin/announcements",
+    "/admin/tickets",
+    "/admin/support",
+    "/admin/datasets",
+    "/admin/charts",
+    "/admin/activity",
+    "/admin/promote",
+    "/admin/chats",
+    "/admin/faq",
+]
+
+@app.route("/admin/maintenance", methods=["GET"])
+@require_auth
+def get_maintenance():
+    return jsonify({"maintenance": maintenance_mode})
+
+@app.route("/admin/maintenance", methods=["POST"])
+@require_admin
+def set_maintenance():
+    global maintenance_mode
+    data = request.json or {}
+    maintenance_mode = bool(data.get("enabled", False))
+    log.info("Maintenance mode set to: %s", maintenance_mode)
+    return jsonify({"status": "success", "maintenance": maintenance_mode})
 # ─────────────────────────────────────────
 # RUN
 # ─────────────────────────────────────────
