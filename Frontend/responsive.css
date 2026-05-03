@@ -1,18 +1,23 @@
-/* ═══════════════════════════════════
-   GLOBAL RESPONSIVE STYLES
-   Breakpoints:
-   Mobile:  < 480px
-   Tablet:  481px - 768px
-   Laptop:  769px - 1024px
-   Desktop: > 1024px
-═══════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════
+   INSIGHTFLOW — responsive.css
+   Full responsive coverage for all pages:
+   index, login, reset-password, dashboard, chatbot,
+   visualize, report, account, admin, support
 
-/* Base - applies to all */
-* {
+   Breakpoints:
+   Mobile  : ≤ 480px
+   Tablet  : 481px – 768px
+   Laptop  : 769px – 1024px
+   Desktop : > 1024px
+   Wide    : ≥ 1400px
+═══════════════════════════════════════════════════════════ */
+
+/* ── BASE (all screen sizes) ─────────────────────────────── */
+*, *::before, *::after {
   box-sizing: border-box;
 }
 
-img, video {
+img, video, svg {
   max-width: 100%;
   height: auto;
 }
@@ -23,166 +28,74 @@ table {
   display: block;
 }
 
-/* ── TABLET (768px and below) ── */
+/* ════════════════════════════════════════════════════════════
+   TABLET  (≤ 768px)
+════════════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
 
-  /* Navigation */
-  .sidebar, .nav-sidebar {
-    width: 100% !important;
-    height: auto !important;
-    position: relative !important;
-    flex-direction: row !important;
-  }
-
-  /* Layout */
+  /* ── Generic layout ── */
   .layout, .main-layout, .container {
     flex-direction: column !important;
     width: 100% !important;
     padding: 10px !important;
   }
 
-  /* Cards & Panels */
   .card, .panel, .box {
     width: 100% !important;
     margin: 8px 0 !important;
   }
 
-  /* Grids */
   .grid, .stats-grid, .cards-grid {
     grid-template-columns: 1fr 1fr !important;
     gap: 10px !important;
   }
 
-  /* Tables */
   .table-wrapper, table {
     overflow-x: auto !important;
     display: block !important;
     white-space: nowrap !important;
   }
 
-  /* Buttons */
-  .btn, button {
-    padding: 8px 14px !important;
-    font-size: 14px !important;
-  }
-
-  /* Typography */
-  h1 { font-size: 24px !important; }
-  h2 { font-size: 20px !important; }
-  h3 { font-size: 18px !important; }
-
-  /* Forms */
-  input, select, textarea {
-    width: 100% !important;
-    font-size: 16px !important; /* prevents zoom on iOS */
-  }
-
-  /* Charts */
   canvas, .chart-container {
     width: 100% !important;
     height: auto !important;
   }
 
-  /* Modals */
-  .modal-content, .modal-box {
+  .modal-content, .modal-box, .modal {
     width: 95% !important;
     margin: 10px auto !important;
     padding: 16px !important;
   }
-}
 
-/* ── MOBILE (480px and below) ── */
-@media (max-width: 480px) {
+  h1 { font-size: 24px !important; }
+  h2 { font-size: 20px !important; }
+  h3 { font-size: 18px !important; }
 
-  /* Layout */
-  .layout, .main-layout, .container {
-    padding: 6px !important;
-  }
-
-  /* Grids → single column */
-  .grid, .stats-grid, .cards-grid {
-    grid-template-columns: 1fr !important;
-  }
-
-  /* Navigation → icons only or hamburger */
-  .sidebar .nav-text,
-  .sidebar .menu-text {
-    display: none !important;
-  }
-
-  .sidebar {
-    width: 60px !important;
-  }
-
-  /* Typography */
-  h1 { font-size: 20px !important; }
-  h2 { font-size: 18px !important; }
-  h3 { font-size: 16px !important; }
-  p, span, td, th { font-size: 13px !important; }
-
-  /* Buttons */
-  .btn, button {
+  input, select, textarea {
     width: 100% !important;
-    padding: 10px !important;
-    font-size: 14px !important;
+    font-size: 16px !important; /* prevents iOS zoom */
   }
 
-  /* Header */
-  .header, .topbar {
-    flex-wrap: wrap !important;
-    padding: 8px !important;
-    gap: 8px !important;
-  }
-
-  /* Tables */
-  th, td {
-    padding: 6px 8px !important;
-    font-size: 12px !important;
-  }
-
-  /* Charts smaller on mobile */
-  canvas {
-    max-height: 250px !important;
-  }
-
-  /* Modals full screen on mobile */
-  .modal-content, .modal-box {
-    width: 100% !important;
-    height: 100% !important;
-    border-radius: 0 !important;
-    margin: 0 !important;
-  }
-}
-
-/* ── LARGE DESKTOP (1400px+) ── */
-@media (min-width: 1400px) {
-  .container, .main-layout {
-    max-width: 1400px;
-    margin: 0 auto;
-  }
-}
-/* ── TOPBAR FIX ── */
-@media (max-width: 768px) {
-  .topbar {
+  /* ── TOPBAR (all pages) ── */
+  .topbar, .ac-topbar, .r-topbar {
     flex-wrap: wrap !important;
     padding: 8px 12px !important;
     gap: 8px !important;
+    height: auto !important;
   }
 
-  .nav-links {
+  .nav-links, .ac-topnav {
     display: flex !important;
     flex-wrap: wrap !important;
     gap: 8px !important;
     font-size: 13px !important;
   }
 
-  .logo {
+  .logo, .ac-logo, .r-logo {
     font-size: 18px !important;
   }
-}
 
-/* ── KPI CARDS FIX ── */
-@media (max-width: 768px) {
+  /* ── DASHBOARD ── */
   .kpi-container {
     flex-direction: column !important;
   }
@@ -190,12 +103,20 @@ table {
   .kpi-card {
     width: 100% !important;
   }
-}
 
-/* ── CHATBOT FIX ── */
-@media (max-width: 768px) {
+  .upload-box {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  /* ── CHATBOT ── */
   .chatbot-page {
-    padding: 10px !important;
+    padding: 80px 10px 10px !important;
+  }
+
+  .chatbot-header {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
   }
 
   .quick-prompts {
@@ -212,17 +133,21 @@ table {
   .chat-input-row {
     flex-direction: row !important;
   }
-}
 
-/* ── VISUALIZE PAGE FIX ── */
-@media (max-width: 768px) {
+  /* ── VISUALIZE ── */
+  .viz-page {
+    padding: 80px 12px 20px !important;
+  }
+
   .chart-builder {
     flex-direction: column !important;
+    gap: 16px !important;
   }
 
   .viz-controls {
     width: 100% !important;
     max-height: none !important;
+    overflow: visible !important;
   }
 
   .chart-column {
@@ -230,49 +155,862 @@ table {
   }
 
   .chart-area {
-    height: 300px !important;
+    height: 320px !important;
   }
-}
 
-/* ── LOGIN PAGE FIX ── */
-@media (max-width: 768px) {
-  .login-container, .auth-container {
+  .color-options {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  .download-btns {
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+  }
+
+  .viz-dashboard-cta {
+    margin: 16px 0 !important;
+  }
+
+  /* ── LOGIN / REGISTER ── */
+  .layout {
     flex-direction: column !important;
-    width: 100% !important;
-    padding: 20px !important;
   }
 
-  .login-left, .auth-left {
+  .left-panel {
     display: none !important;
   }
 
-  .login-right, .auth-right {
+  .right-panel {
     width: 100% !important;
     padding: 20px !important;
   }
+
+  .form-wrapper {
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+
+  .form-card {
+    padding: 24px 16px !important;
+  }
+
+  .form-actions {
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+
+  .form-actions .btn {
+    width: 100% !important;
+  }
+
+  /* ── RESET PASSWORD ── */
+  .container {
+    padding: 20px !important;
+  }
+
+  .step-indicator {
+    gap: 8px !important;
+  }
+
+  /* ── ACCOUNT ── */
+  .ac-layout {
+    flex-direction: column !important;
+  }
+
+  .ac-sidebar {
+    width: 100% !important;
+    border-right: none !important;
+    border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+    padding: 12px !important;
+  }
+
+  .sb-nav {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 4px !important;
+    flex-direction: row !important;
+  }
+
+  .sb-section-label {
+    width: 100% !important;
+    margin-top: 8px !important;
+  }
+
+  .sb-item {
+    flex: 1 1 auto !important;
+    min-width: 80px !important;
+    padding: 8px 6px !important;
+    justify-content: center !important;
+    border-radius: 8px !important;
+  }
+
+  .sb-item span {
+    font-size: 11px !important;
+    display: none !important; /* show only icons on tablet */
+  }
+
+  .sb-user {
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 12px !important;
+    padding: 10px !important;
+  }
+
+  .ac-canvas {
+    width: 100% !important;
+    padding: 16px 12px !important;
+  }
+
+  .field-row {
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  .charts-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .btn-row {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  /* ── REPORT ── */
+  .r-body {
+    flex-direction: column !important;
+  }
+
+  .r-sidebar {
+    width: 100% !important;
+    border-right: none !important;
+    border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+    padding: 12px !important;
+  }
+
+  .r-sb-chips {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+  }
+
+  .r-sb-chip {
+    flex: 1 1 auto !important;
+    min-width: 100px !important;
+    padding: 8px 10px !important;
+  }
+
+  .r-sb-stats {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  .r-sb-actions {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 8px !important;
+  }
+
+  .r-sb-btn {
+    flex: 1 !important;
+  }
+
+  .r-canvas {
+    padding: 12px !important;
+  }
+
+  .r-kpi-row {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  .r-g-main, .r-g-mid, .r-g-bot, .r-g-extra {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  /* ── ADMIN ── */
+  .admin-layout, .layout {
+    flex-direction: column !important;
+  }
+
+  .sidebar {
+    width: 100% !important;
+    height: auto !important;
+    position: relative !important;
+    padding: 10px !important;
+  }
+
+  .sb-nav {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    flex-direction: row !important;
+    gap: 4px !important;
+  }
+
+  .nav-item {
+    flex: 1 1 auto !important;
+    min-width: 90px !important;
+    padding: 8px 6px !important;
+  }
+
+  .nav-item span {
+    font-size: 11px !important;
+  }
+
+  .top-right {
+    gap: 8px !important;
+    flex-wrap: wrap !important;
+  }
+
+  .col-7-3 {
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  .cfg-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .mgrid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  .modal-btns {
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+
+  .modal-btns .btn {
+    width: 100% !important;
+  }
+
+  /* ── SUPPORT ── */
+  .page {
+    padding: 80px 12px 20px !important;
+  }
+
+  .tabs {
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+  }
+
+  .tab {
+    flex: 1 1 auto !important;
+    min-width: 80px !important;
+    font-size: 13px !important;
+    padding: 8px 10px !important;
+  }
+
+  .form-row {
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+
+  .faq-cats {
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+  }
+
+  .faq-stats {
+    flex-wrap: wrap !important;
+    gap: 10px !important;
+  }
+
+  /* ── INDEX / LANDING ── */
+  .hero {
+    padding: 100px 20px 60px !important;
+    text-align: center !important;
+  }
+
+  .hero-title {
+    font-size: 42px !important;
+    line-height: 1.2 !important;
+  }
+
+  .hero-btns {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 12px !important;
+  }
+
+  .btn-go, .btn-more {
+    width: 100% !important;
+    max-width: 280px !important;
+  }
+
+  .stats-strip {
+    flex-wrap: wrap !important;
+    gap: 10px !important;
+    justify-content: center !important;
+  }
+
+  .bento {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+
+  .section {
+    padding: 60px 20px !important;
+  }
+
+  .numbers {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .process {
+    flex-direction: column !important;
+    gap: 16px !important;
+  }
+
+  .nav-links .nbtn {
+    padding: 8px 16px !important;
+    font-size: 13px !important;
+  }
+
+  /* header nav collapse on tablet */
+  .nlink {
+    display: none !important;
+  }
 }
 
-/* ── DASHBOARD FIX ── */
+
+/* ════════════════════════════════════════════════════════════
+   MOBILE  (≤ 480px)
+════════════════════════════════════════════════════════════ */
 @media (max-width: 480px) {
+
+  /* ── Generic ── */
+  .layout, .main-layout, .container {
+    padding: 6px !important;
+  }
+
+  .grid, .stats-grid, .cards-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  h1 { font-size: 20px !important; }
+  h2 { font-size: 18px !important; }
+  h3 { font-size: 16px !important; }
+  p, span, td, th { font-size: 13px !important; }
+
+  th, td {
+    padding: 6px 8px !important;
+    font-size: 12px !important;
+  }
+
+  canvas {
+    max-height: 240px !important;
+  }
+
+  .modal-content, .modal-box, .modal {
+    width: 100% !important;
+    max-height: 92vh !important;
+    border-radius: 12px 12px 0 0 !important;
+    margin: auto 0 0 !important;
+    overflow-y: auto !important;
+  }
+
+  .modal-ov {
+    align-items: flex-end !important;
+  }
+
+  /* ── TOPBAR ── */
+  .topbar, .ac-topbar, .r-topbar {
+    padding: 8px !important;
+    height: auto !important;
+    min-height: 50px !important;
+  }
+
+  .nav-links span, .ac-topnav-btn {
+    font-size: 12px !important;
+    padding: 4px 8px !important;
+  }
+
+  /* ── DASHBOARD ── */
   .dashboard {
-    padding: 80px 10px 20px !important;
+    padding: 70px 10px 20px !important;
   }
 
   .upload-box {
     flex-direction: column !important;
     align-items: stretch !important;
+    gap: 8px !important;
   }
 
-  .upload-box button {
+  .upload-box button,
+  .upload-box label {
     width: 100% !important;
+    text-align: center !important;
   }
 
   .ai-cta-inner {
     flex-direction: column !important;
     text-align: center !important;
+    gap: 12px !important;
   }
 
   .ai-cta-btn {
     width: 100% !important;
+  }
+
+  .kpi-card p {
+    font-size: 28px !important;
+  }
+
+  /* ── CHATBOT ── */
+  .chatbot-page {
+    padding: 70px 8px 8px !important;
+  }
+
+  .chatbot-header {
+    padding: 8px !important;
+  }
+
+  .chatbot-title {
+    font-size: 18px !important;
+  }
+
+  .chat-window {
+    border-radius: 10px !important;
+  }
+
+  .quick-btn {
+    font-size: 11px !important;
+    padding: 5px 8px !important;
+  }
+
+  .chatbot-input-area {
+    padding: 8px !important;
+    gap: 8px !important;
+  }
+
+  .send-btn {
+    width: 42px !important;
+    height: 42px !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* ── VISUALIZE ── */
+  .viz-page {
+    padding: 70px 8px 16px !important;
+  }
+
+  .viz-title {
+    font-size: 22px !important;
+  }
+
+  .chart-area {
+    height: 260px !important;
+  }
+
+  .ctrl-label {
+    font-size: 10px !important;
+  }
+
+  #saveChartBtn {
+    font-size: 12px !important;
+    padding: 9px 0 !important;
+  }
+
+  .viz-dashboard-btn {
+    flex-direction: column !important;
+    text-align: center !important;
+    gap: 6px !important;
+    padding: 12px !important;
+  }
+
+  /* ── LOGIN / REGISTER ── */
+  .right-panel, .form-wrapper {
+    padding: 16px !important;
+  }
+
+  .form-card {
+    padding: 20px 14px !important;
+    border-radius: 12px !important;
+  }
+
+  /* ── RESET PASSWORD ── */
+  .container .card {
+    padding: 20px 14px !important;
+    border-radius: 12px !important;
+  }
+
+  .step-indicator {
+    flex-direction: row !important;
+    justify-content: center !important;
+  }
+
+  .step-label {
+    font-size: 10px !important;
+  }
+
+  /* ── ACCOUNT ── */
+  .ac-topbar {
+    padding: 6px 10px !important;
+  }
+
+  .ac-layout {
+    padding-top: 50px !important;
+  }
+
+  .ac-sidebar {
+    padding: 8px !important;
+  }
+
+  .sb-item {
+    padding: 8px 4px !important;
+    min-width: 48px !important;
+  }
+
+  .sb-icon-bg {
+    width: 28px !important;
+    height: 28px !important;
+  }
+
+  .ac-canvas {
+    padding: 12px 10px !important;
+  }
+
+  .pg-head {
+    flex-direction: column !important;
+    gap: 8px !important;
+    align-items: flex-start !important;
+  }
+
+  .session-pill {
+    font-size: 11px !important;
+  }
+
+  .ac-card {
+    padding: 14px !important;
+  }
+
+  .profile-hero {
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+  }
+
+  .charts-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  .chart-card {
+    width: 100% !important;
+  }
+
+  .ac-table {
+    font-size: 12px !important;
+  }
+
+  .danger-zone {
+    padding: 12px !important;
+  }
+
+  /* ── REPORT ── */
+  .r-topbar {
+    padding: 6px 10px !important;
+  }
+
+  .r-body {
+    padding-top: 50px !important;
+  }
+
+  .r-sidebar {
+    padding: 8px 10px !important;
+  }
+
+  .r-sb-chip {
+    padding: 6px 8px !important;
+    font-size: 12px !important;
+  }
+
+  .r-canvas {
+    padding: 8px !important;
+  }
+
+  .r-kpi-row {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+  }
+
+  .r-kpi {
+    padding: 12px 10px !important;
+  }
+
+  .r-kpi-val {
+    font-size: 22px !important;
+  }
+
+  .r-g-main, .r-g-mid, .r-g-bot, .r-g-extra, .r-g-stats {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  /* ── ADMIN ── */
+  .topbar .top-left,
+  .topbar .top-right {
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+  }
+
+  .admin-pill {
+    font-size: 10px !important;
+    padding: 2px 8px !important;
+  }
+
+  .sidebar {
+    padding: 6px !important;
+  }
+
+  .nav-item {
+    padding: 7px 4px !important;
+    min-width: 44px !important;
+  }
+
+  .nav-icon {
+    font-size: 16px !important;
+  }
+
+  .nav-item span:not(.nav-badge) {
+    display: none !important;
+  }
+
+  .cfset-grid, .cfg-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .donut-box {
+    width: 100% !important;
+  }
+
+  /* admin stats row wraps */
+  .kpi-container, .kpi-row {
+    flex-direction: column !important;
+  }
+
+  /* ── SUPPORT ── */
+  .page {
+    padding: 70px 8px 16px !important;
+  }
+
+  .card {
+    padding: 14px !important;
+  }
+
+  .card-head {
+    flex-direction: column !important;
+    gap: 6px !important;
+  }
+
+  .tabs {
+    overflow-x: auto !important;
+    flex-wrap: nowrap !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding-bottom: 4px !important;
+  }
+
+  .tab {
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+  }
+
+  .faq-item {
+    padding: 10px 12px !important;
+  }
+
+  .faq-q-text {
+    font-size: 13px !important;
+  }
+
+  .faq-a-inner {
+    font-size: 13px !important;
+  }
+
+  /* ── INDEX / LANDING ── */
+  .hero {
+    padding: 80px 16px 40px !important;
+  }
+
+  .hero-title {
+    font-size: 30px !important;
+    letter-spacing: 1px !important;
+  }
+
+  .hero-sub {
+    font-size: 14px !important;
+  }
+
+  .stats-strip {
+    grid-template-columns: 1fr 1fr !important;
+    display: grid !important;
+  }
+
+  .stat {
+    flex-direction: column !important;
+    text-align: center !important;
+  }
+
+  .bento {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .section {
+    padding: 40px 14px !important;
+  }
+
+  .sec-title {
+    font-size: 22px !important;
+    line-height: 1.3 !important;
+  }
+
+  .numbers {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  .cta-sec {
+    padding: 40px 16px !important;
+  }
+
+  .cta-h {
+    font-size: 22px !important;
+  }
+
+  .cta-box {
+    padding: 24px 16px !important;
+  }
+
+  /* top nav mobile — only show CTA button */
+  .logo-box {
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  .logo-name {
+    font-size: 15px !important;
+  }
+}
+
+
+/* ════════════════════════════════════════════════════════════
+   LAPTOP  (769px – 1024px)  — minor tweaks
+════════════════════════════════════════════════════════════ */
+@media (min-width: 769px) and (max-width: 1024px) {
+
+  /* Topbar tighter */
+  .topbar {
+    padding: 0 24px !important;
+  }
+
+  /* Dashboard KPI wrap */
+  .kpi-container {
+    flex-wrap: wrap !important;
+  }
+
+  .kpi-card {
+    flex: 1 1 160px !important;
+  }
+
+  /* Visualize — controls narrower */
+  .viz-controls {
+    width: 240px !important;
+    min-width: 200px !important;
+  }
+
+  /* Account sidebar narrower */
+  .ac-sidebar {
+    width: 200px !important;
+    min-width: 180px !important;
+  }
+
+  /* Report sidebar narrower */
+  .r-sidebar {
+    width: 200px !important;
+    min-width: 180px !important;
+  }
+
+  /* Admin sidebar narrower */
+  .sidebar {
+    width: 180px !important;
+  }
+
+  .nav-item span {
+    font-size: 12px !important;
+  }
+
+  /* Report KPI grid */
+  .r-kpi-row {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+
+  /* Bento grid 2-col */
+  .bento {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Index landing hero */
+  .hero-title {
+    font-size: 52px !important;
+  }
+
+  .section {
+    padding: 80px 32px !important;
+  }
+}
+
+
+/* ════════════════════════════════════════════════════════════
+   WIDE DESKTOP  (≥ 1400px)
+════════════════════════════════════════════════════════════ */
+@media (min-width: 1400px) {
+
+  .container, .main-layout {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .section {
+    max-width: 1300px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .r-kpi-row {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)) !important;
+  }
+}
+
+
+/* ════════════════════════════════════════════════════════════
+   PRINT  — strip nav, show full content
+════════════════════════════════════════════════════════════ */
+@media print {
+  .topbar, .ac-topbar, .r-topbar,
+  .r-sidebar, .ac-sidebar, .sidebar,
+  .chatbot-input-area, .quick-prompts,
+  .viz-controls, .viz-dashboard-cta,
+  #annTicker, .t-close {
+    display: none !important;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+    animation: none !important;
+  }
+
+  .r-canvas, .ac-canvas, .dashboard, .viz-page {
+    padding-top: 0 !important;
+  }
+
+  canvas {
+    max-height: none !important;
   }
 }
