@@ -1,0 +1,13 @@
+flask
+flask-cors
+flask-mail
+flask-limiter
+pandas
+openpyxl
+xlrd
+groq
+python-dotenv
+bcrypt
+PyJWT
+mysql-connector-python
+gunicorn
