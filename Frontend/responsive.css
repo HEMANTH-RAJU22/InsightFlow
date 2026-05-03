@@ -1150,16 +1150,19 @@ img, video {
 ════════════════════════════════════════════════════════ */
 @media (max-width: 480px) {
 
-  /* Dashboard: KPI cards smaller, 2-per-row */
+  /* Dashboard: KPI cards 2-per-row on mobile only */
   .kpi-container {
     display: grid !important;
     grid-template-columns: 1fr 1fr !important;
     gap: 10px !important;
+    justify-content: unset !important;
   }
 
   .kpi-card {
     width: 100% !important;
     flex: none !important;
+    min-width: unset !important;
+    max-width: unset !important;
     padding: 14px 12px !important;
     min-height: 90px !important;
   }
@@ -1173,7 +1176,7 @@ img, video {
     font-size: 26px !important;
   }
 
-  /* Dataset card full width */
+  /* Dataset card full width on mobile */
   .kpi-card.dataset-card {
     grid-column: span 2 !important;
   }
@@ -1279,5 +1282,27 @@ img, video {
   /* Data overview heading */
   .data-overview h2 {
     font-size: 18px !important;
+  }
+}
+
+/* ════════════════════════════════════════════════════════
+   DESKTOP — KPI cards in 2 rows (4 + 3)
+════════════════════════════════════════════════════════ */
+@media (min-width: 769px) {
+  .kpi-container {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 20px !important;
+  }
+
+  .kpi-card {
+    min-width: unset !important;
+    max-width: unset !important;
+    width: 100% !important;
+    flex: none !important;
+  }
+
+  .kpi-card.dataset-card {
+    grid-column: unset !important;
   }
 }
