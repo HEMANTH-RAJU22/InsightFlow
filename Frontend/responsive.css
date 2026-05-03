@@ -1,95 +1,1340 @@
+/* ═══════════════════════════════════════════════════════════
+   INSIGHTFLOW — responsive.css
+   Based on actual class names and layout structures
+   from all pages: index, login, reset-password, dashboard,
+   chatbot, visualize, report, account, admin, support
+═══════════════════════════════════════════════════════════ */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+img, video {
+  max-width: 100%;
+  height: auto;
+}
+
+
 /* ════════════════════════════════════════════════════════
-   INSIGHTFLOW — MOBILE IMPROVEMENTS
-   Consolidated from screenshot reviews (03 May 2026)
-   Covers: chatbot · visualize · report · account
-   Viewport: 375×554 (Chrome DevTools responsive mode)
+   TABLET — max-width: 768px
 ════════════════════════════════════════════════════════ */
-
-
-/* ────────────────────────────────────────────────────
-   GLOBAL: html/body scroll foundation
-   Prevents any page from being trapped/blacked out
-──────────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  html {
-    overflow-x: hidden !important;
-    overflow-y: auto !important;
-    -webkit-text-size-adjust: 100% !important;
+
+  /* ── TOPBAR (dashboard, chatbot, visualize) ── */
+  .topbar {
+    padding: 8px 16px !important;
+    height: auto !important;
+    min-height: 60px !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
   }
 
-  body {
-    overflow-x: hidden !important;
+  .nav-links {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+  }
+
+  .nav-links span {
+    font-size: 13px !important;
+    padding: 4px 8px !important;
+  }
+
+  .logo {
+    font-size: 17px !important;
+    letter-spacing: 2px !important;
+  }
+
+  /* ── DASHBOARD ── */
+  .dashboard {
+    padding: 90px 16px 24px !important;
+  }
+
+  .upload-box {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  .kpi-container {
+    gap: 12px !important;
+  }
+
+  .kpi-card {
+    flex: 1 1 calc(50% - 6px) !important;
+    min-width: 140px !important;
+  }
+
+  .ai-cta-inner {
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  .ai-cta-btn {
+    width: 100% !important;
+  }
+
+  .table-container {
+    overflow-x: auto !important;
+  }
+
+  table {
+    display: table !important;
+    white-space: nowrap !important;
+    width: 100% !important;
+  }
+
+  /* ── CHATBOT ── */
+  .chatbot-page {
+    width: 100% !important;
+    padding: 70px 12px 0 !important;
+  }
+
+  .chatbot-header {
+    padding: 10px 12px !important;
+    gap: 8px !important;
+  }
+
+  .chatbot-title {
+    font-size: 20px !important;
+  }
+
+  .quick-prompts {
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+  }
+
+  .quick-btn {
+    font-size: 12px !important;
+    padding: 6px 10px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .chatbot-input-area {
+    padding: 10px !important;
+  }
+
+  /* ── VISUALIZE ── */
+  .viz-page {
+    width: 100% !important;
+    padding: 80px 12px 40px !important;
+  }
+
+  .chart-builder {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .viz-controls {
+    width: 100% !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  .chart-column {
+    width: 100% !important;
+  }
+
+  .chart-area {
+    height: 320px !important;
+  }
+
+  #myChart {
+    height: 288px !important;
+  }
+
+  .color-options {
+    flex-wrap: wrap !important;
+  }
+
+  .download-btns {
+    display: flex !important;
+    gap: 8px !important;
+  }
+
+  .download-btns .viz-action-btn {
+    flex: 1 !important;
+  }
+
+  /* ── LOGIN ── */
+  .layout {
+    flex-direction: column !important;
     min-height: 100vh !important;
+  }
+
+  .left-panel {
+    flex: 0 0 auto !important;
+    padding: 32px 24px !important;
+    border-right: none !important;
+    border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+  }
+
+  .right-panel {
+    flex: 1 !important;
+    padding: 24px !important;
+    overflow-y: auto !important;
+  }
+
+  .form-wrapper {
+    max-width: 100% !important;
+  }
+
+  .form-card {
+    padding: 32px 24px !important;
+  }
+
+  .form-actions {
+    flex-wrap: wrap !important;
+    gap: 10px !important;
+  }
+
+  /* ── ACCOUNT ── */
+  .ac-topbar {
+    padding: 8px 16px !important;
+    height: auto !important;
+    min-height: 56px !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+  }
+
+  .ac-topnav {
+    gap: 6px !important;
+    flex-wrap: wrap !important;
+  }
+
+  .ac-topnav-btn {
+    font-size: 12px !important;
+    padding: 4px 8px !important;
+  }
+
+  .ac-layout {
+    flex-direction: column !important;
+    overflow: visible !important;
     height: auto !important;
   }
 
-  /* All topbars: fixed, always on top, never clips children */
-  .topbar,
-  .ac-topbar,
+  .ac-sidebar {
+    width: 100% !important;
+    height: auto !important;
+    border-right: none !important;
+    border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+    overflow: visible !important;
+  }
+
+  .sb-user {
+    padding: 14px 16px !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 12px !important;
+  }
+
+  .sb-nav {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    gap: 4px !important;
+    padding: 8px 12px !important;
+  }
+
+  .sb-section-label {
+    width: 100% !important;
+    margin-top: 4px !important;
+  }
+
+  .sb-item {
+    flex: 0 0 auto !important;
+    padding: 8px 12px !important;
+    border-radius: 8px !important;
+    gap: 6px !important;
+  }
+
+  .sb-divider {
+    width: 100% !important;
+    height: 1px !important;
+    margin: 4px 0 !important;
+  }
+
+  .sb-footer {
+    display: none !important;
+  }
+
+  .ac-canvas {
+    width: 100% !important;
+    height: auto !important;
+    padding: 16px 14px !important;
+    overflow-y: visible !important;
+  }
+
+  .field-row {
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  .charts-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+  }
+
+  .btn-row {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  /* ── REPORT ── */
   .r-topbar {
+    padding: 8px 16px !important;
+    flex-wrap: wrap !important;
+    height: auto !important;
+    min-height: 60px !important;
+    gap: 8px !important;
+  }
+
+  .r-nav {
+    gap: 12px !important;
+    flex-wrap: wrap !important;
+  }
+
+  .r-nav span {
+    font-size: 13px !important;
+  }
+
+  .r-body {
+    flex-direction: column !important;
+    overflow: visible !important;
+    max-height: none !important;
+    height: auto !important;
+  }
+
+  .r-sidebar {
+    width: 100% !important;
+    height: auto !important;
+    border-right: none !important;
+    border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+    overflow: visible !important;
+    flex-shrink: 0 !important;
+  }
+
+  .r-sb-chips {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+  }
+
+  .r-sb-chip {
+    flex: 1 1 auto !important;
+    min-width: 80px !important;
+  }
+
+  .r-sb-stats {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  .r-sb-stat {
+    flex: 1 1 auto !important;
+  }
+
+  .r-sb-actions {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 8px !important;
+  }
+
+  .r-sb-btn {
+    flex: 1 !important;
+  }
+
+  .r-canvas {
+    overflow-y: auto !important;
+    padding: 12px !important;
+    max-height: none !important;
+    height: auto !important;
+    min-height: 60vh !important;
+  }
+
+  .r-kpi-row {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+
+  .r-g-main,
+  .r-g-mid,
+  .r-g-bot,
+  .r-g-extra,
+  .r-g-stats {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  /* ── ADMIN ── */
+  .layout {
+    flex-direction: column !important;
+    overflow: visible !important;
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
+  .sidebar {
+    width: 100% !important;
+    height: auto !important;
+    flex-direction: column !important;
+    border-right: none !important;
+    border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+  }
+
+  .sb-nav {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    padding: 8px !important;
+    gap: 4px !important;
+  }
+
+  .nav-item {
+    flex: 1 1 auto !important;
+    padding: 8px !important;
+    gap: 6px !important;
+    min-width: 90px !important;
+    border-radius: 8px !important;
+  }
+
+  .nav-item span:not(.nav-badge) {
+    font-size: 11px !important;
+  }
+
+  .sb-section {
+    width: 100% !important;
+    padding: 4px 8px !important;
+    margin-top: 6px !important;
+  }
+
+  .cfg-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .mgrid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  .modal-ov {
+    align-items: flex-end !important;
+    padding: 0 !important;
+  }
+
+  .modal {
+    width: 100% !important;
+    border-radius: 16px 16px 0 0 !important;
+    padding: 20px 16px !important;
+    margin: 0 !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+  }
+
+  .modal-btns {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  /* ── SUPPORT ── */
+  .page {
+    padding: 80px 16px 32px !important;
+    gap: 16px !important;
+  }
+
+  .tabs {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    width: 100% !important;
+  }
+
+  .tab {
+    flex-shrink: 0 !important;
+    padding: 8px 14px !important;
+    font-size: 12px !important;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  .faq-stats {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+
+  /* ── INDEX / LANDING ── */
+  nav {
+    padding: 0 16px !important;
+  }
+
+  .nav-links .nlink {
+    display: none !important;
+  }
+
+  .hero {
+    padding: 100px 20px 60px !important;
+    min-height: auto !important;
+  }
+
+  .ht1, .ht2 {
+    font-size: 40px !important;
+    letter-spacing: 1px !important;
+  }
+
+  .hero-sub {
+    font-size: 15px !important;
+    padding: 0 8px !important;
+  }
+
+  .hero-btns {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 10px !important;
+  }
+
+  .btn-go, .btn-more {
+    width: 100% !important;
+    max-width: 300px !important;
+  }
+
+  .stats-strip {
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 0 !important;
+  }
+
+  .stat {
+    flex: 1 1 50% !important;
+    border-right: none !important;
+    border-bottom: 1px solid rgba(255,140,0,0.08) !important;
+    padding: 16px 20px !important;
+  }
+
+  .bento {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .c1, .c2, .c3, .c4, .c5 {
+    grid-column: span 1 !important;
+  }
+
+  .section {
+    padding: 70px 20px !important;
+  }
+
+  .sec-title {
+    font-size: 26px !important;
+  }
+
+  .process {
+    padding: 70px 20px !important;
+  }
+
+  .numbers {
+    padding: 50px 20px !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 14px !important;
+  }
+
+  .cta-sec {
+    padding: 60px 20px !important;
+  }
+
+  .ticker {
+    overflow: hidden !important;
+  }
+}
+
+
+/* ════════════════════════════════════════════════════════
+   MOBILE — max-width: 480px
+════════════════════════════════════════════════════════ */
+@media (max-width: 480px) {
+
+  /* ── TOPBAR ── */
+  .topbar {
+    padding: 6px 12px !important;
+    gap: 4px !important;
+    min-height: 50px !important;
+  }
+
+  .logo {
+    font-size: 15px !important;
+    letter-spacing: 1.5px !important;
+  }
+
+  .nav-links span {
+    font-size: 11px !important;
+    padding: 3px 6px !important;
+  }
+
+  /* ── DASHBOARD ── */
+  .dashboard {
+    padding: 72px 10px 20px !important;
+  }
+
+  .dashboard h1 {
+    font-size: 20px !important;
+  }
+
+  .upload-box {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .upload-box button,
+  .upload-label {
+    width: 100% !important;
+    text-align: center !important;
+    box-sizing: border-box !important;
+  }
+
+  .kpi-container {
+    flex-direction: column !important;
+  }
+
+  .kpi-card {
+    flex: none !important;
+    width: 100% !important;
+  }
+
+  .kpi-card p {
+    font-size: 32px !important;
+  }
+
+  /* ── CHATBOT ── */
+  .chatbot-page {
+    padding: 62px 8px 0 !important;
+    height: calc(100vh - 50px) !important;
+  }
+
+  .chatbot-title {
+    font-size: 17px !important;
+  }
+
+  .quick-btn {
+    font-size: 11px !important;
+    padding: 5px 8px !important;
+  }
+
+  /* ── VISUALIZE ── */
+  .viz-page {
+    padding: 64px 8px 30px !important;
+  }
+
+  .viz-title {
+    font-size: 20px !important;
+  }
+
+  .chart-area {
+    height: 250px !important;
+  }
+
+  #myChart {
+    height: 218px !important;
+  }
+
+  .ctrl-label {
+    font-size: 10px !important;
+  }
+
+  .viz-dashboard-btn {
+    padding: 14px 16px !important;
+    gap: 10px !important;
+  }
+
+  .viz-dash-title {
+    font-size: 13px !important;
+  }
+
+  /* ── LOGIN ── */
+  .left-panel {
+    display: none !important;
+  }
+
+  .right-panel {
+    padding: 20px 16px !important;
+    min-height: 100vh !important;
+  }
+
+  .form-card {
+    padding: 24px 16px !important;
+    border-radius: 16px !important;
+  }
+
+  .form-links {
+    flex-direction: column !important;
+    gap: 8px !important;
+    text-align: center !important;
+  }
+
+  /* ── RESET PASSWORD ── */
+  .container {
+    padding: 80px 16px 24px !important;
+  }
+
+  .step-label {
+    font-size: 10px !important;
+  }
+
+  /* ── ACCOUNT ── */
+  .ac-topbar {
+    padding: 6px 10px !important;
+    min-height: 50px !important;
+  }
+
+  .ac-logo {
+    font-size: 15px !important;
+  }
+
+  .ac-topnav-btn {
+    font-size: 11px !important;
+    padding: 3px 7px !important;
+  }
+
+  .sb-item span {
+    font-size: 11px !important;
+  }
+
+  .ac-card {
+    padding: 14px 12px !important;
+    border-radius: 12px !important;
+  }
+
+  .pg-head {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+  }
+
+  .profile-hero {
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    gap: 12px !important;
+  }
+
+  .charts-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* ── REPORT ── */
+  .r-topbar {
+    padding: 6px 12px !important;
+    min-height: 50px !important;
+  }
+
+  .r-logo {
+    font-size: 17px !important;
+  }
+
+  .r-canvas {
+    padding: 8px !important;
+  }
+
+  .r-kpi-row {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 6px !important;
+  }
+
+  .r-kpi {
+    padding: 10px !important;
+  }
+
+  .r-kpi-val {
+    font-size: 20px !important;
+  }
+
+  /* ── ADMIN ── */
+  .nav-item span:not(.nav-badge) {
+    display: none !important;
+  }
+
+  .nav-item {
+    min-width: 44px !important;
+    flex: 0 0 44px !important;
+    justify-content: center !important;
+    padding: 8px 6px !important;
+  }
+
+  .nav-icon {
+    font-size: 18px !important;
+    margin: 0 !important;
+  }
+
+  .admin-pill {
+    font-size: 9px !important;
+    padding: 2px 7px !important;
+  }
+
+  .top-time {
+    display: none !important;
+  }
+
+  /* ── SUPPORT ── */
+  .page {
+    padding: 64px 10px 24px !important;
+    gap: 12px !important;
+  }
+
+  .card {
+    padding: 16px 14px !important;
+    border-radius: 14px !important;
+  }
+
+  .tab {
+    padding: 7px 10px !important;
+    font-size: 11px !important;
+  }
+
+  .faq-stats {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 6px !important;
+  }
+
+  .faq-q {
+    padding: 12px 14px !important;
+    font-size: 12px !important;
+  }
+
+  .faq-a-inner {
+    padding: 4px 14px 14px !important;
+    font-size: 12px !important;
+  }
+
+  /* ── INDEX / LANDING ── */
+  .hero {
+    padding: 80px 14px 50px !important;
+  }
+
+  .ht1, .ht2 {
+    font-size: 28px !important;
+    letter-spacing: 0 !important;
+    line-height: 1.2 !important;
+  }
+
+  .hero-sub {
+    font-size: 14px !important;
+  }
+
+  .eyebrow {
+    font-size: 10px !important;
+    margin-bottom: 28px !important;
+  }
+
+  .stats-strip {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  .stat {
+    flex: none !important;
+    padding: 14px 10px !important;
+    text-align: center !important;
+  }
+
+  .stat-v {
+    font-size: 28px !important;
+  }
+
+  .section {
+    padding: 50px 14px !important;
+  }
+
+  .sec-title {
+    font-size: 22px !important;
+    line-height: 1.3 !important;
+  }
+
+  .process {
+    padding: 50px 14px !important;
+  }
+
+  .numbers {
+    padding: 40px 14px !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+  }
+
+  .num-v {
+    font-size: 32px !important;
+  }
+
+  .cta-sec {
+    padding: 50px 14px !important;
+  }
+
+  .cta-h {
+    font-size: 22px !important;
+    line-height: 1.3 !important;
+  }
+
+  .logo-name {
+    font-size: 14px !important;
+    letter-spacing: 2px !important;
+  }
+
+  .nbtn {
+    padding: 8px 18px !important;
+    font-size: 12px !important;
+  }
+}
+
+
+/* ════════════════════════════════════════════════════════
+   LAPTOP — 769px to 1024px
+════════════════════════════════════════════════════════ */
+@media (min-width: 769px) and (max-width: 1024px) {
+
+  .topbar {
+    padding: 0 24px !important;
+  }
+
+  .kpi-container {
+    flex-wrap: wrap !important;
+  }
+
+  .kpi-card {
+    flex: 1 1 160px !important;
+  }
+
+  .chart-builder {
+    grid-template-columns: 260px 1fr !important;
+  }
+
+  .ac-sidebar {
+    width: 200px !important;
+  }
+
+  .r-sidebar {
+    width: 180px !important;
+  }
+
+  .sidebar {
+    width: 190px !important;
+  }
+
+  .bento {
+    grid-template-columns: repeat(6, 1fr) !important;
+  }
+
+  .c1 { grid-column: span 3 !important; }
+  .c2 { grid-column: span 3 !important; }
+  .c3 { grid-column: span 2 !important; }
+  .c4 { grid-column: span 2 !important; }
+  .c5 { grid-column: span 2 !important; }
+
+  .section, .process, .numbers {
+    padding-left: 36px !important;
+    padding-right: 36px !important;
+  }
+}
+
+
+/* ════════════════════════════════════════════════════════
+   WIDE DESKTOP — min-width: 1400px
+════════════════════════════════════════════════════════ */
+@media (min-width: 1400px) {
+  .viz-page,
+  .chatbot-page {
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .section,
+  .process,
+  .numbers {
+    max-width: 1300px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+
+/* ════════════════════════════════════════════════════════
+   PRINT
+════════════════════════════════════════════════════════ */
+@media print {
+  .topbar, .ac-topbar, .r-topbar,
+  .r-sidebar, .ac-sidebar, .sidebar,
+  .chatbot-input-area, .quick-prompts,
+  .viz-controls, .viz-dashboard-cta,
+  #annTicker {
+    display: none !important;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+    animation: none !important;
+  }
+
+  .r-canvas, .ac-canvas {
+    padding-top: 0 !important;
+    overflow: visible !important;
+    height: auto !important;
+  }
+}
+
+/* ════════════════════════════════════════════════════════
+   EXTRA MOBILE FIXES — max-width: 375px (small phones)
+════════════════════════════════════════════════════════ */
+@media (max-width: 375px) {
+
+  /* Topbar: stack logo above nav on very small screens */
+  .topbar {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    padding: 8px 12px !important;
+    gap: 6px !important;
+    min-height: auto !important;
+  }
+
+  .nav-links {
+    gap: 4px !important;
+    width: 100% !important;
+  }
+
+  .nav-links span {
+    font-size: 11px !important;
+    padding: 3px 6px !important;
+  }
+
+  .logo {
+    font-size: 14px !important;
+    letter-spacing: 1px !important;
+  }
+
+  /* Dashboard: single-column KPIs */
+  .kpi-card {
+    flex: none !important;
+    width: 100% !important;
+  }
+
+  /* Chatbot: tighten layout */
+  .chatbot-page {
+    padding: 56px 6px 0 !important;
+  }
+
+  .quick-prompts {
+    gap: 4px !important;
+  }
+
+  .quick-btn {
+    font-size: 10px !important;
+    padding: 4px 7px !important;
+  }
+
+  /* Visualize: smaller chart */
+  .chart-area {
+    height: 220px !important;
+  }
+
+  #myChart {
+    height: 188px !important;
+  }
+
+  /* Index landing: prevent overflow */
+  .ht1, .ht2 {
+    font-size: 24px !important;
+  }
+
+  .hero-sub {
+    font-size: 13px !important;
+  }
+
+  .btn-go, .btn-more {
+    font-size: 13px !important;
+    padding: 12px 20px !important;
+  }
+
+  /* Account sidebar nav: icon-only on tiny screens */
+  .sb-item .sb-label {
+    display: none !important;
+  }
+}
+
+/* ════════════════════════════════════════════════════════
+   FIX: Prevent horizontal overflow on all pages
+════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  html, body {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+  }
+
+  /* Prevent feature cards / bento from overflowing */
+  .bento-card,
+  .feature-card,
+  .kpi-card,
+  .r-kpi,
+  .ac-card {
+    min-width: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* Fix ticker banner on mobile */
+  #annTicker {
+    top: auto !important;
+    position: relative !important;
+  }
+
+  body.ticker-visible .dashboard {
+    padding-top: 120px !important;
+  }
+
+  /* Announcement ticker text wraps better */
+  .t-msg {
+    font-size: 11.5px !important;
+    padding: 0 20px !important;
+  }
+
+  /* Quick prompt row scrolls horizontally instead of wrapping awkwardly */
+  .quick-prompts {
+    overflow-x: auto !important;
+    flex-wrap: nowrap !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding-bottom: 4px !important;
+    scrollbar-width: none !important;
+  }
+
+  .quick-prompts::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .quick-btn {
+    flex-shrink: 0 !important;
+  }
+
+  /* Chatbot input stays above keyboard */
+  .chatbot-input-area {
+    position: sticky !important;
+    bottom: 0 !important;
+    background: inherit !important;
+    z-index: 10 !important;
+  }
+
+  /* Chat window fills available space */
+  .chat-window {
+    flex: 1 !important;
+    overflow-y: auto !important;
+  }
+
+  /* Viz page: controls above chart on mobile */
+  .chart-builder {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  /* Download buttons full width */
+  .download-btns {
+    flex-direction: row !important;
+    gap: 8px !important;
+  }
+
+  /* Report: KPI grid 2-col on mobile */
+  .r-kpi-row {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+
+
+/* ════════════════════════════════════════════════════════
+   TARGETED MOBILE FIXES from live screenshots
+════════════════════════════════════════════════════════ */
+@media (max-width: 480px) {
+
+  /* Dashboard: KPI cards 2-per-row on mobile only */
+  .kpi-container {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+    justify-content: unset !important;
+  }
+
+  .kpi-card {
+    width: 100% !important;
+    flex: none !important;
+    min-width: unset !important;
+    max-width: unset !important;
+    padding: 14px 12px !important;
+    min-height: 90px !important;
+  }
+
+  .kpi-card h3 {
+    font-size: 11px !important;
+    margin-bottom: 6px !important;
+  }
+
+  .kpi-card p {
+    font-size: 26px !important;
+  }
+
+  /* Dataset card full width on mobile */
+  .kpi-card.dataset-card {
+    grid-column: span 2 !important;
+  }
+
+  /* Chatbot: quick prompts horizontal scroll */
+  .quick-prompts {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    gap: 6px !important;
+    padding-bottom: 6px !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+  }
+
+  .quick-prompts::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .quick-btn {
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+    font-size: 11px !important;
+    padding: 6px 10px !important;
+  }
+
+  /* Chatbot input fixed to bottom */
+  .chatbot-input-area {
+    position: sticky !important;
+    bottom: 0 !important;
+    z-index: 10 !important;
+  }
+
+  /* Visualize: chart type dropdown full width */
+  .chart-dropdown {
+    width: 100% !important;
+  }
+
+  /* Visualize: axis dropdowns full width */
+  .axis-dropdown {
+    width: 100% !important;
+  }
+
+  /* Report sidebar: 2x2 grid for view chips */
+  .r-sb-chips {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 6px !important;
+  }
+
+  .r-sb-chip {
+    text-align: center !important;
+    padding: 8px 4px !important;
+    font-size: 11px !important;
+  }
+
+  /* Report stats row: 4 equal columns */
+  .r-sb-stats {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 4px !important;
+  }
+
+  .r-sb-stat {
+    text-align: center !important;
+    padding: 6px 2px !important;
+  }
+
+  /* Report export buttons: stack */
+  .r-sb-actions {
+    flex-direction: column !important;
+    gap: 6px !important;
+  }
+
+  .r-sb-btn {
+    width: 100% !important;
+    text-align: center !important;
+  }
+
+  /* Report KPI cards: smaller on mobile */
+  .r-kpi {
+    padding: 10px 8px !important;
+  }
+
+  .r-kpi-val {
+    font-size: 18px !important;
+  }
+
+  .r-kpi-label {
+    font-size: 9px !important;
+  }
+
+  /* Topbar: prevent overflow */
+  .topbar {
     position: fixed !important;
     top: 0 !important;
     left: 0 !important;
     right: 0 !important;
-    z-index: 1000 !important;
-    height: auto !important;
-    min-height: 52px !important;
-    overflow: visible !important;
-    padding-left: max(12px, env(safe-area-inset-left)) !important;
-    padding-right: max(12px, env(safe-area-inset-right)) !important;
+    z-index: 999 !important;
+    overflow: hidden !important;
   }
 
-  /* Touch targets: all interactive buttons tappable */
-  .quick-btn, .sb-item, .nav-links span,
-  .ac-topnav-btn, .r-nav span, .tab,
-  .r-sb-btn, .r-sb-chip {
-    min-height: 36px !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
+  /* Data overview heading */
+  .data-overview h2 {
+    font-size: 18px !important;
   }
-
-  /* Scrollbar hiding for all horizontal scroll strips */
-  .quick-prompts, .sb-nav, .r-live-row, .tabs {
-    -webkit-overflow-scrolling: touch !important;
-    scrollbar-width: none !important;
-  }
-  .quick-prompts::-webkit-scrollbar,
-  .sb-nav::-webkit-scrollbar,
-  .r-live-row::-webkit-scrollbar,
-  .tabs::-webkit-scrollbar { display: none !important; }
 }
 
+/* ════════════════════════════════════════════════════════
+   DESKTOP — KPI cards in 2 rows (4 + 3)
+════════════════════════════════════════════════════════ */
+@media (min-width: 769px) {
+  .kpi-container {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 20px !important;
+  }
 
-/* ────────────────────────────────────────────────────
-   CHATBOT PAGE — chatbot.html
-   Layout: fixed topbar → header → scrollable chat →
-           quick-prompts strip → input bar
-──────────────────────────────────────────────────── */
-@media (max-width: 768px) {
+  .kpi-card {
+    min-width: unset !important;
+    max-width: unset !important;
+    width: 100% !important;
+    flex: none !important;
+  }
 
-  /* Page shell: flex column, fills viewport, clips inside */
+  .kpi-card.dataset-card {
+    grid-column: unset !important;
+  }
+}
+
+/* ════════════════════════════════════════════════════════
+   SCREENSHOT-BASED IMPROVEMENTS — May 2026
+   Targets: chatbot.html, report.html, account.html
+   Tested at 375×554 (mobile responsive mode)
+════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────
+   CHATBOT PAGE — chatbot.html (375px)
+   Issues: layout not filling height, chat window
+   cramped, quick-btn row overflow, input bar position
+───────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+
+  /* Full-viewport chatbot shell so nothing clips */
   .chatbot-page {
     display: flex !important;
     flex-direction: column !important;
-    height: 100vh !important;
-    padding-top: 52px !important;   /* topbar height */
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-    padding-bottom: 0 !important;
-    overflow: hidden !important;    /* inner sections scroll, not page */
-    box-sizing: border-box !important;
+    height: 100dvh !important;
+    padding: 56px 0 0 !important;
+    overflow: hidden !important;
   }
 
-  /* Avatar + title header */
+  /* Avatar + title row */
   .chatbot-header {
     flex-shrink: 0 !important;
-    display: flex !important;
-    align-items: center !important;
+    padding: 10px 12px 8px !important;
     gap: 10px !important;
-    padding: 10px 14px !important;
-    border-bottom: 1px solid rgba(255,255,255,0.07) !important;
-    margin: 0 !important;
+    border-bottom: 1px solid rgba(255,255,255,0.05) !important;
   }
 
   .chatbot-avatar {
@@ -97,105 +1342,88 @@
     height: 36px !important;
     font-size: 14px !important;
     flex-shrink: 0 !important;
-    border-radius: 50% !important;
   }
 
   .chatbot-title {
     font-size: 16px !important;
-    font-weight: 700 !important;
     line-height: 1.2 !important;
-    margin: 0 !important;
   }
 
-  /* Chat messages: grows, scrolls */
+  /* Chat window: grow to fill remaining space */
   .chat-window {
     flex: 1 1 auto !important;
-    min-height: 0 !important;       /* allows flex-child to shrink correctly */
     overflow-y: auto !important;
-    overflow-x: hidden !important;
-    padding: 12px 14px !important;
+    padding: 12px !important;
     -webkit-overflow-scrolling: touch !important;
-    overscroll-behavior-y: contain !important;
+    overscroll-behavior: contain !important;
   }
 
-  /* Message layout */
-  .msg-row, .message-row {
-    display: flex !important;
-    gap: 8px !important;
-    align-items: flex-start !important;
-    margin-bottom: 10px !important;
-  }
-
-  .msg-avatar, .message-avatar {
-    width: 30px !important;
-    height: 30px !important;
-    font-size: 12px !important;
-    flex-shrink: 0 !important;
-    border-radius: 50% !important;
-    margin-top: 2px !important;
-  }
-
-  .msg-bubble, .message-bubble, .chat-bubble {
-    padding: 10px 13px !important;
-    border-radius: 14px !important;
+  /* Message bubbles */
+  .msg-bubble {
+    max-width: 88% !important;
     font-size: 13.5px !important;
-    line-height: 1.55 !important;
-    max-width: 85% !important;
+    line-height: 1.5 !important;
+    padding: 10px 12px !important;
+    border-radius: 14px !important;
     word-break: break-word !important;
-    margin: 0 !important;
   }
 
-  /* Quick prompts: horizontal scroll, never wraps */
+  /* Quick prompts: horizontal scroll strip */
   .quick-prompts {
     flex-shrink: 0 !important;
     display: flex !important;
     flex-wrap: nowrap !important;
     overflow-x: auto !important;
-    gap: 7px !important;
-    padding: 8px 14px 10px !important;
-    border-top: 1px solid rgba(255,255,255,0.06) !important;
-    margin: 0 !important;
+    gap: 6px !important;
+    padding: 8px 12px !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
   }
+
+  .quick-prompts::-webkit-scrollbar { display: none !important; }
 
   .quick-btn {
-    flex: 0 0 auto !important;
     flex-shrink: 0 !important;
     white-space: nowrap !important;
-    font-size: 12px !important;
-    padding: 7px 13px !important;
-    border-radius: 22px !important;
-    min-height: 34px !important;
-    gap: 5px !important;
+    font-size: 11px !important;
+    padding: 6px 11px !important;
+    border-radius: 20px !important;
   }
 
-  /* Input bar: pinned bottom */
+  /* Input area pinned to bottom */
   .chatbot-input-area {
     flex-shrink: 0 !important;
+    position: sticky !important;
+    bottom: 0 !important;
+    z-index: 20 !important;
+    padding: 10px 12px !important;
+    border-top: 1px solid rgba(255,255,255,0.06) !important;
+    padding-bottom: max(10px, env(safe-area-inset-bottom)) !important;
+  }
+
+  /* Input row layout */
+  .chatbot-input-area .input-row,
+  .chatbot-input-area form {
     display: flex !important;
     align-items: center !important;
     gap: 8px !important;
-    padding: 9px 12px !important;
-    padding-bottom: max(9px, env(safe-area-inset-bottom)) !important;
-    border-top: 1px solid rgba(255,255,255,0.07) !important;
-    margin: 0 !important;
   }
 
   .chatbot-input-area input[type="text"],
   .chatbot-input-area textarea {
     flex: 1 !important;
-    min-height: 40px !important;
-    max-height: 40px !important;
     font-size: 14px !important;
-    padding: 9px 14px !important;
+    padding: 10px 14px !important;
     border-radius: 22px !important;
+    min-height: 42px !important;
   }
 
+  /* Send button */
   .send-btn,
   .chatbot-input-area button[type="submit"] {
     flex-shrink: 0 !important;
-    width: 40px !important;
-    height: 40px !important;
-    min-width: 40px !important;
+    width: 42px !important;
+    height: 42px !important;
     border-radius: 50% !important;
     display: flex !important;
     align-items: center !important;
@@ -205,420 +1433,169 @@
 }
 
 
-/* ────────────────────────────────────────────────────
-   VISUALIZE PAGE — visualize.html
-   Normal block flow + scroll. Title always visible.
-──────────────────────────────────────────────────── */
-@media (max-width: 768px) {
+/* ─────────────────────────────────────────────────────
+   REPORT PAGE — report.html (375px)
+   Issues: sidebar chips/stats cramped, export buttons
+   stacking awkwardly, live data cards clipping
+───────────────────────────────────────────────────── */
+@media (max-width: 480px) {
 
-  .viz-page {
-    display: block !important;
-    padding-top: 64px !important;   /* topbar(52px) + 12px */
-    padding-left: 12px !important;
-    padding-right: 12px !important;
-    padding-bottom: 40px !important;
-    min-height: 100vh !important;
-    height: auto !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    box-sizing: border-box !important;
-  }
-
-  /* Title: first visible thing, always */
-  .viz-title,
-  .viz-page > h1,
-  .viz-page > h2 {
-    display: block !important;
-    font-size: 15px !important;
-    font-weight: 800 !important;
-    letter-spacing: 2px !important;
-    text-transform: uppercase !important;
-    margin: 0 0 14px !important;
-    padding: 0 !important;
-    line-height: 1.2 !important;
-  }
-
-  /* Single column layout */
-  .chart-builder {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 12px !important;
-  }
-
-  /* Controls panel */
-  .viz-controls, .chart-controls {
-    width: 100% !important;
-    border-radius: 14px !important;
-    padding: 16px 14px !important;
-    box-sizing: border-box !important;
-  }
-
-  .ctrl-label, .ctrl-title {
-    font-size: 9.5px !important;
-    letter-spacing: 1px !important;
-    text-transform: uppercase !important;
-    opacity: 0.5 !important;
-    display: block !important;
-    margin-bottom: 6px !important;
-  }
-
-  select, .chart-dropdown, .axis-dropdown {
-    width: 100% !important;
-    font-size: 13px !important;
-    padding: 10px 12px !important;
-    border-radius: 10px !important;
-    min-height: 42px !important;
-    box-sizing: border-box !important;
-    margin-bottom: 10px !important;
-  }
-
-  .color-options {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    gap: 7px !important;
-    margin-bottom: 10px !important;
-  }
-
-  input[type="range"] {
-    width: 100% !important;
-    margin: 6px 0 10px !important;
-    display: block !important;
-  }
-
-  /* Chart area */
-  .chart-column { width: 100% !important; }
-
-  .chart-area {
-    width: 100% !important;
-    height: 300px !important;
-    min-height: 260px !important;
-    border-radius: 14px !important;
-    padding: 10px 8px !important;
-    box-sizing: border-box !important;
-    overflow: hidden !important;
-    margin: 0 !important;
-  }
-
-  #myChart, canvas {
-    width: 100% !important;
-    height: 270px !important;
-    max-height: 270px !important;
-    display: block !important;
-  }
-
-  /* Download buttons */
-  .download-btns {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr !important;
-    gap: 8px !important;
-    margin: 10px 0 !important;
-  }
-
-  .download-btns button,
-  .download-btns .viz-action-btn {
-    font-size: 12px !important;
-    padding: 10px 6px !important;
-    border-radius: 10px !important;
-    width: 100% !important;
-    text-align: center !important;
-  }
-
-  /* Save chart */
-  .viz-save-btn, .save-chart-btn {
-    display: block !important;
-    width: 100% !important;
-    padding: 13px !important;
-    font-size: 14px !important;
-    border-radius: 12px !important;
-    text-align: center !important;
-    margin: 0 0 12px !important;
-    box-sizing: border-box !important;
-  }
-
-  /* Generate Dashboard CTA */
-  .viz-dashboard-btn, .viz-dashboard-cta {
-    display: flex !important;
-    align-items: center !important;
-    gap: 12px !important;
-    padding: 14px !important;
-    border-radius: 14px !important;
-    width: 100% !important;
-    margin: 0 !important;
-    box-sizing: border-box !important;
-  }
-
-  .viz-dash-title { font-size: 13px !important; font-weight: 600 !important; }
-  .viz-dash-sub   { font-size: 11px !important; opacity: 0.6 !important; }
-}
-
-
-/* ────────────────────────────────────────────────────
-   REPORT PAGE — report.html
-   Sidebar: all info visible. Canvas: scroll to charts.
-──────────────────────────────────────────────────── */
-@media (max-width: 768px) {
-
-  /* Body: full-page scroll, column layout */
   .r-body {
-    display: flex !important;
     flex-direction: column !important;
-    padding-top: 52px !important;
-    min-height: 100vh !important;
     height: auto !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    -webkit-overflow-scrolling: touch !important;
-    box-sizing: border-box !important;
+    overflow: visible !important;
   }
 
-  /* Sidebar panel */
   .r-sidebar {
     width: 100% !important;
     height: auto !important;
-    max-height: none !important;
     overflow: visible !important;
     border-right: none !important;
-    border-bottom: 1px solid rgba(255,255,255,0.07) !important;
-    padding: 16px 13px 14px !important;
+    border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+    padding: 12px !important;
     flex-shrink: 0 !important;
-    box-sizing: border-box !important;
   }
 
-  /* Report title card */
-  .r-sb-header, .r-header {
-    display: flex !important;
-    align-items: center !important;
-    gap: 10px !important;
-    margin-bottom: 16px !important;
-  }
+  .r-sb-title { font-size: 15px !important; }
+  .r-sb-sub   { font-size: 11px !important; }
 
-  .r-sb-icon {
-    width: 42px !important;
-    height: 42px !important;
-    border-radius: 11px !important;
-    flex-shrink: 0 !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    font-size: 20px !important;
-  }
-
-  .r-sb-title {
-    font-size: 17px !important;
-    font-weight: 700 !important;
-    line-height: 1 !important;
-  }
-
-  .r-sb-sub {
-    font-size: 10px !important;
-    opacity: 0.45 !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.8px !important;
-  }
-
-  /* Section labels */
-  .r-sb-section-label, .r-section-label,
-  .r-sb-dataset-label, .r-sb-export-label {
-    font-size: 9px !important;
-    letter-spacing: 1px !important;
-    opacity: 0.4 !important;
-    text-transform: uppercase !important;
-    display: block !important;
-    margin: 4px 0 8px !important;
-  }
-
-  /* View chips: 2-column grid */
+  /* View chips: 3-column grid */
   .r-sb-chips {
     display: grid !important;
-    grid-template-columns: 1fr 1fr !important;
-    gap: 7px !important;
-    margin-bottom: 16px !important;
-  }
-
-  .r-sb-chip {
-    display: flex !important;
-    align-items: center !important;
-    gap: 6px !important;
-    padding: 10px !important;
-    border-radius: 10px !important;
-    font-size: 11px !important;
-    font-weight: 500 !important;
-    min-height: 40px !important;
-    box-sizing: border-box !important;
-    cursor: pointer !important;
-  }
-
-  .r-sb-chip svg, .r-sb-chip .chip-icon {
-    flex-shrink: 0 !important;
-    width: 13px !important;
-    height: 13px !important;
-    opacity: 0.7 !important;
-  }
-
-  .chip-count, .r-chip-badge, .r-sb-chip-count {
-    flex-shrink: 0 !important;
-    min-width: 22px !important;
-    height: 20px !important;
-    padding: 0 5px !important;
-    border-radius: 10px !important;
-    font-size: 10px !important;
-    font-weight: 700 !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    margin-left: auto !important;
-  }
-
-  /* Dataset stats: 2×2 */
-  .r-sb-stats {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr !important;
-    gap: 7px !important;
-    margin-bottom: 16px !important;
-  }
-
-  .r-sb-stat {
-    padding: 12px 10px !important;
-    border-radius: 10px !important;
-    text-align: center !important;
-    box-sizing: border-box !important;
-  }
-
-  .r-sb-stat-val, .r-stat-val {
-    font-size: 28px !important;
-    font-weight: 800 !important;
-    line-height: 1 !important;
-    display: block !important;
-    margin-bottom: 4px !important;
-  }
-
-  .r-sb-stat-label, .r-stat-label {
-    font-size: 9px !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.8px !important;
-    opacity: 0.45 !important;
-    display: block !important;
-  }
-
-  /* Export buttons: BOTH side-by-side */
-  .r-sb-actions {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr !important;
-    gap: 8px !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 5px !important;
     margin-bottom: 10px !important;
   }
 
+  .r-sb-chip {
+    padding: 7px 4px !important;
+    font-size: 10px !important;
+    text-align: center !important;
+    border-radius: 8px !important;
+  }
+
+  /* Dataset stats: 2×2 grid */
+  .r-sb-stats {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 6px !important;
+    margin-bottom: 10px !important;
+  }
+
+  .r-sb-stat {
+    text-align: center !important;
+    padding: 8px 6px !important;
+    border-radius: 8px !important;
+  }
+
+  .r-sb-stat-val {
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    line-height: 1.1 !important;
+  }
+
+  .r-sb-stat-label {
+    font-size: 9px !important;
+    opacity: 0.6 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    margin-top: 2px !important;
+  }
+
+  /* Export buttons: two columns side-by-side */
+  .r-sb-actions {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 6px !important;
+    margin-top: 8px !important;
+  }
+
   .r-sb-btn {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 7px !important;
     width: 100% !important;
-    padding: 12px 8px !important;
+    text-align: center !important;
     font-size: 12px !important;
-    font-weight: 600 !important;
-    border-radius: 11px !important;
-    min-height: 46px !important;
+    padding: 10px 6px !important;
+    border-radius: 10px !important;
     white-space: nowrap !important;
-    box-sizing: border-box !important;
   }
 
-  /* Canvas: no max-height, scrollable with parent */
-  .r-canvas {
-    width: 100% !important;
-    height: auto !important;
-    max-height: none !important;
-    overflow: visible !important;
-    padding: 14px 13px !important;
-    flex: 1 1 auto !important;
-    box-sizing: border-box !important;
-  }
-
-  /* Live data cards */
+  /* Live data cards: horizontal scroll */
   .r-live-row {
     display: flex !important;
     overflow-x: auto !important;
     gap: 8px !important;
-    padding-bottom: 8px !important;
-    margin-bottom: 12px !important;
     -webkit-overflow-scrolling: touch !important;
     scrollbar-width: none !important;
+    padding-bottom: 4px !important;
   }
+
   .r-live-row::-webkit-scrollbar { display: none !important; }
 
   .r-live-card {
-    flex: 0 0 130px !important;
-    min-width: 130px !important;
-    padding: 12px !important;
-    border-radius: 11px !important;
+    flex-shrink: 0 !important;
+    min-width: 120px !important;
+    padding: 10px !important;
+    border-radius: 10px !important;
   }
 
-  /* KPI cards */
-  .r-kpi-row {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr !important;
-    gap: 8px !important;
-    margin-bottom: 12px !important;
+  .r-live-field {
+    font-size: 9px !important;
+    opacity: 0.5 !important;
+    text-transform: uppercase !important;
   }
 
-  .r-kpi {
-    padding: 12px 10px !important;
-    border-radius: 11px !important;
-    box-sizing: border-box !important;
+  .r-live-val {
+    font-size: 20px !important;
+    font-weight: 700 !important;
   }
 
-  .r-kpi-val   { font-size: 20px !important; font-weight: 700 !important; display: block !important; }
-  .r-kpi-label { font-size: 9px  !important; opacity: 0.5 !important; display: block !important; }
-
-  /* Chart grids: all single column */
-  .r-g-main, .r-g-mid, .r-g-bot,
-  .r-g-extra, .r-g-stats, .r-chart-grid {
-    display: grid !important;
+  /* Chart panels: full width stack */
+  .r-g-main,
+  .r-g-mid,
+  .r-g-bot,
+  .r-g-extra,
+  .r-g-stats {
     grid-template-columns: 1fr !important;
-    gap: 10px !important;
-    margin-bottom: 12px !important;
+    gap: 8px !important;
   }
 
-  .r-chart-panel, .r-panel {
-    width: 100% !important;
-    border-radius: 13px !important;
-    padding: 13px 12px !important;
-    box-sizing: border-box !important;
-    overflow: hidden !important;
-    min-height: 200px !important;
+  /* KPI row: 2-col */
+  .r-kpi-row {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 6px !important;
   }
 
-  .r-panel-title {
-    font-size: 12px !important;
-    font-weight: 600 !important;
-    margin-bottom: 10px !important;
-    display: block !important;
-  }
+  .r-kpi      { padding: 10px 8px !important; border-radius: 10px !important; }
+  .r-kpi-val  { font-size: 17px !important; }
+  .r-kpi-label{ font-size: 9px !important; opacity: 0.55 !important; }
 }
 
 
-/* ────────────────────────────────────────────────────
-   ACCOUNT PAGE — account.html
-──────────────────────────────────────────────────── */
-@media (max-width: 768px) {
+/* ─────────────────────────────────────────────────────
+   ACCOUNT PAGE — account.html (375px)
+   Issues: sidebar nav wrapping, profile card stats
+   could be larger, layout height issues
+───────────────────────────────────────────────────── */
+@media (max-width: 480px) {
 
   .ac-layout {
     flex-direction: column !important;
-    padding-top: 52px !important;
-    min-height: 100vh !important;
+    overflow: visible !important;
     height: auto !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
+    min-height: 100vh !important;
   }
 
+  /* Sidebar: compact top strip */
   .ac-sidebar {
     width: 100% !important;
     height: auto !important;
     border-right: none !important;
     border-bottom: 1px solid rgba(255,255,255,0.07) !important;
     overflow: visible !important;
+    flex-shrink: 0 !important;
   }
 
+  /* User identity row */
   .sb-user {
     padding: 12px 14px !important;
     flex-direction: row !important;
@@ -626,6 +1603,17 @@
     gap: 10px !important;
   }
 
+  .sb-avatar {
+    width: 38px !important;
+    height: 38px !important;
+    font-size: 15px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .sb-name { font-size: 14px !important; font-weight: 600 !important; }
+  .sb-role { font-size: 11px !important; opacity: 0.55 !important; }
+
+  /* Sidebar nav: horizontal pill row */
   .sb-nav {
     display: flex !important;
     flex-direction: row !important;
@@ -633,24 +1621,47 @@
     flex-wrap: nowrap !important;
     gap: 4px !important;
     padding: 8px 12px !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
   }
 
-  .sb-section-label, .sb-divider, .sb-footer { display: none !important; }
+  .sb-nav::-webkit-scrollbar  { display: none !important; }
+  .sb-section-label            { display: none !important; }
+  .sb-divider                  { display: none !important; }
+  .sb-footer                   { display: none !important; }
 
   .sb-item {
-    flex: 0 0 auto !important;
     flex-shrink: 0 !important;
+    flex: 0 0 auto !important;
     padding: 7px 12px !important;
     border-radius: 20px !important;
+    gap: 5px !important;
     font-size: 12px !important;
     white-space: nowrap !important;
   }
 
+  .sb-item svg,
+  .sb-item .sb-icon {
+    width: 14px !important;
+    height: 14px !important;
+    font-size: 14px !important;
+  }
+
+  /* Account main canvas */
   .ac-canvas {
     width: 100% !important;
-    height: auto !important;
-    overflow: visible !important;
     padding: 14px 12px !important;
+    overflow-y: visible !important;
+    height: auto !important;
+  }
+
+  .pg-title    { font-size: 17px !important; font-weight: 700 !important; }
+
+  /* Session timer */
+  .session-timer {
+    font-size: 11px !important;
+    padding: 4px 10px !important;
+    border-radius: 20px !important;
   }
 
   /* Profile card */
@@ -662,79 +1673,1394 @@
     padding: 16px !important;
   }
 
-  .profile-avatar {
+  /* Bigger avatar so it reads clearly */
+  .profile-avatar,
+  .profile-hero .sb-avatar {
     width: 72px !important;
     height: 72px !important;
     font-size: 26px !important;
   }
 
+  .profile-name  { font-size: 18px !important; font-weight: 700 !important; }
+  .profile-email { font-size: 12px !important; opacity: 0.6 !important; }
+
+  /* Status badges */
+  .profile-badges {
+    display: flex !important;
+    gap: 6px !important;
+    justify-content: center !important;
+    flex-wrap: wrap !important;
+  }
+
+  .profile-badge {
+    font-size: 10px !important;
+    padding: 3px 10px !important;
+    border-radius: 20px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.5px !important;
+  }
+
+  /* Stats row (86 UPLOADS / 3.4K TOTAL ROWS) */
   .profile-stats {
     display: grid !important;
     grid-template-columns: 1fr 1fr !important;
     gap: 8px !important;
     width: 100% !important;
+    margin-top: 4px !important;
   }
 
-  .profile-stat-val  { font-size: 22px !important; font-weight: 700 !important; }
-  .profile-stat-label{ font-size: 9px  !important; opacity: 0.55 !important; text-transform: uppercase !important; }
-
-  .charts-grid { grid-template-columns: 1fr !important; }
-  .field-row   { flex-direction: column !important; }
-  .ac-card     { padding: 14px 12px !important; border-radius: 14px !important; }
-}
-
-
-/* ────────────────────────────────────────────────────
-   SAFE-AREA (notch / home indicator)
-──────────────────────────────────────────────────── */
-@supports (padding: max(0px)) {
-  .chatbot-input-area {
-    padding-bottom: max(9px, env(safe-area-inset-bottom)) !important;
+  .profile-stat {
+    text-align: center !important;
+    padding: 10px 8px !important;
+    border-radius: 10px !important;
   }
-  .viz-page, .r-canvas, .ac-canvas, .dashboard {
-    padding-bottom: max(24px, env(safe-area-inset-bottom)) !important;
+
+  .profile-stat-val {
+    font-size: 22px !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
   }
-}
 
-
-/* ────────────────────────────────────────────────────
-   TABLET 481–768px: proportional scaling
-──────────────────────────────────────────────────── */
-@media (min-width: 481px) and (max-width: 768px) {
-  .chatbot-page  { padding-top: 60px !important; }
-  .viz-page      { padding-top: 72px !important; }
-  .r-body        { padding-top: 60px !important; }
-  .chart-area    { height: 360px !important; }
-  #myChart, canvas { height: 330px !important; max-height: 330px !important; }
-  .r-sb-actions  { grid-template-columns: 1fr 1fr !important; }
-}
-
-
-/* ────────────────────────────────────────────────────
-   SMALL PHONES — max-width: 375px
-──────────────────────────────────────────────────── */
-@media (max-width: 375px) {
-  .quick-btn     { font-size: 11px !important; padding: 6px 10px !important; }
-  .r-sb-stat-val { font-size: 22px !important; }
-  .chart-area    { height: 260px !important; }
-  #myChart, canvas { height: 232px !important; max-height: 232px !important; }
-  .viz-title, .viz-page > h1, .viz-page > h2 { font-size: 13px !important; }
-}
-
-
-/* ────────────────────────────────────────────────────
-   DESKTOP min-width: 769px — KPI grid 4-col
-──────────────────────────────────────────────────── */
-@media (min-width: 769px) {
-  .kpi-container {
-    display: grid !important;
-    grid-template-columns: repeat(4, 1fr) !important;
-    gap: 20px !important;
+  .profile-stat-label {
+    font-size: 9px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    opacity: 0.55 !important;
+    margin-top: 3px !important;
   }
-  .kpi-card {
-    min-width: unset !important;
-    max-width: unset !important;
+
+  .profile-last-upload {
+    font-size: 12px !important;
+    text-align: center !important;
+    opacity: 0.7 !important;
+  }
+
+  /* Edit display name button */
+  .edit-name-btn {
     width: 100% !important;
-    flex: none !important;
+    max-width: 220px !important;
+    margin: 0 auto !important;
+    display: block !important;
+    text-align: center !important;
+    font-size: 13px !important;
+    padding: 9px 16px !important;
+    border-radius: 10px !important;
+  }
+
+  /* Form fields */
+  .field-row {
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+
+  .ac-card {
+    padding: 14px 12px !important;
+    border-radius: 14px !important;
+    margin-bottom: 10px !important;
+  }
+
+  /* Charts grid: single column */
+  .charts-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+}
+
+
+/* ─────────────────────────────────────────────────────
+   SAFE-AREA / NOTCH SUPPORT (all pages)
+   iPhone home indicator + notch padding
+───────────────────────────────────────────────────── */
+@supports (padding: max(0px)) {
+  .topbar,
+  .ac-topbar,
+  .r-topbar {
+    padding-left:  max(12px, env(safe-area-inset-left))  !important;
+    padding-right: max(12px, env(safe-area-inset-right)) !important;
+  }
+
+  .chatbot-input-area {
+    padding-bottom: max(10px, env(safe-area-inset-bottom)) !important;
+  }
+
+  .chatbot-page,
+  .viz-page,
+  .dashboard,
+  .ac-canvas,
+  .r-canvas {
+    padding-bottom: max(20px, env(safe-area-inset-bottom)) !important;
+  }
+}
+
+
+/* ─────────────────────────────────────────────────────
+   TOUCH TARGET MINIMUMS (WCAG 2.5.5 — 44×44px)
+   All interactive elements must be comfortably tappable
+───────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .quick-btn,
+  .sb-item,
+  .nav-links span,
+  .ac-topnav-btn,
+  .r-nav span,
+  .tab,
+  .r-sb-btn,
+  .r-sb-chip {
+    min-height: 36px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .send-btn,
+  button[type="submit"],
+  .upload-box button,
+  .upload-label {
+    min-height: 44px !important;
+    min-width: 44px !important;
+  }
+}
+
+
+/* ════════════════════════════════════════════════════════
+   PATCH 2 — Screenshot review, 03 May 2026 @ 17:52
+   Pages: chatbot.html · visualize.html · report.html
+   Viewport tested: 375 × 554 px (Chrome DevTools)
+════════════════════════════════════════════════════════ */
+
+
+/* ─────────────────────────────────────────────────────
+   CHATBOT — quick-btn 4th item clips ("In...")
+   Fix: guarantee the row always scrolls, never clips,
+   and each button has enough right-padding at the end
+───────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+
+  /* Row scrolls horizontally — NO wrapping at all */
+  .quick-prompts {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+    gap: 7px !important;
+    padding: 8px 12px 10px !important;
+    /* Extra right padding so last button isn't flush against edge */
+    padding-right: 20px !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+    /* Prevent parent from clipping overflow */
+    position: relative !important;
+    z-index: 1 !important;
+  }
+
+  .quick-prompts::-webkit-scrollbar { display: none !important; }
+
+  /* Each button: fixed, compact, never shrinks */
+  .quick-btn {
+    flex: 0 0 auto !important;
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+    font-size: 11.5px !important;
+    padding: 7px 13px !important;
+    border-radius: 22px !important;
+    min-height: 34px !important;
+    line-height: 1 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 5px !important;
+  }
+
+  /* Ensure the parent container doesn't clip child overflow */
+  .chatbot-page,
+  .chatbot-wrapper {
+    overflow-x: visible !important;
+  }
+
+  /* Chat area: must not clip the prompt row above it */
+  .chat-window {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+  }
+}
+
+
+/* ─────────────────────────────────────────────────────
+   VISUALIZE — chart preview garbled at 375px
+   Problems:
+   1. Chart canvas too short — bars/labels overlap
+   2. Axis labels rotate and collide
+   3. Download PNG/JPG buttons need proper layout
+   4. "Generate Dashboard" CTA card layout
+───────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+
+  /* Viz page: full-width, comfortable padding */
+  .viz-page {
+    padding: 60px 10px 40px !important;
+    overflow-x: hidden !important;
+  }
+
+  .viz-title {
+    font-size: 18px !important;
+    letter-spacing: 1px !important;
+    margin-bottom: 14px !important;
+  }
+
+  /* Controls panel: full width, stacked */
+  .viz-controls,
+  .chart-controls {
+    width: 100% !important;
+    padding: 16px 14px !important;
+    border-radius: 14px !important;
+    margin-bottom: 14px !important;
+  }
+
+  /* Control group labels */
+  .ctrl-label,
+  .ctrl-title {
+    font-size: 10px !important;
+    letter-spacing: 0.8px !important;
+    margin-bottom: 6px !important;
+    opacity: 0.55 !important;
+  }
+
+  /* Dropdowns: full width */
+  .chart-dropdown,
+  .axis-dropdown,
+  select {
+    width: 100% !important;
+    font-size: 13px !important;
+    padding: 10px 12px !important;
+    border-radius: 10px !important;
+    min-height: 42px !important;
+  }
+
+  /* Color swatches row */
+  .color-options {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 7px !important;
+    margin-top: 4px !important;
+  }
+
+  .color-swatch {
+    width: 26px !important;
+    height: 26px !important;
+    border-radius: 50% !important;
+  }
+
+  /* ── CHART AREA: the key fix ── */
+  /* Give the chart enough vertical room so labels don't collide */
+  .chart-area,
+  .chart-column {
+    width: 100% !important;
+    height: 320px !important;      /* was 250px — bumped up for label room */
+    min-height: 280px !important;
+    border-radius: 14px !important;
+    padding: 12px 8px 8px !important;
+    overflow: hidden !important;
+    margin-bottom: 12px !important;
+  }
+
+  /* The actual canvas element */
+  #myChart,
+  canvas {
+    width: 100% !important;
+    height: 290px !important;      /* matches chart-area */
+    max-height: 290px !important;
+    display: block !important;
+  }
+
+  /* Download buttons: two equal columns */
+  .download-btns {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+    margin-bottom: 10px !important;
+  }
+
+  .download-btns .viz-action-btn,
+  .download-btns button {
+    width: 100% !important;
+    font-size: 12px !important;
+    padding: 10px 8px !important;
+    border-radius: 10px !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+  }
+
+  /* Save chart button: full width */
+  .save-chart-btn,
+  .viz-save-btn {
+    width: 100% !important;
+    font-size: 14px !important;
+    padding: 13px 16px !important;
+    border-radius: 12px !important;
+    margin-bottom: 12px !important;
+  }
+
+  /* "Generate Dashboard" CTA card */
+  .viz-dashboard-btn,
+  .viz-dashboard-cta {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    padding: 16px 14px !important;
+    border-radius: 14px !important;
+    width: 100% !important;
+  }
+
+  .viz-dash-icon {
+    flex-shrink: 0 !important;
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 18px !important;
+  }
+
+  .viz-dash-text {
+    flex: 1 !important;
+  }
+
+  .viz-dash-title {
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    margin-bottom: 2px !important;
+  }
+
+  .viz-dash-sub {
+    font-size: 11px !important;
+    opacity: 0.6 !important;
+    line-height: 1.4 !important;
+  }
+
+  .viz-dash-arrow {
+    flex-shrink: 0 !important;
+    font-size: 18px !important;
+    opacity: 0.7 !important;
+  }
+
+  /* Range slider (data points) */
+  .data-points-slider,
+  input[type="range"] {
+    width: 100% !important;
+    height: 4px !important;
+    margin: 8px 0 !important;
+  }
+
+  /* Toggle switch row (Single/Multi color) */
+  .color-mode-row {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    font-size: 12px !important;
+  }
+}
+
+/* Tablet: chart needs more height too */
+@media (min-width: 481px) and (max-width: 768px) {
+  .chart-area,
+  .chart-column {
+    height: 380px !important;
+  }
+
+  #myChart,
+  canvas {
+    height: 350px !important;
+    max-height: 350px !important;
+  }
+}
+
+
+/* ─────────────────────────────────────────────────────
+   REPORT — view chips with count badges too tight,
+   dataset 2×2 stat boxes need bigger numbers,
+   export buttons should fill full width at 375
+───────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+
+  /* Report topbar: tighter on narrow */
+  .r-topbar {
+    padding: 6px 12px !important;
+    min-height: 50px !important;
+    gap: 6px !important;
+  }
+
+  /* Sidebar content area */
+  .r-sidebar {
+    padding: 14px 12px 10px !important;
+  }
+
+  /* Report title block */
+  .r-sb-header {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    margin-bottom: 14px !important;
+  }
+
+  .r-sb-icon {
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 10px !important;
+    font-size: 20px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .r-sb-title {
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    line-height: 1.1 !important;
+  }
+
+  .r-sb-sub {
+    font-size: 10px !important;
+    opacity: 0.5 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.8px !important;
+  }
+
+  /* VIEWS section label */
+  .r-sb-section-label {
+    font-size: 9px !important;
+    letter-spacing: 1px !important;
+    opacity: 0.45 !important;
+    margin-bottom: 6px !important;
+    text-transform: uppercase !important;
+  }
+
+  /* View chips: 2 per row so count badge has space */
+  .r-sb-chips {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 6px !important;
+    margin-bottom: 14px !important;
+  }
+
+  .r-sb-chip {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 9px 10px !important;
+    border-radius: 10px !important;
+    font-size: 11px !important;
+    font-weight: 500 !important;
+    gap: 6px !important;
+    min-height: 38px !important;
+  }
+
+  /* Count badge inside chip */
+  .r-sb-chip-count,
+  .r-chip-badge {
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    min-width: 20px !important;
+    height: 20px !important;
+    border-radius: 10px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 5px !important;
+  }
+
+  /* Chip icon */
+  .r-sb-chip svg,
+  .r-sb-chip .chip-icon {
+    width: 14px !important;
+    height: 14px !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Dataset label */
+  .r-sb-dataset-label {
+    font-size: 9px !important;
+    letter-spacing: 1px !important;
+    opacity: 0.45 !important;
+    margin-bottom: 6px !important;
+    text-transform: uppercase !important;
+  }
+
+  /* Dataset stats: 2×2 with proper sizing */
+  .r-sb-stats {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+    margin-bottom: 14px !important;
+  }
+
+  .r-sb-stat {
+    padding: 10px 10px !important;
+    border-radius: 10px !important;
+    text-align: center !important;
+  }
+
+  /* Stat number — make it legible */
+  .r-sb-stat-val,
+  .r-stat-val {
+    font-size: 24px !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+    display: block !important;
+    margin-bottom: 3px !important;
+  }
+
+  /* Stat label */
+  .r-sb-stat-label,
+  .r-stat-label {
+    font-size: 9px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.8px !important;
+    opacity: 0.5 !important;
+    display: block !important;
+  }
+
+  /* Export label */
+  .r-sb-export-label {
+    font-size: 9px !important;
+    letter-spacing: 1px !important;
+    opacity: 0.45 !important;
+    margin-bottom: 6px !important;
+    text-transform: uppercase !important;
+  }
+
+  /* Export buttons: full width, stacked for better tap area */
+  .r-sb-actions {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 7px !important;
+  }
+
+  .r-sb-btn {
+    width: 100% !important;
+    padding: 12px 14px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    border-radius: 11px !important;
+    text-align: center !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 7px !important;
+    min-height: 46px !important;
+  }
+
+  /* Live indicator row */
+  .r-live-indicator {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    font-size: 11px !important;
+    margin-top: 4px !important;
+  }
+
+  .r-live-dot {
+    width: 7px !important;
+    height: 7px !important;
+    border-radius: 50% !important;
+    flex-shrink: 0 !important;
+  }
+
+  .r-live-time {
+    font-size: 10px !important;
+    opacity: 0.5 !important;
+    margin-left: auto !important;
+  }
+}
+
+
+/* ─────────────────────────────────────────────────────
+   GLOBAL — prevent .topbar from clipping scrollable
+   children (fixes the quick-btn clip issue at root)
+───────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  /* Topbar itself must not clip anything underneath */
+  .topbar {
+    overflow: visible !important;
+  }
+
+  /* Any direct scroll container: allow horizontal scroll
+     but hide the bar neatly */
+  [data-scroll="x"],
+  .quick-prompts,
+  .r-live-row,
+  .sb-nav,
+  .tabs {
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+  }
+
+  [data-scroll="x"]::-webkit-scrollbar,
+  .quick-prompts::-webkit-scrollbar,
+  .r-live-row::-webkit-scrollbar,
+  .sb-nav::-webkit-scrollbar,
+  .tabs::-webkit-scrollbar {
+    display: none !important;
+  }
+}
+
+
+/* ════════════════════════════════════════════════════════
+   PATCH 3 — Screenshot review, 03 May 2026 @ 17:58-17:59
+   Image 1: Chatbot — title position, message box size, gaps
+   Image 2: Visualize — page title hidden under topbar
+   Image 3: Visualize — chart gap too large, wasted space
+   Image 4: Report — view chips cut off, scroll to charts
+════════════════════════════════════════════════════════ */
+
+
+/* ═══════════════════════════════════════════════════════
+   IMAGE 1 — CHATBOT PAGE (375px)
+   • "Data Analyst" title sitting too low — pull it up
+   • Welcome message box too tall — shrink padding
+   • Gap between message box and quick-prompts too large
+   • Overall: tighten vertical rhythm so all fits in view
+═══════════════════════════════════════════════════════ */
+@media (max-width: 480px) {
+
+  /* Page shell: flex column, full dynamic viewport height */
+  .chatbot-page {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100dvh !important;
+    min-height: -webkit-fill-available !important;
+    padding-top: 50px !important;   /* exact topbar height */
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    padding-bottom: 0 !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Header row: avatar + "Data Analyst" — no excess padding */
+  .chatbot-header {
+    flex-shrink: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    padding: 8px 14px !important;   /* was 10-12px — slightly tighter */
+    margin: 0 !important;
+    border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+  }
+
+  .chatbot-avatar {
+    width: 34px !important;
+    height: 34px !important;
+    font-size: 13px !important;
+    flex-shrink: 0 !important;
+    border-radius: 50% !important;
+  }
+
+  .chatbot-title {
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+    margin: 0 !important;
+  }
+
+  /* Chat window: scrollable, flex-grow to fill middle */
+  .chat-window {
+    flex: 1 1 auto !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding: 10px 12px !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior-y: contain !important;
+    min-height: 0 !important;       /* critical for flex children */
+  }
+
+  /* Welcome message bubble: compact, not full-height */
+  .msg-row,
+  .message-row {
+    margin-bottom: 8px !important;
+    display: flex !important;
+    gap: 8px !important;
+    align-items: flex-start !important;
+  }
+
+  .msg-avatar,
+  .message-avatar {
+    width: 30px !important;
+    height: 30px !important;
+    font-size: 12px !important;
+    flex-shrink: 0 !important;
+    margin-top: 2px !important;
+  }
+
+  /* The bubble itself — reduce padding so text sits tight */
+  .msg-bubble,
+  .message-bubble,
+  .chat-bubble {
+    padding: 10px 13px !important;
+    border-radius: 14px !important;
+    font-size: 13.5px !important;
+    line-height: 1.5 !important;
+    max-width: 86% !important;
+    word-break: break-word !important;
+    margin: 0 !important;           /* remove any extra margin */
+  }
+
+  /* Quick-prompts strip: directly below chat window, no gap */
+  .quick-prompts {
+    flex-shrink: 0 !important;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    gap: 6px !important;
+    padding: 7px 14px 9px !important;
+    margin: 0 !important;
+    border-top: 1px solid rgba(255,255,255,0.05) !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+  }
+
+  .quick-prompts::-webkit-scrollbar { display: none !important; }
+
+  .quick-btn {
+    flex: 0 0 auto !important;
+    white-space: nowrap !important;
+    font-size: 11.5px !important;
+    padding: 6px 13px !important;
+    border-radius: 20px !important;
+    min-height: 32px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 5px !important;
+  }
+
+  /* Input area: pinned to bottom, tight */
+  .chatbot-input-area {
+    flex-shrink: 0 !important;
+    padding: 8px 12px !important;
+    padding-bottom: max(8px, env(safe-area-inset-bottom)) !important;
+    border-top: 1px solid rgba(255,255,255,0.07) !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin: 0 !important;
+  }
+
+  .chatbot-input-area input,
+  .chatbot-input-area textarea {
+    flex: 1 !important;
+    font-size: 14px !important;
+    padding: 9px 14px !important;
+    border-radius: 22px !important;
+    min-height: 40px !important;
+    max-height: 40px !important;
+  }
+
+  .send-btn {
+    flex-shrink: 0 !important;
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 15px !important;
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   IMAGE 2 & 3 — VISUALIZE PAGE (375px)
+   • Page title scrolled under topbar — fix top padding
+   • Controls panel: no wasted space between sections
+   • Chart area: correct height + no giant gap above it
+   • "Generate Dashboard" card: pull up close to chart
+   • Full page scrollable so nothing is hidden
+═══════════════════════════════════════════════════════ */
+@media (max-width: 480px) {
+
+  /* Viz page: normal document flow, scroll vertically */
+  .viz-page {
+    display: block !important;
+    padding: 58px 10px 30px !important;  /* 58px = topbar height + 8px breathe */
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    min-height: 100dvh !important;
+    height: auto !important;             /* NOT fixed height — let content flow */
+    box-sizing: border-box !important;
+  }
+
+  /* Page title: sits right under topbar, visible immediately */
+  .viz-title,
+  .viz-page h1,
+  .viz-page > h2 {
+    font-size: 16px !important;
+    letter-spacing: 2px !important;
+    font-weight: 800 !important;
+    margin: 0 0 12px !important;
+    padding: 0 !important;
+    line-height: 1 !important;
+    display: block !important;
+  }
+
+  /* Chart builder: single column, no grid */
+  .chart-builder {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  /* Controls panel */
+  .viz-controls,
+  .chart-controls {
+    width: 100% !important;
+    border-radius: 14px !important;
+    padding: 14px 13px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Reduce spacing between control groups */
+  .ctrl-group,
+  .control-group {
+    margin-bottom: 12px !important;
+  }
+
+  .ctrl-group:last-child,
+  .control-group:last-child {
+    margin-bottom: 0 !important;
+  }
+
+  .ctrl-label,
+  .ctrl-title {
+    font-size: 9.5px !important;
+    letter-spacing: 1px !important;
+    opacity: 0.5 !important;
+    margin-bottom: 5px !important;
+    display: block !important;
+  }
+
+  select,
+  .chart-dropdown,
+  .axis-dropdown {
+    width: 100% !important;
+    font-size: 13px !important;
+    padding: 9px 12px !important;
+    border-radius: 9px !important;
+    min-height: 40px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Color mode toggle row */
+  .color-mode-row {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    font-size: 12px !important;
+    margin-bottom: 8px !important;
+  }
+
+  /* Color swatches */
+  .color-options {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+    margin-top: 4px !important;
+  }
+
+  .color-swatch {
+    width: 24px !important;
+    height: 24px !important;
+    border-radius: 50% !important;
+    cursor: pointer !important;
+  }
+
+  /* Data points slider */
+  input[type="range"] {
+    width: 100% !important;
+    margin: 6px 0 !important;
+  }
+
+  /* ── CHART AREA ──
+     Tall enough for labels, no extra gap above/below */
+  .chart-column {
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+
+  .chart-area {
+    width: 100% !important;
+    height: 280px !important;
+    min-height: 240px !important;
+    border-radius: 14px !important;
+    padding: 10px 8px 8px !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    /* NO margin-top — chart sits right under controls */
+    margin-top: 0 !important;
+  }
+
+  #myChart,
+  canvas {
+    width: 100% !important;
+    height: 252px !important;
+    max-height: 252px !important;
+    display: block !important;
+  }
+
+  /* Download buttons row */
+  .download-btns {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+  }
+
+  .download-btns button,
+  .download-btns .viz-action-btn {
+    font-size: 12px !important;
+    padding: 10px 6px !important;
+    border-radius: 10px !important;
+    width: 100% !important;
+    text-align: center !important;
+  }
+
+  /* Save Chart button */
+  .viz-save-btn,
+  .save-chart-btn {
+    width: 100% !important;
+    padding: 12px !important;
+    font-size: 14px !important;
+    border-radius: 12px !important;
+    text-align: center !important;
+    margin: 0 !important;          /* no extra gap */
+  }
+
+  /* "Generate Dashboard" CTA — no giant top gap */
+  .viz-dashboard-btn,
+  .viz-dashboard-cta {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    padding: 14px 14px !important;
+    border-radius: 14px !important;
+    width: 100% !important;
+    margin-top: 0 !important;      /* was auto/large — remove it */
+    box-sizing: border-box !important;
+  }
+
+  .viz-dash-icon {
+    flex-shrink: 0 !important;
+    width: 34px !important;
+    height: 34px !important;
+    font-size: 18px !important;
+    border-radius: 8px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .viz-dash-text { flex: 1 !important; }
+
+  .viz-dash-title {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    margin-bottom: 2px !important;
+    line-height: 1.2 !important;
+  }
+
+  .viz-dash-sub {
+    font-size: 11px !important;
+    opacity: 0.6 !important;
+    line-height: 1.4 !important;
+  }
+
+  .viz-dash-arrow {
+    flex-shrink: 0 !important;
+    font-size: 18px !important;
+    opacity: 0.6 !important;
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   IMAGE 4 — REPORT PAGE (375px)
+   • View chips: 2 per row, with counts, fully visible
+   • Dataset stats: 2×2 grid, clear numbers
+   • Export buttons: full width
+   • Visualizations below: page must scroll to reach them
+   • Canvas area: scrollable, nothing hidden
+═══════════════════════════════════════════════════════ */
+@media (max-width: 480px) {
+
+  /* Report overall layout: normal flow, scroll works */
+  .r-body {
+    display: flex !important;
+    flex-direction: column !important;
+    height: auto !important;
+    min-height: calc(100dvh - 50px) !important;
+    overflow: visible !important;
+  }
+
+  /* Sidebar: auto height, not fixed, full width */
+  .r-sidebar {
+    width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    border-right: none !important;
+    border-bottom: 1px solid rgba(255,255,255,0.07) !important;
+    padding: 14px 13px !important;
+    flex-shrink: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Report header: icon + title + subtitle */
+  .r-sb-header,
+  .r-header {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    margin-bottom: 14px !important;
+  }
+
+  .r-sb-icon {
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 10px !important;
+    flex-shrink: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 19px !important;
+  }
+
+  .r-sb-title {
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    line-height: 1.1 !important;
+  }
+
+  .r-sb-sub {
+    font-size: 10px !important;
+    opacity: 0.45 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.8px !important;
+  }
+
+  /* VIEWS label */
+  .r-sb-section-label,
+  .r-section-label {
+    font-size: 9px !important;
+    letter-spacing: 1px !important;
+    opacity: 0.4 !important;
+    text-transform: uppercase !important;
+    margin-bottom: 7px !important;
+    display: block !important;
+  }
+
+  /* View chips: 2 per row — icon + label + count all fit */
+  .r-sb-chips {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 6px !important;
+    margin-bottom: 14px !important;
+  }
+
+  .r-sb-chip {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 9px 10px !important;
+    border-radius: 10px !important;
+    font-size: 11px !important;
+    font-weight: 500 !important;
+    gap: 4px !important;
+    min-height: 40px !important;
+    cursor: pointer !important;
+    box-sizing: border-box !important;
+  }
+
+  .r-sb-chip .chip-icon,
+  .r-sb-chip svg {
+    width: 13px !important;
+    height: 13px !important;
+    flex-shrink: 0 !important;
+    opacity: 0.7 !important;
+  }
+
+  .r-sb-chip .chip-label {
+    flex: 1 !important;
+    font-size: 10.5px !important;
+  }
+
+  /* Count badge: circle with number */
+  .r-sb-chip .chip-count,
+  .r-sb-chip-count,
+  .r-chip-badge {
+    flex-shrink: 0 !important;
+    min-width: 20px !important;
+    height: 20px !important;
+    padding: 0 5px !important;
+    border-radius: 10px !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  /* Dataset section */
+  .r-sb-dataset-label {
+    font-size: 9px !important;
+    letter-spacing: 1px !important;
+    opacity: 0.4 !important;
+    text-transform: uppercase !important;
+    margin-bottom: 7px !important;
+    display: block !important;
+  }
+
+  /* Stats: 2×2 grid, big readable numbers */
+  .r-sb-stats {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 7px !important;
+    margin-bottom: 14px !important;
+  }
+
+  .r-sb-stat {
+    padding: 11px 10px !important;
+    border-radius: 10px !important;
+    text-align: center !important;
+    box-sizing: border-box !important;
+  }
+
+  .r-sb-stat-val,
+  .r-stat-val {
+    font-size: 26px !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+    display: block !important;
+    margin-bottom: 3px !important;
+  }
+
+  .r-sb-stat-label,
+  .r-stat-label {
+    font-size: 8.5px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.8px !important;
+    opacity: 0.45 !important;
+    display: block !important;
+  }
+
+  /* Export label */
+  .r-sb-export-label,
+  .r-export-label {
+    font-size: 9px !important;
+    letter-spacing: 1px !important;
+    opacity: 0.4 !important;
+    text-transform: uppercase !important;
+    margin-bottom: 7px !important;
+    display: block !important;
+  }
+
+  /* Export buttons: full width stacked, large tap targets */
+  .r-sb-actions {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 7px !important;
+    margin-bottom: 6px !important;
+  }
+
+  .r-sb-btn {
+    width: 100% !important;
+    padding: 13px 16px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    border-radius: 11px !important;
+    text-align: center !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 7px !important;
+    min-height: 46px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Live indicator */
+  .r-live-badge,
+  .r-live-indicator {
+    display: flex !important;
+    align-items: center !important;
+    gap: 5px !important;
+    font-size: 11px !important;
+    padding: 4px 0 !important;
+  }
+
+  /* ── CANVAS: must scroll to show charts below export ── */
+  .r-canvas {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 50vh !important;
+    max-height: none !important;   /* remove any fixed max-height that clips */
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding: 12px !important;
+    box-sizing: border-box !important;
+    /* Make canvas naturally extend so visualizations show */
+    flex: 1 1 auto !important;
+  }
+
+  /* Live data cards: horizontal scroll */
+  .r-live-row {
+    display: flex !important;
+    overflow-x: auto !important;
+    gap: 8px !important;
+    padding-bottom: 6px !important;
+    margin-bottom: 10px !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+  }
+
+  .r-live-row::-webkit-scrollbar { display: none !important; }
+
+  .r-live-card {
+    flex: 0 0 130px !important;
+    min-width: 130px !important;
+    padding: 11px 12px !important;
+    border-radius: 11px !important;
+  }
+
+  /* KPI cards in canvas */
+  .r-kpi-row {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 7px !important;
+    margin-bottom: 10px !important;
+  }
+
+  .r-kpi {
+    padding: 11px 10px !important;
+    border-radius: 11px !important;
+    box-sizing: border-box !important;
+  }
+
+  .r-kpi-val {
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    display: block !important;
+    margin-bottom: 3px !important;
+  }
+
+  .r-kpi-label {
+    font-size: 9px !important;
+    opacity: 0.5 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+  }
+
+  /* Chart panels in canvas: full width, stacked */
+  .r-g-main,
+  .r-g-mid,
+  .r-g-bot,
+  .r-g-extra,
+  .r-g-stats,
+  .r-chart-grid {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+    margin-bottom: 10px !important;
+  }
+
+  /* Individual chart panels */
+  .r-chart-panel,
+  .r-panel {
+    width: 100% !important;
+    border-radius: 13px !important;
+    padding: 12px !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    min-height: 200px !important;
+  }
+
+  .r-panel-title {
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    margin-bottom: 10px !important;
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   GLOBAL SCROLL FIX — make html/body scroll on all pages
+   so nothing is ever hidden below the fold
+═══════════════════════════════════════════════════════ */
+@media (max-width: 480px) {
+
+  html {
+    scroll-behavior: smooth !important;
+    -webkit-text-size-adjust: 100% !important;
+  }
+
+  body {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    min-height: 100dvh !important;
+    min-height: -webkit-fill-available !important;
+  }
+
+  /* Any page wrapper that uses height:100vh must switch to min-height */
+  .viz-page,
+  .r-body,
+  .ac-layout,
+  .chatbot-page {
+    box-sizing: border-box !important;
+  }
+
+  /* Prevent any element from setting overflow:hidden on the page root
+     and trapping content below the fold */
+  main,
+  .main,
+  .page-content,
+  .content {
+    overflow: visible !important;
+    height: auto !important;
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   TABLET 481–768px: proportional improvements
+═══════════════════════════════════════════════════════ */
+@media (min-width: 481px) and (max-width: 768px) {
+
+  .chatbot-page {
+    padding-top: 60px !important;
+  }
+
+  .viz-page {
+    padding: 70px 20px 40px !important;
+  }
+
+  .viz-title {
+    font-size: 20px !important;
+  }
+
+  .chart-area {
+    height: 360px !important;
+  }
+
+  #myChart, canvas {
+    height: 330px !important;
+    max-height: 330px !important;
+  }
+
+  .r-sb-chips {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .r-sb-stats {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .r-sb-actions {
+    flex-direction: row !important;
+  }
+
+  .r-sb-btn {
+    flex: 1 !important;
   }
 }
