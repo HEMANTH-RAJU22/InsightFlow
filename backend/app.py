@@ -20,6 +20,15 @@ from functools import wraps
 load_dotenv()
 warnings.filterwarnings("ignore")
 
+db = mysql.connector.connect(
+    host=os.environ.get("DB_HOST", "localhost"),
+    user=os.environ.get("DB_USER", "root"),
+    password=os.environ.get("DB_PASSWORD", ""),
+    database=os.environ.get("DB_NAME", "insightflow"),
+    port=int(os.environ.get("DB_PORT", 3306)),  # ← Add this!
+    connection_timeout=5
+)
+
 # ── JWT Secret — MUST be set in .env, no weak default ──
 JWT_SECRET = os.environ.get("JWT_SECRET")
 if not JWT_SECRET:
