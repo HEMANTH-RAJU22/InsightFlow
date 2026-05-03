@@ -4,6 +4,7 @@ from flask_mail import Mail, Message
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 import pandas as pd
+import mysql.connector
 import warnings
 import os
 import re
