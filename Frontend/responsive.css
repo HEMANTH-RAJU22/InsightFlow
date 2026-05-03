@@ -1,0 +1,163 @@
+/* ═══════════════════════════════════
+   GLOBAL RESPONSIVE STYLES
+   Breakpoints:
+   Mobile:  < 480px
+   Tablet:  481px - 768px
+   Laptop:  769px - 1024px
+   Desktop: > 1024px
+═══════════════════════════════════ */
+
+/* Base - applies to all */
+* {
+  box-sizing: border-box;
+}
+
+img, video {
+  max-width: 100%;
+  height: auto;
+}
+
+table {
+  width: 100%;
+  overflow-x: auto;
+  display: block;
+}
+
+/* ── TABLET (768px and below) ── */
+@media (max-width: 768px) {
+
+  /* Navigation */
+  .sidebar, .nav-sidebar {
+    width: 100% !important;
+    height: auto !important;
+    position: relative !important;
+    flex-direction: row !important;
+  }
+
+  /* Layout */
+  .layout, .main-layout, .container {
+    flex-direction: column !important;
+    width: 100% !important;
+    padding: 10px !important;
+  }
+
+  /* Cards & Panels */
+  .card, .panel, .box {
+    width: 100% !important;
+    margin: 8px 0 !important;
+  }
+
+  /* Grids */
+  .grid, .stats-grid, .cards-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+  }
+
+  /* Tables */
+  .table-wrapper, table {
+    overflow-x: auto !important;
+    display: block !important;
+    white-space: nowrap !important;
+  }
+
+  /* Buttons */
+  .btn, button {
+    padding: 8px 14px !important;
+    font-size: 14px !important;
+  }
+
+  /* Typography */
+  h1 { font-size: 24px !important; }
+  h2 { font-size: 20px !important; }
+  h3 { font-size: 18px !important; }
+
+  /* Forms */
+  input, select, textarea {
+    width: 100% !important;
+    font-size: 16px !important; /* prevents zoom on iOS */
+  }
+
+  /* Charts */
+  canvas, .chart-container {
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  /* Modals */
+  .modal-content, .modal-box {
+    width: 95% !important;
+    margin: 10px auto !important;
+    padding: 16px !important;
+  }
+}
+
+/* ── MOBILE (480px and below) ── */
+@media (max-width: 480px) {
+
+  /* Layout */
+  .layout, .main-layout, .container {
+    padding: 6px !important;
+  }
+
+  /* Grids → single column */
+  .grid, .stats-grid, .cards-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Navigation → icons only or hamburger */
+  .sidebar .nav-text,
+  .sidebar .menu-text {
+    display: none !important;
+  }
+
+  .sidebar {
+    width: 60px !important;
+  }
+
+  /* Typography */
+  h1 { font-size: 20px !important; }
+  h2 { font-size: 18px !important; }
+  h3 { font-size: 16px !important; }
+  p, span, td, th { font-size: 13px !important; }
+
+  /* Buttons */
+  .btn, button {
+    width: 100% !important;
+    padding: 10px !important;
+    font-size: 14px !important;
+  }
+
+  /* Header */
+  .header, .topbar {
+    flex-wrap: wrap !important;
+    padding: 8px !important;
+    gap: 8px !important;
+  }
+
+  /* Tables */
+  th, td {
+    padding: 6px 8px !important;
+    font-size: 12px !important;
+  }
+
+  /* Charts smaller on mobile */
+  canvas {
+    max-height: 250px !important;
+  }
+
+  /* Modals full screen on mobile */
+  .modal-content, .modal-box {
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+  }
+}
+
+/* ── LARGE DESKTOP (1400px+) ── */
+@media (min-width: 1400px) {
+  .container, .main-layout {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+}
