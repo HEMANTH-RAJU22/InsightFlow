@@ -1,107 +1,53 @@
 /* ═══════════════════════════════════════════════════════════
    INSIGHTFLOW — responsive.css
-   Full responsive coverage for all pages:
-   index, login, reset-password, dashboard, chatbot,
-   visualize, report, account, admin, support
-
-   Breakpoints:
-   Mobile  : ≤ 480px
-   Tablet  : 481px – 768px
-   Laptop  : 769px – 1024px
-   Desktop : > 1024px
-   Wide    : ≥ 1400px
+   Based on actual class names and layout structures
+   from all pages: index, login, reset-password, dashboard,
+   chatbot, visualize, report, account, admin, support
 ═══════════════════════════════════════════════════════════ */
 
-/* ── BASE (all screen sizes) ─────────────────────────────── */
 *, *::before, *::after {
   box-sizing: border-box;
 }
 
-img, video, svg {
+img, video {
   max-width: 100%;
   height: auto;
 }
 
-table {
-  width: 100%;
-  overflow-x: auto;
-  display: block;
-}
 
-/* ════════════════════════════════════════════════════════════
-   TABLET  (≤ 768px)
-════════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════
+   TABLET — max-width: 768px
+════════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
 
-  /* ── Generic layout ── */
-  .layout, .main-layout, .container {
-    flex-direction: column !important;
-    width: 100% !important;
-    padding: 10px !important;
-  }
-
-  .card, .panel, .box {
-    width: 100% !important;
-    margin: 8px 0 !important;
-  }
-
-  .grid, .stats-grid, .cards-grid {
-    grid-template-columns: 1fr 1fr !important;
-    gap: 10px !important;
-  }
-
-  .table-wrapper, table {
-    overflow-x: auto !important;
-    display: block !important;
-    white-space: nowrap !important;
-  }
-
-  canvas, .chart-container {
-    width: 100% !important;
+  /* ── TOPBAR (dashboard, chatbot, visualize) ── */
+  .topbar {
+    padding: 8px 16px !important;
     height: auto !important;
-  }
-
-  .modal-content, .modal-box, .modal {
-    width: 95% !important;
-    margin: 10px auto !important;
-    padding: 16px !important;
-  }
-
-  h1 { font-size: 24px !important; }
-  h2 { font-size: 20px !important; }
-  h3 { font-size: 18px !important; }
-
-  input, select, textarea {
-    width: 100% !important;
-    font-size: 16px !important; /* prevents iOS zoom */
-  }
-
-  /* ── TOPBAR (all pages) ── */
-  .topbar, .ac-topbar, .r-topbar {
+    min-height: 60px !important;
     flex-wrap: wrap !important;
-    padding: 8px 12px !important;
-    gap: 8px !important;
-    height: auto !important;
+    gap: 6px !important;
   }
 
-  .nav-links, .ac-topnav {
+  .nav-links {
     display: flex !important;
     flex-wrap: wrap !important;
-    gap: 8px !important;
-    font-size: 13px !important;
+    gap: 6px !important;
   }
 
-  .logo, .ac-logo, .r-logo {
-    font-size: 18px !important;
+  .nav-links span {
+    font-size: 13px !important;
+    padding: 4px 8px !important;
+  }
+
+  .logo {
+    font-size: 17px !important;
+    letter-spacing: 2px !important;
   }
 
   /* ── DASHBOARD ── */
-  .kpi-container {
-    flex-direction: column !important;
-  }
-
-  .kpi-card {
-    width: 100% !important;
+  .dashboard {
+    padding: 90px 16px 24px !important;
   }
 
   .upload-box {
@@ -109,18 +55,50 @@ table {
     gap: 8px !important;
   }
 
+  .kpi-container {
+    gap: 12px !important;
+  }
+
+  .kpi-card {
+    flex: 1 1 calc(50% - 6px) !important;
+    min-width: 140px !important;
+  }
+
+  .ai-cta-inner {
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  .ai-cta-btn {
+    width: 100% !important;
+  }
+
+  .table-container {
+    overflow-x: auto !important;
+  }
+
+  table {
+    display: table !important;
+    white-space: nowrap !important;
+    width: 100% !important;
+  }
+
   /* ── CHATBOT ── */
   .chatbot-page {
-    padding: 80px 10px 10px !important;
+    width: 100% !important;
+    padding: 70px 12px 0 !important;
   }
 
   .chatbot-header {
-    flex-wrap: wrap !important;
+    padding: 10px 12px !important;
     gap: 8px !important;
   }
 
+  .chatbot-title {
+    font-size: 20px !important;
+  }
+
   .quick-prompts {
-    display: flex !important;
     flex-wrap: wrap !important;
     gap: 6px !important;
   }
@@ -128,20 +106,22 @@ table {
   .quick-btn {
     font-size: 12px !important;
     padding: 6px 10px !important;
+    flex-shrink: 0 !important;
   }
 
-  .chat-input-row {
-    flex-direction: row !important;
+  .chatbot-input-area {
+    padding: 10px !important;
   }
 
   /* ── VISUALIZE ── */
   .viz-page {
-    padding: 80px 12px 20px !important;
+    width: 100% !important;
+    padding: 80px 12px 40px !important;
   }
 
   .chart-builder {
-    flex-direction: column !important;
-    gap: 16px !important;
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
   }
 
   .viz-controls {
@@ -158,108 +138,130 @@ table {
     height: 320px !important;
   }
 
+  #myChart {
+    height: 288px !important;
+  }
+
   .color-options {
     flex-wrap: wrap !important;
-    gap: 8px !important;
   }
 
   .download-btns {
-    flex-wrap: wrap !important;
-    gap: 6px !important;
+    display: flex !important;
+    gap: 8px !important;
   }
 
-  .viz-dashboard-cta {
-    margin: 16px 0 !important;
+  .download-btns .viz-action-btn {
+    flex: 1 !important;
   }
 
-  /* ── LOGIN / REGISTER ── */
+  /* ── LOGIN ── */
   .layout {
     flex-direction: column !important;
+    min-height: 100vh !important;
   }
 
   .left-panel {
-    display: none !important;
+    flex: 0 0 auto !important;
+    padding: 32px 24px !important;
+    border-right: none !important;
+    border-bottom: 1px solid rgba(255,255,255,0.06) !important;
   }
 
   .right-panel {
-    width: 100% !important;
-    padding: 20px !important;
+    flex: 1 !important;
+    padding: 24px !important;
+    overflow-y: auto !important;
   }
 
   .form-wrapper {
     max-width: 100% !important;
-    padding: 0 !important;
   }
 
   .form-card {
-    padding: 24px 16px !important;
+    padding: 32px 24px !important;
   }
 
   .form-actions {
-    flex-direction: column !important;
+    flex-wrap: wrap !important;
     gap: 10px !important;
   }
 
-  .form-actions .btn {
-    width: 100% !important;
-  }
-
-  /* ── RESET PASSWORD ── */
-  .container {
-    padding: 20px !important;
-  }
-
-  .step-indicator {
-    gap: 8px !important;
-  }
-
   /* ── ACCOUNT ── */
+  .ac-topbar {
+    padding: 8px 16px !important;
+    height: auto !important;
+    min-height: 56px !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+  }
+
+  .ac-topnav {
+    gap: 6px !important;
+    flex-wrap: wrap !important;
+  }
+
+  .ac-topnav-btn {
+    font-size: 12px !important;
+    padding: 4px 8px !important;
+  }
+
   .ac-layout {
     flex-direction: column !important;
+    overflow: visible !important;
+    height: auto !important;
   }
 
   .ac-sidebar {
     width: 100% !important;
+    height: auto !important;
     border-right: none !important;
-    border-bottom: 1px solid rgba(255,255,255,0.08) !important;
-    padding: 12px !important;
+    border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+    overflow: visible !important;
+  }
+
+  .sb-user {
+    padding: 14px 16px !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 12px !important;
   }
 
   .sb-nav {
     display: flex !important;
+    flex-direction: row !important;
     flex-wrap: wrap !important;
     gap: 4px !important;
-    flex-direction: row !important;
+    padding: 8px 12px !important;
   }
 
   .sb-section-label {
     width: 100% !important;
-    margin-top: 8px !important;
+    margin-top: 4px !important;
   }
 
   .sb-item {
-    flex: 1 1 auto !important;
-    min-width: 80px !important;
-    padding: 8px 6px !important;
-    justify-content: center !important;
+    flex: 0 0 auto !important;
+    padding: 8px 12px !important;
     border-radius: 8px !important;
+    gap: 6px !important;
   }
 
-  .sb-item span {
-    font-size: 11px !important;
-    display: none !important; /* show only icons on tablet */
+  .sb-divider {
+    width: 100% !important;
+    height: 1px !important;
+    margin: 4px 0 !important;
   }
 
-  .sb-user {
-    flex-direction: row !important;
-    align-items: center !important;
-    gap: 12px !important;
-    padding: 10px !important;
+  .sb-footer {
+    display: none !important;
   }
 
   .ac-canvas {
     width: 100% !important;
-    padding: 16px 12px !important;
+    height: auto !important;
+    padding: 16px 14px !important;
+    overflow-y: visible !important;
   }
 
   .field-row {
@@ -268,7 +270,8 @@ table {
   }
 
   .charts-grid {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
   }
 
   .btn-row {
@@ -277,15 +280,37 @@ table {
   }
 
   /* ── REPORT ── */
+  .r-topbar {
+    padding: 8px 16px !important;
+    flex-wrap: wrap !important;
+    height: auto !important;
+    min-height: 60px !important;
+    gap: 8px !important;
+  }
+
+  .r-nav {
+    gap: 12px !important;
+    flex-wrap: wrap !important;
+  }
+
+  .r-nav span {
+    font-size: 13px !important;
+  }
+
   .r-body {
     flex-direction: column !important;
+    overflow: visible !important;
+    max-height: none !important;
+    height: auto !important;
   }
 
   .r-sidebar {
     width: 100% !important;
+    height: auto !important;
     border-right: none !important;
-    border-bottom: 1px solid rgba(255,255,255,0.08) !important;
-    padding: 12px !important;
+    border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+    overflow: visible !important;
+    flex-shrink: 0 !important;
   }
 
   .r-sb-chips {
@@ -297,8 +322,7 @@ table {
 
   .r-sb-chip {
     flex: 1 1 auto !important;
-    min-width: 100px !important;
-    padding: 8px 10px !important;
+    min-width: 80px !important;
   }
 
   .r-sb-stats {
@@ -306,6 +330,10 @@ table {
     flex-direction: row !important;
     flex-wrap: wrap !important;
     gap: 8px !important;
+  }
+
+  .r-sb-stat {
+    flex: 1 1 auto !important;
   }
 
   .r-sb-actions {
@@ -319,56 +347,67 @@ table {
   }
 
   .r-canvas {
+    overflow-y: auto !important;
     padding: 12px !important;
+    max-height: none !important;
+    height: auto !important;
+    min-height: 60vh !important;
   }
 
   .r-kpi-row {
     grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+
+  .r-g-main,
+  .r-g-mid,
+  .r-g-bot,
+  .r-g-extra,
+  .r-g-stats {
+    grid-template-columns: 1fr !important;
     gap: 10px !important;
   }
 
-  .r-g-main, .r-g-mid, .r-g-bot, .r-g-extra {
-    grid-template-columns: 1fr !important;
-    gap: 12px !important;
-  }
-
   /* ── ADMIN ── */
-  .admin-layout, .layout {
+  .layout {
     flex-direction: column !important;
+    overflow: visible !important;
+    height: auto !important;
+    min-height: 0 !important;
   }
 
   .sidebar {
     width: 100% !important;
     height: auto !important;
-    position: relative !important;
-    padding: 10px !important;
+    flex-direction: column !important;
+    border-right: none !important;
+    border-bottom: 1px solid rgba(255,255,255,0.06) !important;
   }
 
   .sb-nav {
     display: flex !important;
-    flex-wrap: wrap !important;
     flex-direction: row !important;
+    flex-wrap: wrap !important;
+    padding: 8px !important;
     gap: 4px !important;
   }
 
   .nav-item {
     flex: 1 1 auto !important;
+    padding: 8px !important;
+    gap: 6px !important;
     min-width: 90px !important;
-    padding: 8px 6px !important;
+    border-radius: 8px !important;
   }
 
-  .nav-item span {
+  .nav-item span:not(.nav-badge) {
     font-size: 11px !important;
   }
 
-  .top-right {
-    gap: 8px !important;
-    flex-wrap: wrap !important;
-  }
-
-  .col-7-3 {
-    flex-direction: column !important;
-    gap: 12px !important;
+  .sb-section {
+    width: 100% !important;
+    padding: 4px 8px !important;
+    margin-top: 6px !important;
   }
 
   .cfg-grid {
@@ -380,203 +419,202 @@ table {
     gap: 10px !important;
   }
 
-  .modal-btns {
-    flex-direction: column !important;
-    gap: 8px !important;
+  .modal-ov {
+    align-items: flex-end !important;
+    padding: 0 !important;
   }
 
-  .modal-btns .btn {
+  .modal {
     width: 100% !important;
+    border-radius: 16px 16px 0 0 !important;
+    padding: 20px 16px !important;
+    margin: 0 !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+  }
+
+  .modal-btns {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
   }
 
   /* ── SUPPORT ── */
   .page {
-    padding: 80px 12px 20px !important;
+    padding: 80px 16px 32px !important;
+    gap: 16px !important;
   }
 
   .tabs {
-    flex-wrap: wrap !important;
-    gap: 6px !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    width: 100% !important;
   }
 
   .tab {
-    flex: 1 1 auto !important;
-    min-width: 80px !important;
-    font-size: 13px !important;
-    padding: 8px 10px !important;
+    flex-shrink: 0 !important;
+    padding: 8px 14px !important;
+    font-size: 12px !important;
   }
 
   .form-row {
-    flex-direction: column !important;
+    grid-template-columns: 1fr !important;
     gap: 10px !important;
-  }
-
-  .faq-cats {
-    flex-wrap: wrap !important;
-    gap: 6px !important;
   }
 
   .faq-stats {
-    flex-wrap: wrap !important;
-    gap: 10px !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
   }
 
   /* ── INDEX / LANDING ── */
-  .hero {
-    padding: 100px 20px 60px !important;
-    text-align: center !important;
+  nav {
+    padding: 0 16px !important;
   }
 
-  .hero-title {
-    font-size: 42px !important;
-    line-height: 1.2 !important;
+  .nav-links .nlink {
+    display: none !important;
+  }
+
+  .hero {
+    padding: 100px 20px 60px !important;
+    min-height: auto !important;
+  }
+
+  .ht1, .ht2 {
+    font-size: 40px !important;
+    letter-spacing: 1px !important;
+  }
+
+  .hero-sub {
+    font-size: 15px !important;
+    padding: 0 8px !important;
   }
 
   .hero-btns {
     flex-direction: column !important;
     align-items: center !important;
-    gap: 12px !important;
+    gap: 10px !important;
   }
 
   .btn-go, .btn-more {
     width: 100% !important;
-    max-width: 280px !important;
+    max-width: 300px !important;
   }
 
   .stats-strip {
     flex-wrap: wrap !important;
-    gap: 10px !important;
     justify-content: center !important;
+    gap: 0 !important;
+  }
+
+  .stat {
+    flex: 1 1 50% !important;
+    border-right: none !important;
+    border-bottom: 1px solid rgba(255,140,0,0.08) !important;
+    padding: 16px 20px !important;
   }
 
   .bento {
     grid-template-columns: 1fr !important;
-    gap: 14px !important;
+    gap: 12px !important;
+  }
+
+  .c1, .c2, .c3, .c4, .c5 {
+    grid-column: span 1 !important;
   }
 
   .section {
-    padding: 60px 20px !important;
+    padding: 70px 20px !important;
   }
 
-  .numbers {
-    grid-template-columns: repeat(2, 1fr) !important;
+  .sec-title {
+    font-size: 26px !important;
   }
 
   .process {
-    flex-direction: column !important;
-    gap: 16px !important;
+    padding: 70px 20px !important;
   }
 
-  .nav-links .nbtn {
-    padding: 8px 16px !important;
-    font-size: 13px !important;
+  .numbers {
+    padding: 50px 20px !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 14px !important;
   }
 
-  /* header nav collapse on tablet */
-  .nlink {
-    display: none !important;
+  .cta-sec {
+    padding: 60px 20px !important;
+  }
+
+  .ticker {
+    overflow: hidden !important;
   }
 }
 
 
-/* ════════════════════════════════════════════════════════════
-   MOBILE  (≤ 480px)
-════════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════
+   MOBILE — max-width: 480px
+════════════════════════════════════════════════════════ */
 @media (max-width: 480px) {
 
-  /* ── Generic ── */
-  .layout, .main-layout, .container {
-    padding: 6px !important;
-  }
-
-  .grid, .stats-grid, .cards-grid {
-    grid-template-columns: 1fr !important;
-  }
-
-  h1 { font-size: 20px !important; }
-  h2 { font-size: 18px !important; }
-  h3 { font-size: 16px !important; }
-  p, span, td, th { font-size: 13px !important; }
-
-  th, td {
-    padding: 6px 8px !important;
-    font-size: 12px !important;
-  }
-
-  canvas {
-    max-height: 240px !important;
-  }
-
-  .modal-content, .modal-box, .modal {
-    width: 100% !important;
-    max-height: 92vh !important;
-    border-radius: 12px 12px 0 0 !important;
-    margin: auto 0 0 !important;
-    overflow-y: auto !important;
-  }
-
-  .modal-ov {
-    align-items: flex-end !important;
-  }
-
   /* ── TOPBAR ── */
-  .topbar, .ac-topbar, .r-topbar {
-    padding: 8px !important;
-    height: auto !important;
+  .topbar {
+    padding: 6px 12px !important;
+    gap: 4px !important;
     min-height: 50px !important;
   }
 
-  .nav-links span, .ac-topnav-btn {
-    font-size: 12px !important;
-    padding: 4px 8px !important;
+  .logo {
+    font-size: 15px !important;
+    letter-spacing: 1.5px !important;
+  }
+
+  .nav-links span {
+    font-size: 11px !important;
+    padding: 3px 6px !important;
   }
 
   /* ── DASHBOARD ── */
   .dashboard {
-    padding: 70px 10px 20px !important;
+    padding: 72px 10px 20px !important;
+  }
+
+  .dashboard h1 {
+    font-size: 20px !important;
   }
 
   .upload-box {
     flex-direction: column !important;
     align-items: stretch !important;
-    gap: 8px !important;
   }
 
   .upload-box button,
-  .upload-box label {
+  .upload-label {
     width: 100% !important;
     text-align: center !important;
+    box-sizing: border-box !important;
   }
 
-  .ai-cta-inner {
+  .kpi-container {
     flex-direction: column !important;
-    text-align: center !important;
-    gap: 12px !important;
   }
 
-  .ai-cta-btn {
+  .kpi-card {
+    flex: none !important;
     width: 100% !important;
   }
 
   .kpi-card p {
-    font-size: 28px !important;
+    font-size: 32px !important;
   }
 
   /* ── CHATBOT ── */
   .chatbot-page {
-    padding: 70px 8px 8px !important;
-  }
-
-  .chatbot-header {
-    padding: 8px !important;
+    padding: 62px 8px 0 !important;
+    height: calc(100vh - 50px) !important;
   }
 
   .chatbot-title {
-    font-size: 18px !important;
-  }
-
-  .chat-window {
-    border-radius: 10px !important;
+    font-size: 17px !important;
   }
 
   .quick-btn {
@@ -584,65 +622,60 @@ table {
     padding: 5px 8px !important;
   }
 
-  .chatbot-input-area {
-    padding: 8px !important;
-    gap: 8px !important;
-  }
-
-  .send-btn {
-    width: 42px !important;
-    height: 42px !important;
-    flex-shrink: 0 !important;
-  }
-
   /* ── VISUALIZE ── */
   .viz-page {
-    padding: 70px 8px 16px !important;
+    padding: 64px 8px 30px !important;
   }
 
   .viz-title {
-    font-size: 22px !important;
+    font-size: 20px !important;
   }
 
   .chart-area {
-    height: 260px !important;
+    height: 250px !important;
+  }
+
+  #myChart {
+    height: 218px !important;
   }
 
   .ctrl-label {
     font-size: 10px !important;
   }
 
-  #saveChartBtn {
-    font-size: 12px !important;
-    padding: 9px 0 !important;
-  }
-
   .viz-dashboard-btn {
-    flex-direction: column !important;
-    text-align: center !important;
-    gap: 6px !important;
-    padding: 12px !important;
+    padding: 14px 16px !important;
+    gap: 10px !important;
   }
 
-  /* ── LOGIN / REGISTER ── */
-  .right-panel, .form-wrapper {
-    padding: 16px !important;
+  .viz-dash-title {
+    font-size: 13px !important;
+  }
+
+  /* ── LOGIN ── */
+  .left-panel {
+    display: none !important;
+  }
+
+  .right-panel {
+    padding: 20px 16px !important;
+    min-height: 100vh !important;
   }
 
   .form-card {
-    padding: 20px 14px !important;
-    border-radius: 12px !important;
+    padding: 24px 16px !important;
+    border-radius: 16px !important;
+  }
+
+  .form-links {
+    flex-direction: column !important;
+    gap: 8px !important;
+    text-align: center !important;
   }
 
   /* ── RESET PASSWORD ── */
-  .container .card {
-    padding: 20px 14px !important;
-    border-radius: 12px !important;
-  }
-
-  .step-indicator {
-    flex-direction: row !important;
-    justify-content: center !important;
+  .container {
+    padding: 80px 16px 24px !important;
   }
 
   .step-label {
@@ -652,83 +685,52 @@ table {
   /* ── ACCOUNT ── */
   .ac-topbar {
     padding: 6px 10px !important;
+    min-height: 50px !important;
   }
 
-  .ac-layout {
-    padding-top: 50px !important;
+  .ac-logo {
+    font-size: 15px !important;
   }
 
-  .ac-sidebar {
-    padding: 8px !important;
+  .ac-topnav-btn {
+    font-size: 11px !important;
+    padding: 3px 7px !important;
   }
 
-  .sb-item {
-    padding: 8px 4px !important;
-    min-width: 48px !important;
-  }
-
-  .sb-icon-bg {
-    width: 28px !important;
-    height: 28px !important;
-  }
-
-  .ac-canvas {
-    padding: 12px 10px !important;
-  }
-
-  .pg-head {
-    flex-direction: column !important;
-    gap: 8px !important;
-    align-items: flex-start !important;
-  }
-
-  .session-pill {
+  .sb-item span {
     font-size: 11px !important;
   }
 
   .ac-card {
-    padding: 14px !important;
+    padding: 14px 12px !important;
+    border-radius: 12px !important;
+  }
+
+  .pg-head {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
   }
 
   .profile-hero {
     flex-direction: column !important;
     align-items: center !important;
     text-align: center !important;
+    gap: 12px !important;
   }
 
   .charts-grid {
     grid-template-columns: 1fr !important;
-    gap: 10px !important;
-  }
-
-  .chart-card {
-    width: 100% !important;
-  }
-
-  .ac-table {
-    font-size: 12px !important;
-  }
-
-  .danger-zone {
-    padding: 12px !important;
   }
 
   /* ── REPORT ── */
   .r-topbar {
-    padding: 6px 10px !important;
+    padding: 6px 12px !important;
+    min-height: 50px !important;
   }
 
-  .r-body {
-    padding-top: 50px !important;
-  }
-
-  .r-sidebar {
-    padding: 8px 10px !important;
-  }
-
-  .r-sb-chip {
-    padding: 6px 8px !important;
-    font-size: 12px !important;
+  .r-logo {
+    font-size: 17px !important;
   }
 
   .r-canvas {
@@ -737,133 +739,111 @@ table {
 
   .r-kpi-row {
     grid-template-columns: 1fr 1fr !important;
-    gap: 8px !important;
-  }
-
-  .r-kpi {
-    padding: 12px 10px !important;
-  }
-
-  .r-kpi-val {
-    font-size: 22px !important;
-  }
-
-  .r-g-main, .r-g-mid, .r-g-bot, .r-g-extra, .r-g-stats {
-    grid-template-columns: 1fr !important;
-    gap: 10px !important;
-  }
-
-  /* ── ADMIN ── */
-  .topbar .top-left,
-  .topbar .top-right {
-    flex-wrap: wrap !important;
     gap: 6px !important;
   }
 
-  .admin-pill {
-    font-size: 10px !important;
-    padding: 2px 8px !important;
+  .r-kpi {
+    padding: 10px !important;
   }
 
-  .sidebar {
-    padding: 6px !important;
+  .r-kpi-val {
+    font-size: 20px !important;
   }
 
-  .nav-item {
-    padding: 7px 4px !important;
-    min-width: 44px !important;
-  }
-
-  .nav-icon {
-    font-size: 16px !important;
-  }
-
+  /* ── ADMIN ── */
   .nav-item span:not(.nav-badge) {
     display: none !important;
   }
 
-  .cfset-grid, .cfg-grid {
-    grid-template-columns: 1fr !important;
+  .nav-item {
+    min-width: 44px !important;
+    flex: 0 0 44px !important;
+    justify-content: center !important;
+    padding: 8px 6px !important;
   }
 
-  .donut-box {
-    width: 100% !important;
+  .nav-icon {
+    font-size: 18px !important;
+    margin: 0 !important;
   }
 
-  /* admin stats row wraps */
-  .kpi-container, .kpi-row {
-    flex-direction: column !important;
+  .admin-pill {
+    font-size: 9px !important;
+    padding: 2px 7px !important;
+  }
+
+  .top-time {
+    display: none !important;
   }
 
   /* ── SUPPORT ── */
   .page {
-    padding: 70px 8px 16px !important;
+    padding: 64px 10px 24px !important;
+    gap: 12px !important;
   }
 
   .card {
-    padding: 14px !important;
-  }
-
-  .card-head {
-    flex-direction: column !important;
-    gap: 6px !important;
-  }
-
-  .tabs {
-    overflow-x: auto !important;
-    flex-wrap: nowrap !important;
-    -webkit-overflow-scrolling: touch !important;
-    padding-bottom: 4px !important;
+    padding: 16px 14px !important;
+    border-radius: 14px !important;
   }
 
   .tab {
-    white-space: nowrap !important;
-    flex-shrink: 0 !important;
+    padding: 7px 10px !important;
+    font-size: 11px !important;
   }
 
-  .faq-item {
-    padding: 10px 12px !important;
+  .faq-stats {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 6px !important;
   }
 
-  .faq-q-text {
-    font-size: 13px !important;
+  .faq-q {
+    padding: 12px 14px !important;
+    font-size: 12px !important;
   }
 
   .faq-a-inner {
-    font-size: 13px !important;
+    padding: 4px 14px 14px !important;
+    font-size: 12px !important;
   }
 
   /* ── INDEX / LANDING ── */
   .hero {
-    padding: 80px 16px 40px !important;
+    padding: 80px 14px 50px !important;
   }
 
-  .hero-title {
-    font-size: 30px !important;
-    letter-spacing: 1px !important;
+  .ht1, .ht2 {
+    font-size: 28px !important;
+    letter-spacing: 0 !important;
+    line-height: 1.2 !important;
   }
 
   .hero-sub {
     font-size: 14px !important;
   }
 
+  .eyebrow {
+    font-size: 10px !important;
+    margin-bottom: 28px !important;
+  }
+
   .stats-strip {
-    grid-template-columns: 1fr 1fr !important;
     display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
   }
 
   .stat {
-    flex-direction: column !important;
+    flex: none !important;
+    padding: 14px 10px !important;
     text-align: center !important;
   }
 
-  .bento {
-    grid-template-columns: 1fr !important;
-    gap: 12px !important;
+  .stat-v {
+    font-size: 28px !important;
   }
 
   .section {
-    padding: 40px 14px !important;
+    padding: 50px 14px !important;
   }
 
   .sec-title {
@@ -871,45 +851,50 @@ table {
     line-height: 1.3 !important;
   }
 
+  .process {
+    padding: 50px 14px !important;
+  }
+
   .numbers {
+    padding: 40px 14px !important;
     grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+  }
+
+  .num-v {
+    font-size: 32px !important;
   }
 
   .cta-sec {
-    padding: 40px 16px !important;
+    padding: 50px 14px !important;
   }
 
   .cta-h {
     font-size: 22px !important;
-  }
-
-  .cta-box {
-    padding: 24px 16px !important;
-  }
-
-  /* top nav mobile — only show CTA button */
-  .logo-box {
-    width: 32px !important;
-    height: 32px !important;
+    line-height: 1.3 !important;
   }
 
   .logo-name {
-    font-size: 15px !important;
+    font-size: 14px !important;
+    letter-spacing: 2px !important;
+  }
+
+  .nbtn {
+    padding: 8px 18px !important;
+    font-size: 12px !important;
   }
 }
 
 
-/* ════════════════════════════════════════════════════════════
-   LAPTOP  (769px – 1024px)  — minor tweaks
-════════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════
+   LAPTOP — 769px to 1024px
+════════════════════════════════════════════════════════ */
 @media (min-width: 769px) and (max-width: 1024px) {
 
-  /* Topbar tighter */
   .topbar {
     padding: 0 24px !important;
   }
 
-  /* Dashboard KPI wrap */
   .kpi-container {
     flex-wrap: wrap !important;
   }
@@ -918,85 +903,69 @@ table {
     flex: 1 1 160px !important;
   }
 
-  /* Visualize — controls narrower */
-  .viz-controls {
-    width: 240px !important;
-    min-width: 200px !important;
+  .chart-builder {
+    grid-template-columns: 260px 1fr !important;
   }
 
-  /* Account sidebar narrower */
   .ac-sidebar {
     width: 200px !important;
-    min-width: 180px !important;
   }
 
-  /* Report sidebar narrower */
   .r-sidebar {
-    width: 200px !important;
-    min-width: 180px !important;
-  }
-
-  /* Admin sidebar narrower */
-  .sidebar {
     width: 180px !important;
   }
 
-  .nav-item span {
-    font-size: 12px !important;
+  .sidebar {
+    width: 190px !important;
   }
 
-  /* Report KPI grid */
-  .r-kpi-row {
-    grid-template-columns: repeat(3, 1fr) !important;
-  }
-
-  /* Bento grid 2-col */
   .bento {
-    grid-template-columns: repeat(2, 1fr) !important;
+    grid-template-columns: repeat(6, 1fr) !important;
   }
 
-  /* Index landing hero */
-  .hero-title {
-    font-size: 52px !important;
-  }
+  .c1 { grid-column: span 3 !important; }
+  .c2 { grid-column: span 3 !important; }
+  .c3 { grid-column: span 2 !important; }
+  .c4 { grid-column: span 2 !important; }
+  .c5 { grid-column: span 2 !important; }
 
-  .section {
-    padding: 80px 32px !important;
+  .section, .process, .numbers {
+    padding-left: 36px !important;
+    padding-right: 36px !important;
   }
 }
 
 
-/* ════════════════════════════════════════════════════════════
-   WIDE DESKTOP  (≥ 1400px)
-════════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════
+   WIDE DESKTOP — min-width: 1400px
+════════════════════════════════════════════════════════ */
 @media (min-width: 1400px) {
-
-  .container, .main-layout {
+  .viz-page,
+  .chatbot-page {
     max-width: 1400px;
-    margin: 0 auto;
-  }
-
-  .section {
-    max-width: 1300px;
     margin-left: auto;
     margin-right: auto;
   }
 
-  .r-kpi-row {
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)) !important;
+  .section,
+  .process,
+  .numbers {
+    max-width: 1300px;
+    margin-left: auto;
+    margin-right: auto;
   }
 }
 
 
-/* ════════════════════════════════════════════════════════════
-   PRINT  — strip nav, show full content
-════════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════
+   PRINT
+════════════════════════════════════════════════════════ */
 @media print {
   .topbar, .ac-topbar, .r-topbar,
   .r-sidebar, .ac-sidebar, .sidebar,
   .chatbot-input-area, .quick-prompts,
   .viz-controls, .viz-dashboard-cta,
-  #annTicker, .t-close {
+  #annTicker {
     display: none !important;
   }
 
@@ -1006,11 +975,9 @@ table {
     animation: none !important;
   }
 
-  .r-canvas, .ac-canvas, .dashboard, .viz-page {
+  .r-canvas, .ac-canvas {
     padding-top: 0 !important;
-  }
-
-  canvas {
-    max-height: none !important;
+    overflow: visible !important;
+    height: auto !important;
   }
 }
