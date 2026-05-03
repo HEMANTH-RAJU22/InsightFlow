@@ -936,7 +936,9 @@ function countOccurrences(arr){
 
 function buildSummaryStats(d){
   const grid = document.getElementById("statsGrid")
-  document.getElementById("vizStats").style.display = "block"
+  const vizStatsEl = document.getElementById("vizStats")
+  if(!grid || !vizStatsEl) return
+  vizStatsEl.style.display = "block"
   grid.innerHTML = d.headers.map((h, i) => {
     const vals  = d.dataset.map(r => r[i]).filter(v => v !== "" && v !== null && v !== undefined)
     const nums  = vals.map(v => parseFloat(v)).filter(v => !isNaN(v))

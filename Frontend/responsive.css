@@ -1143,3 +1143,141 @@ img, video {
     grid-template-columns: 1fr 1fr !important;
   }
 }
+
+
+/* ════════════════════════════════════════════════════════
+   TARGETED MOBILE FIXES from live screenshots
+════════════════════════════════════════════════════════ */
+@media (max-width: 480px) {
+
+  /* Dashboard: KPI cards smaller, 2-per-row */
+  .kpi-container {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+  }
+
+  .kpi-card {
+    width: 100% !important;
+    flex: none !important;
+    padding: 14px 12px !important;
+    min-height: 90px !important;
+  }
+
+  .kpi-card h3 {
+    font-size: 11px !important;
+    margin-bottom: 6px !important;
+  }
+
+  .kpi-card p {
+    font-size: 26px !important;
+  }
+
+  /* Dataset card full width */
+  .kpi-card.dataset-card {
+    grid-column: span 2 !important;
+  }
+
+  /* Chatbot: quick prompts horizontal scroll */
+  .quick-prompts {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    gap: 6px !important;
+    padding-bottom: 6px !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+  }
+
+  .quick-prompts::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .quick-btn {
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+    font-size: 11px !important;
+    padding: 6px 10px !important;
+  }
+
+  /* Chatbot input fixed to bottom */
+  .chatbot-input-area {
+    position: sticky !important;
+    bottom: 0 !important;
+    z-index: 10 !important;
+  }
+
+  /* Visualize: chart type dropdown full width */
+  .chart-dropdown {
+    width: 100% !important;
+  }
+
+  /* Visualize: axis dropdowns full width */
+  .axis-dropdown {
+    width: 100% !important;
+  }
+
+  /* Report sidebar: 2x2 grid for view chips */
+  .r-sb-chips {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 6px !important;
+  }
+
+  .r-sb-chip {
+    text-align: center !important;
+    padding: 8px 4px !important;
+    font-size: 11px !important;
+  }
+
+  /* Report stats row: 4 equal columns */
+  .r-sb-stats {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 4px !important;
+  }
+
+  .r-sb-stat {
+    text-align: center !important;
+    padding: 6px 2px !important;
+  }
+
+  /* Report export buttons: stack */
+  .r-sb-actions {
+    flex-direction: column !important;
+    gap: 6px !important;
+  }
+
+  .r-sb-btn {
+    width: 100% !important;
+    text-align: center !important;
+  }
+
+  /* Report KPI cards: smaller on mobile */
+  .r-kpi {
+    padding: 10px 8px !important;
+  }
+
+  .r-kpi-val {
+    font-size: 18px !important;
+  }
+
+  .r-kpi-label {
+    font-size: 9px !important;
+  }
+
+  /* Topbar: prevent overflow */
+  .topbar {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 999 !important;
+    overflow: hidden !important;
+  }
+
+  /* Data overview heading */
+  .data-overview h2 {
+    font-size: 18px !important;
+  }
+}
