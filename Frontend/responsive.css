@@ -161,3 +161,118 @@ table {
     margin: 0 auto;
   }
 }
+/* ── TOPBAR FIX ── */
+@media (max-width: 768px) {
+  .topbar {
+    flex-wrap: wrap !important;
+    padding: 8px 12px !important;
+    gap: 8px !important;
+  }
+
+  .nav-links {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    font-size: 13px !important;
+  }
+
+  .logo {
+    font-size: 18px !important;
+  }
+}
+
+/* ── KPI CARDS FIX ── */
+@media (max-width: 768px) {
+  .kpi-container {
+    flex-direction: column !important;
+  }
+
+  .kpi-card {
+    width: 100% !important;
+  }
+}
+
+/* ── CHATBOT FIX ── */
+@media (max-width: 768px) {
+  .chatbot-page {
+    padding: 10px !important;
+  }
+
+  .quick-prompts {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+  }
+
+  .quick-btn {
+    font-size: 12px !important;
+    padding: 6px 10px !important;
+  }
+
+  .chat-input-row {
+    flex-direction: row !important;
+  }
+}
+
+/* ── VISUALIZE PAGE FIX ── */
+@media (max-width: 768px) {
+  .chart-builder {
+    flex-direction: column !important;
+  }
+
+  .viz-controls {
+    width: 100% !important;
+    max-height: none !important;
+  }
+
+  .chart-column {
+    width: 100% !important;
+  }
+
+  .chart-area {
+    height: 300px !important;
+  }
+}
+
+/* ── LOGIN PAGE FIX ── */
+@media (max-width: 768px) {
+  .login-container, .auth-container {
+    flex-direction: column !important;
+    width: 100% !important;
+    padding: 20px !important;
+  }
+
+  .login-left, .auth-left {
+    display: none !important;
+  }
+
+  .login-right, .auth-right {
+    width: 100% !important;
+    padding: 20px !important;
+  }
+}
+
+/* ── DASHBOARD FIX ── */
+@media (max-width: 480px) {
+  .dashboard {
+    padding: 80px 10px 20px !important;
+  }
+
+  .upload-box {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .upload-box button {
+    width: 100% !important;
+  }
+
+  .ai-cta-inner {
+    flex-direction: column !important;
+    text-align: center !important;
+  }
+
+  .ai-cta-btn {
+    width: 100% !important;
+  }
+}
