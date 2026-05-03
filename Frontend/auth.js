@@ -28,7 +28,7 @@
   var JWT_KEY    = 'insightflow_jwt'       // localStorage key for JWT
   var LEGACY_KEY = 'userEmail'             // kept for backward compat
   var LOGIN_PAGE = 'login.html'
-  var API_BASE   = 'http://127.0.0.1:5000'
+  var API_BASE   = 'https://insightflow-backend-z3w0.onrender.com'
   var WARN_MS    = 15 * 60 * 1000         // warn 15 min before expiry
 
   /* ══════════════════════════════════════
