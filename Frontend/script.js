@@ -693,10 +693,15 @@ let chartColor2 = "#ffb347"
 let chartInst   = null
 
 window.addEventListener("DOMContentLoaded", function(){
+  // Only run on visualize page
+  if(!document.getElementById("vizContent")) return
+
   const raw = localStorage.getItem("insightflow_dataset")
   if(!raw){
-    document.getElementById("noDataMsg").style.display  = "block"
-    document.getElementById("vizContent").style.display = "none"
+    const noData = document.getElementById("noDataMsg")
+    const vizEl  = document.getElementById("vizContent")
+    if(noData) noData.style.display  = "block"
+    if(vizEl)  vizEl.style.display   = "none"
     return
   }
 
@@ -1025,11 +1030,21 @@ let chartInsts  = []
 const CHART_COLORS = ["#ff8c00","#3b82f6","#10b981","#ec4899","#8b5cf6","#ef4444","#f59e0b","#06b6d4"]
 
 window.addEventListener("DOMContentLoaded", function(){
+  // Only run on report page
+  if(!document.getElementById("reportContent")) return
+
   const raw = localStorage.getItem("insightflow_dataset")
-  if(!raw){ document.getElementById("noDataMsg").style.display="block"; document.getElementById("reportContent").style.display="none"; return }
+  if(!raw){
+    const noData = document.getElementById("noDataMsg")
+    const rptEl  = document.getElementById("reportContent")
+    if(noData) noData.style.display  = "block"
+    if(rptEl)  rptEl.style.display   = "none"
+    return
+  }
   const d = JSON.parse(raw)
   rptHeaders = d.headers || []; rptDataset = d.dataset || []; rptMeta = d
-  document.getElementById("reportMeta").innerText = `${d.fileName}  ·  ${Number(d.rows).toLocaleString()} rows  ·  ${d.columns} columns`
+  const metaEl = document.getElementById("reportMeta")
+  if(metaEl) metaEl.innerText = `${d.fileName}  ·  ${Number(d.rows).toLocaleString()} rows  ·  ${d.columns} columns`
   buildDashboard()
 })
 
