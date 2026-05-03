@@ -1306,3 +1306,517 @@ img, video {
     grid-column: unset !important;
   }
 }
+
+/* ════════════════════════════════════════════════════════
+   SCREENSHOT-BASED IMPROVEMENTS — May 2026
+   Targets: chatbot.html, report.html, account.html
+   Tested at 375×554 (mobile responsive mode)
+════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────
+   CHATBOT PAGE — chatbot.html (375px)
+   Issues: layout not filling height, chat window
+   cramped, quick-btn row overflow, input bar position
+───────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+
+  /* Full-viewport chatbot shell so nothing clips */
+  .chatbot-page {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100dvh !important;
+    padding: 56px 0 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* Avatar + title row */
+  .chatbot-header {
+    flex-shrink: 0 !important;
+    padding: 10px 12px 8px !important;
+    gap: 10px !important;
+    border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+  }
+
+  .chatbot-avatar {
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 14px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .chatbot-title {
+    font-size: 16px !important;
+    line-height: 1.2 !important;
+  }
+
+  /* Chat window: grow to fill remaining space */
+  .chat-window {
+    flex: 1 1 auto !important;
+    overflow-y: auto !important;
+    padding: 12px !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+  }
+
+  /* Message bubbles */
+  .msg-bubble {
+    max-width: 88% !important;
+    font-size: 13.5px !important;
+    line-height: 1.5 !important;
+    padding: 10px 12px !important;
+    border-radius: 14px !important;
+    word-break: break-word !important;
+  }
+
+  /* Quick prompts: horizontal scroll strip */
+  .quick-prompts {
+    flex-shrink: 0 !important;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    gap: 6px !important;
+    padding: 8px 12px !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+  }
+
+  .quick-prompts::-webkit-scrollbar { display: none !important; }
+
+  .quick-btn {
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+    font-size: 11px !important;
+    padding: 6px 11px !important;
+    border-radius: 20px !important;
+  }
+
+  /* Input area pinned to bottom */
+  .chatbot-input-area {
+    flex-shrink: 0 !important;
+    position: sticky !important;
+    bottom: 0 !important;
+    z-index: 20 !important;
+    padding: 10px 12px !important;
+    border-top: 1px solid rgba(255,255,255,0.06) !important;
+    padding-bottom: max(10px, env(safe-area-inset-bottom)) !important;
+  }
+
+  /* Input row layout */
+  .chatbot-input-area .input-row,
+  .chatbot-input-area form {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+
+  .chatbot-input-area input[type="text"],
+  .chatbot-input-area textarea {
+    flex: 1 !important;
+    font-size: 14px !important;
+    padding: 10px 14px !important;
+    border-radius: 22px !important;
+    min-height: 42px !important;
+  }
+
+  /* Send button */
+  .send-btn,
+  .chatbot-input-area button[type="submit"] {
+    flex-shrink: 0 !important;
+    width: 42px !important;
+    height: 42px !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 16px !important;
+  }
+}
+
+
+/* ─────────────────────────────────────────────────────
+   REPORT PAGE — report.html (375px)
+   Issues: sidebar chips/stats cramped, export buttons
+   stacking awkwardly, live data cards clipping
+───────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+
+  .r-body {
+    flex-direction: column !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .r-sidebar {
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    border-right: none !important;
+    border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+    padding: 12px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .r-sb-title { font-size: 15px !important; }
+  .r-sb-sub   { font-size: 11px !important; }
+
+  /* View chips: 3-column grid */
+  .r-sb-chips {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 5px !important;
+    margin-bottom: 10px !important;
+  }
+
+  .r-sb-chip {
+    padding: 7px 4px !important;
+    font-size: 10px !important;
+    text-align: center !important;
+    border-radius: 8px !important;
+  }
+
+  /* Dataset stats: 2×2 grid */
+  .r-sb-stats {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 6px !important;
+    margin-bottom: 10px !important;
+  }
+
+  .r-sb-stat {
+    text-align: center !important;
+    padding: 8px 6px !important;
+    border-radius: 8px !important;
+  }
+
+  .r-sb-stat-val {
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    line-height: 1.1 !important;
+  }
+
+  .r-sb-stat-label {
+    font-size: 9px !important;
+    opacity: 0.6 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    margin-top: 2px !important;
+  }
+
+  /* Export buttons: two columns side-by-side */
+  .r-sb-actions {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 6px !important;
+    margin-top: 8px !important;
+  }
+
+  .r-sb-btn {
+    width: 100% !important;
+    text-align: center !important;
+    font-size: 12px !important;
+    padding: 10px 6px !important;
+    border-radius: 10px !important;
+    white-space: nowrap !important;
+  }
+
+  /* Live data cards: horizontal scroll */
+  .r-live-row {
+    display: flex !important;
+    overflow-x: auto !important;
+    gap: 8px !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+    padding-bottom: 4px !important;
+  }
+
+  .r-live-row::-webkit-scrollbar { display: none !important; }
+
+  .r-live-card {
+    flex-shrink: 0 !important;
+    min-width: 120px !important;
+    padding: 10px !important;
+    border-radius: 10px !important;
+  }
+
+  .r-live-field {
+    font-size: 9px !important;
+    opacity: 0.5 !important;
+    text-transform: uppercase !important;
+  }
+
+  .r-live-val {
+    font-size: 20px !important;
+    font-weight: 700 !important;
+  }
+
+  /* Chart panels: full width stack */
+  .r-g-main,
+  .r-g-mid,
+  .r-g-bot,
+  .r-g-extra,
+  .r-g-stats {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
+  /* KPI row: 2-col */
+  .r-kpi-row {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 6px !important;
+  }
+
+  .r-kpi      { padding: 10px 8px !important; border-radius: 10px !important; }
+  .r-kpi-val  { font-size: 17px !important; }
+  .r-kpi-label{ font-size: 9px !important; opacity: 0.55 !important; }
+}
+
+
+/* ─────────────────────────────────────────────────────
+   ACCOUNT PAGE — account.html (375px)
+   Issues: sidebar nav wrapping, profile card stats
+   could be larger, layout height issues
+───────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+
+  .ac-layout {
+    flex-direction: column !important;
+    overflow: visible !important;
+    height: auto !important;
+    min-height: 100vh !important;
+  }
+
+  /* Sidebar: compact top strip */
+  .ac-sidebar {
+    width: 100% !important;
+    height: auto !important;
+    border-right: none !important;
+    border-bottom: 1px solid rgba(255,255,255,0.07) !important;
+    overflow: visible !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* User identity row */
+  .sb-user {
+    padding: 12px 14px !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 10px !important;
+  }
+
+  .sb-avatar {
+    width: 38px !important;
+    height: 38px !important;
+    font-size: 15px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .sb-name { font-size: 14px !important; font-weight: 600 !important; }
+  .sb-role { font-size: 11px !important; opacity: 0.55 !important; }
+
+  /* Sidebar nav: horizontal pill row */
+  .sb-nav {
+    display: flex !important;
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    flex-wrap: nowrap !important;
+    gap: 4px !important;
+    padding: 8px 12px !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+  }
+
+  .sb-nav::-webkit-scrollbar  { display: none !important; }
+  .sb-section-label            { display: none !important; }
+  .sb-divider                  { display: none !important; }
+  .sb-footer                   { display: none !important; }
+
+  .sb-item {
+    flex-shrink: 0 !important;
+    flex: 0 0 auto !important;
+    padding: 7px 12px !important;
+    border-radius: 20px !important;
+    gap: 5px !important;
+    font-size: 12px !important;
+    white-space: nowrap !important;
+  }
+
+  .sb-item svg,
+  .sb-item .sb-icon {
+    width: 14px !important;
+    height: 14px !important;
+    font-size: 14px !important;
+  }
+
+  /* Account main canvas */
+  .ac-canvas {
+    width: 100% !important;
+    padding: 14px 12px !important;
+    overflow-y: visible !important;
+    height: auto !important;
+  }
+
+  .pg-title    { font-size: 17px !important; font-weight: 700 !important; }
+
+  /* Session timer */
+  .session-timer {
+    font-size: 11px !important;
+    padding: 4px 10px !important;
+    border-radius: 20px !important;
+  }
+
+  /* Profile card */
+  .profile-hero {
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    gap: 14px !important;
+    padding: 16px !important;
+  }
+
+  /* Bigger avatar so it reads clearly */
+  .profile-avatar,
+  .profile-hero .sb-avatar {
+    width: 72px !important;
+    height: 72px !important;
+    font-size: 26px !important;
+  }
+
+  .profile-name  { font-size: 18px !important; font-weight: 700 !important; }
+  .profile-email { font-size: 12px !important; opacity: 0.6 !important; }
+
+  /* Status badges */
+  .profile-badges {
+    display: flex !important;
+    gap: 6px !important;
+    justify-content: center !important;
+    flex-wrap: wrap !important;
+  }
+
+  .profile-badge {
+    font-size: 10px !important;
+    padding: 3px 10px !important;
+    border-radius: 20px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.5px !important;
+  }
+
+  /* Stats row (86 UPLOADS / 3.4K TOTAL ROWS) */
+  .profile-stats {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+    width: 100% !important;
+    margin-top: 4px !important;
+  }
+
+  .profile-stat {
+    text-align: center !important;
+    padding: 10px 8px !important;
+    border-radius: 10px !important;
+  }
+
+  .profile-stat-val {
+    font-size: 22px !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+  }
+
+  .profile-stat-label {
+    font-size: 9px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    opacity: 0.55 !important;
+    margin-top: 3px !important;
+  }
+
+  .profile-last-upload {
+    font-size: 12px !important;
+    text-align: center !important;
+    opacity: 0.7 !important;
+  }
+
+  /* Edit display name button */
+  .edit-name-btn {
+    width: 100% !important;
+    max-width: 220px !important;
+    margin: 0 auto !important;
+    display: block !important;
+    text-align: center !important;
+    font-size: 13px !important;
+    padding: 9px 16px !important;
+    border-radius: 10px !important;
+  }
+
+  /* Form fields */
+  .field-row {
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+
+  .ac-card {
+    padding: 14px 12px !important;
+    border-radius: 14px !important;
+    margin-bottom: 10px !important;
+  }
+
+  /* Charts grid: single column */
+  .charts-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+}
+
+
+/* ─────────────────────────────────────────────────────
+   SAFE-AREA / NOTCH SUPPORT (all pages)
+   iPhone home indicator + notch padding
+───────────────────────────────────────────────────── */
+@supports (padding: max(0px)) {
+  .topbar,
+  .ac-topbar,
+  .r-topbar {
+    padding-left:  max(12px, env(safe-area-inset-left))  !important;
+    padding-right: max(12px, env(safe-area-inset-right)) !important;
+  }
+
+  .chatbot-input-area {
+    padding-bottom: max(10px, env(safe-area-inset-bottom)) !important;
+  }
+
+  .chatbot-page,
+  .viz-page,
+  .dashboard,
+  .ac-canvas,
+  .r-canvas {
+    padding-bottom: max(20px, env(safe-area-inset-bottom)) !important;
+  }
+}
+
+
+/* ─────────────────────────────────────────────────────
+   TOUCH TARGET MINIMUMS (WCAG 2.5.5 — 44×44px)
+   All interactive elements must be comfortably tappable
+───────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .quick-btn,
+  .sb-item,
+  .nav-links span,
+  .ac-topnav-btn,
+  .r-nav span,
+  .tab,
+  .r-sb-btn,
+  .r-sb-chip {
+    min-height: 36px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .send-btn,
+  button[type="submit"],
+  .upload-box button,
+  .upload-label {
+    min-height: 44px !important;
+    min-width: 44px !important;
+  }
+}
