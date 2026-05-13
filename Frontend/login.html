@@ -34,19 +34,22 @@
   box-sizing: border-box;
 }
 
-html, body {
+html {
   width: 100%;
-  height: 100%;
-  overflow: hidden;
+  min-height: 100%;
 }
 
 body {
+  width: 100%;
+  min-height: 100%;
   font-family: var(--font);
   background: #060b18;
   color: var(--text-1);
   display: flex;
   flex-direction: column;
   position: relative;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 /* ─ BACKGROUND ANIMATION ─ */
@@ -85,9 +88,8 @@ body::after {
   position: relative;
   z-index: 1;
   display: flex;
-  height: 100%;
+  min-height: 100vh;
   width: 100%;
-  min-height: 0;
 }
 
 .left-panel {
@@ -100,7 +102,6 @@ body::after {
   backdrop-filter: blur(40px);
   border-right: 1px solid rgba(255, 255, 255, 0.08);
   position: relative;
-  overflow: hidden;
 }
 
 .left-panel::before {
@@ -122,8 +123,6 @@ body::after {
   align-items: center;
   padding: 48px;
   position: relative;
-  overflow-y: auto;
-  overflow-x: hidden;
 }
 
 .right-panel::-webkit-scrollbar {
@@ -676,82 +675,266 @@ body::after {
   }
 }
 
+/* ── TABLET & MOBILE ≤ 768px ── */
 @media (max-width: 768px) {
+  html, body {
+    height: auto;
+    min-height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
   .layout {
     flex-direction: column;
+    min-height: 100svh;
+    min-height: 100vh;
   }
-  
+
+  /* Left panel: compact header strip */
   .left-panel {
     flex: 0 0 auto;
-    padding: 32px 24px;
+    padding: 28px 22px 24px;
     border-right: none;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    min-height: auto;
+    justify-content: flex-start;
+    gap: 0;
   }
-  
+
   .heading {
-    margin-top: 20px;
+    margin-top: 16px;
   }
-  
+
   .heading h1 {
-    font-size: 28px;
+    font-size: 26px;
+    line-height: 1.25;
   }
-  
-  .features {
-    display: none;
-  }
-  
-  .right-panel {
-    flex: 1;
-    padding: 24px;
-  }
-  
-  .form-wrapper {
+
+  .heading p {
+    font-size: 13px;
+    margin-top: 8px;
     max-width: 100%;
   }
-  
+
+  /* Show features on tablet, hide on phone (below 480) */
+  .features {
+    margin-top: 20px;
+    gap: 10px;
+  }
+
+  .footer-left {
+    margin-top: 20px;
+  }
+
+  /* Right panel: fills remaining space, centered */
+  .right-panel {
+    flex: 1;
+    padding: 28px 20px 40px;
+    justify-content: flex-start;
+    align-items: stretch;
+    overflow: visible;
+  }
+
+  .form-wrapper {
+    max-width: 100%;
+    width: 100%;
+  }
+
   .form-card {
-    padding: 32px 24px;
+    padding: 28px 22px;
+  }
+
+  .form-header {
+    margin-bottom: 22px;
+  }
+
+  .form-header h2 {
+    font-size: 22px;
   }
 }
 
+/* ── PHONE ≤ 480px ── */
 @media (max-width: 480px) {
-  body {
-    font-size: 14px;
+  html, body {
+    height: auto;
+    min-height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
   }
-  
+
+  .layout {
+    flex-direction: column;
+    min-height: 100svh;
+  }
+
+  /* Very compact left panel — just logo + tagline + status */
   .left-panel {
-    padding: 24px 16px;
+    padding: 20px 16px 18px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    border-bottom: 1px solid rgba(255,140,0,0.15);
+    background: rgba(6,11,24,0.98);
   }
-  
+
+  /* Hide heading, features, footer-left inside left panel on small phones */
+  .left-panel .heading,
+  .left-panel .features,
+  .left-panel .footer-left {
+    display: none;
+  }
+
+  /* Logo stays visible */
   .logo-section {
-    margin-bottom: 8px;
+    margin-bottom: 0;
+    animation: none;
+    flex-shrink: 0;
   }
-  
+
   .logo-icon {
-    width: 40px;
-    height: 40px;
-    font-size: 20px;
+    width: 38px;
+    height: 38px;
+    font-size: 18px;
+    border-radius: 10px;
   }
-  
+
   .logo-text .name {
+    font-size: 18px;
+    letter-spacing: 1.5px;
+  }
+
+  .logo-text .tagline {
+    font-size: 9px;
+    letter-spacing: 1.5px;
+  }
+
+  /* Status badge on the right side of topbar */
+  .left-panel .footer-left {
+    display: flex !important;
+    margin-top: 0 !important;
+    font-size: 10px;
+    animation: none;
+    flex-shrink: 0;
+  }
+
+  .status-dot {
+    width: 6px;
+    height: 6px;
+  }
+
+  /* Right panel — main content area */
+  .right-panel {
+    flex: 1;
+    padding: 24px 16px 48px;
+    justify-content: flex-start;
+    align-items: stretch;
+    overflow: visible;
+  }
+
+  .form-wrapper {
+    max-width: 100%;
+    width: 100%;
+    animation: none;
+  }
+
+  .form-card {
+    padding: 24px 18px 28px;
+    border-radius: var(--r);
+  }
+
+  .form-header {
+    margin-bottom: 20px;
+  }
+
+  .form-header h2 {
     font-size: 20px;
   }
-  
-  .heading h1 {
-    font-size: 22px;
+
+  .form-header p {
+    font-size: 11.5px;
   }
-  
-  .form-card {
-    padding: 24px 16px;
+
+  .form-group {
+    margin-bottom: 16px;
+    animation: none;
   }
-  
+
+  .form-label {
+    font-size: 9.5px;
+    letter-spacing: 1.2px;
+    margin-bottom: 7px;
+  }
+
+  /* Prevent iOS auto-zoom on inputs */
+  .form-input {
+    font-size: 16px;
+    padding: 13px 14px;
+    border-radius: 9px;
+  }
+
+  .password-toggle {
+    right: 10px;
+    font-size: 13px;
+  }
+
   .form-actions {
     flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
   }
-  
+
   .btn {
-    padding: 11px 16px;
+    padding: 14px 16px;
+    font-size: 14px;
+    min-height: 50px;
+    border-radius: 10px;
+  }
+
+  .form-links {
+    margin-top: 14px;
+    font-size: 11.5px;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .divider {
+    margin: 16px 0;
+  }
+
+  .social-btn {
+    min-height: 46px;
+  }
+
+  /* Toast — bottom center on mobile */
+  .toast {
+    bottom: 16px;
+    right: 16px;
+    left: 16px;
+    right: 16px;
+    font-size: 12px;
+    padding: 13px 16px;
+    border-radius: 10px;
+  }
+}
+
+/* ── VERY SMALL ≤ 360px ── */
+@media (max-width: 360px) {
+  .right-panel {
+    padding: 20px 12px 40px;
+  }
+
+  .form-card {
+    padding: 20px 14px 24px;
+  }
+
+  .logo-text .name {
+    font-size: 16px;
+  }
+
+  .btn {
+    padding: 13px 12px;
+    font-size: 13px;
   }
 }
   </style>
