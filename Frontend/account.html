@@ -395,6 +395,125 @@ body.account-body {
 .modal h3{font-size:17px;font-weight:700;color:#f8fafc}
 .modal p{font-size:13px;color:rgba(255,255,255,0.42);line-height:1.6}
 .modal-btns{display:flex;gap:9px;justify-content:flex-end}
+
+/* ════════════════════════════════════
+   MOBILE RESPONSIVE — account.html
+   ════════════════════════════════════ */
+
+/* Hamburger button (hidden on desktop) */
+.sb-hamburger {
+  display: none;
+  position: fixed;
+  top: 12px;
+  left: 14px;
+  z-index: 1100;
+  width: 38px; height: 38px;
+  border-radius: 10px;
+  background: rgba(255,140,0,0.12);
+  border: 1px solid rgba(255,140,0,0.25);
+  align-items: center; justify-content: center;
+  cursor: pointer; flex-direction: column; gap: 5px;
+  padding: 9px;
+}
+.sb-hamburger span {
+  display: block; width: 100%; height: 2px;
+  background: #ff8c00; border-radius: 2px;
+  transition: all 0.2s;
+}
+.sb-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 900;
+  backdrop-filter: blur(2px);
+}
+.sb-overlay.open { display: block; }
+
+@media (max-width: 900px) {
+  /* Topbar compact */
+  .ac-topbar { padding: 0 14px 0 60px; height: 52px; }
+  .ac-logo { font-size: 13px; letter-spacing: 2px; }
+  .ac-topnav-btn { font-size: 11px; padding: 5px 10px; }
+
+  /* Show hamburger */
+  .sb-hamburger { display: flex; }
+
+  /* Sidebar becomes off-canvas drawer */
+  .ac-sidebar {
+    position: fixed;
+    top: 0; left: 0;
+    width: 240px !important;
+    height: 100vh;
+    z-index: 1000;
+    transform: translateX(-100%);
+    transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+    box-shadow: 4px 0 32px rgba(0,0,0,0.6);
+  }
+  .ac-sidebar.open { transform: translateX(0); }
+
+  /* Layout: single column */
+  .ac-layout { flex-direction: column; }
+
+  .ac-canvas {
+    height: calc(100vh - 52px);
+    margin-top: 52px;
+    padding: 18px 14px 32px;
+    width: 100%;
+  }
+
+  /* Profile hero vertical on small screens */
+  .profile-hero { flex-direction: row; gap: 14px; padding: 14px 16px; }
+  .profile-avatar { width: 56px; height: 56px; font-size: 20px; }
+  .profile-name { font-size: 16px; }
+
+  /* Stats strip 3-col still fine on tablet */
+  .stats-strip { grid-template-columns: repeat(3,1fr); gap: 8px; }
+
+  /* Session grid */
+  .session-grid { grid-template-columns: 1fr 1fr; }
+
+  /* Field rows to single col */
+  .field-row { grid-template-columns: 1fr; }
+
+  /* Table: allow horizontal scroll */
+  .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+  .btn-row { flex-wrap: wrap; }
+  .btn { width: 100%; justify-content: center; }
+
+  .pg-head { flex-wrap: wrap; gap: 10px; }
+  .pg-head-title { font-size: 17px; }
+  .session-pill { font-size: 10px; padding: 4px 10px; }
+}
+
+@media (max-width: 480px) {
+  .ac-topbar { padding: 0 10px 0 56px; height: 50px; }
+  .ac-logo { font-size: 12px; letter-spacing: 1.5px; }
+  .ac-topnav-btn { font-size: 10px; padding: 4px 8px; }
+  .ac-topnav-btn:nth-child(2) { display: none; } /* hide AI Analyst on very small */
+
+  .ac-canvas { padding: 14px 10px 28px; }
+
+  .profile-hero { flex-direction: column; align-items: center; text-align: center; padding: 16px; }
+  .profile-badges { justify-content: center; }
+
+  .stats-strip { grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+  .stat-val { font-size: 18px; }
+  .stat-lbl { font-size: 8px; }
+
+  .session-grid { grid-template-columns: 1fr; }
+  .session-info { flex-direction: column; align-items: flex-start; gap: 8px; }
+
+  .pg-head-icon { width: 36px; height: 36px; font-size: 15px; border-radius: 10px; }
+  .pg-head-title { font-size: 15px; }
+  .pg-head-sub { font-size: 11px; }
+
+  .card-head h2 { font-size: 13px; }
+
+  .ac-card { padding: 15px; gap: 14px; }
+
+  .btn { font-size: 12px; padding: 9px 16px; }
+}
 </style>
 </head>
 <body class="account-body">
@@ -418,6 +537,14 @@ body.account-body {
 
 <!-- AVATAR INPUT -->
 <input type="file" id="avatarFileInput" accept="image/*" style="display:none" onchange="handleAvatarUpload(this)">
+
+<!-- SIDEBAR OVERLAY (mobile) -->
+<div class="sb-overlay" id="sbOverlay" onclick="closeSidebar()"></div>
+
+<!-- HAMBURGER (mobile) -->
+<button class="sb-hamburger" id="sbHamburger" onclick="toggleSidebar()" aria-label="Menu">
+  <span></span><span></span><span></span>
+</button>
 
 <!-- TOPBAR -->
 <div class="ac-topbar">
@@ -1260,6 +1387,30 @@ function loadSupportFaq(){
       document.getElementById('suppFaqList').innerHTML=html
     }).catch(function(){ document.getElementById('suppFaqList').innerHTML='' })
 }
+
+/* ── Mobile sidebar toggle ── */
+function toggleSidebar(){
+  var sb=document.querySelector('.ac-sidebar');
+  var ov=document.getElementById('sbOverlay');
+  if(!sb) return;
+  var open=sb.classList.toggle('open');
+  if(ov) ov.classList.toggle('open',open);
+  document.body.style.overflow=open?'hidden':'';
+}
+function closeSidebar(){
+  var sb=document.querySelector('.ac-sidebar');
+  var ov=document.getElementById('sbOverlay');
+  if(sb) sb.classList.remove('open');
+  if(ov) ov.classList.remove('open');
+  document.body.style.overflow='';
+}
+(function(){
+  document.querySelectorAll('.sb-item').forEach(function(el){
+    el.addEventListener('click',function(){
+      if(window.innerWidth<=900) setTimeout(closeSidebar,150);
+    });
+  });
+})();
 </script>
 </body>
 </html>
