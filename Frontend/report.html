@@ -113,94 +113,6 @@ body.report-body::before,body.report-body::after{display:none!important}
 #rNoData p{color:#aaa;font-size:14px}
 #rNoData a{background:#ff8c00;color:white;padding:11px 28px;border-radius:6px;text-decoration:none;font-weight:600;font-size:14px;transition:all .2s}
 #rNoData a:hover{background:#ffa733;transform:translateY(-2px)}
-
-/* ════════════════════════════════════
-   MOBILE RESPONSIVE — report.html
-   ════════════════════════════════════ */
-
-/* Mobile menu button */
-.r-menu-btn {
-  display: none;
-  background: rgba(255,140,0,0.12);
-  border: 1px solid rgba(255,140,0,0.28);
-  color: #ff8c00;
-  border-radius: 8px;
-  width: 36px; height: 36px;
-  align-items: center; justify-content: center;
-  cursor: pointer; font-size: 16px; flex-shrink: 0;
-}
-.r-sidebar-overlay {
-  display: none;
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,0.65);
-  z-index: 800;
-  backdrop-filter: blur(2px);
-}
-.r-sidebar-overlay.open { display: block; }
-
-@media (max-width: 900px) {
-  /* Topbar */
-  .r-topbar { padding: 0 14px; height: 52px; gap: 10px; }
-  .r-logo { font-size: 16px; letter-spacing: 1.5px; }
-  .r-nav { gap: 8px; }
-  .r-nav span { font-size: 12px; padding: 4px 8px; }
-  .r-menu-btn { display: flex; }
-
-  /* Sidebar: off-canvas */
-  .r-body { flex-direction: column; }
-  .r-sidebar {
-    position: fixed;
-    top: 0; left: 0;
-    width: 220px !important;
-    height: 100vh;
-    z-index: 900;
-    transform: translateX(-100%);
-    transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
-    box-shadow: 4px 0 32px rgba(0,0,0,0.7);
-  }
-  .r-sidebar.open { transform: translateX(0); }
-
-  .r-canvas {
-    padding: 10px 12px;
-    overflow-y: auto;
-    max-height: calc(100vh - 52px);
-    margin-top: 52px;
-  }
-
-  /* Grid collapses */
-  .r-g-main  { grid-template-columns: 1fr !important; }
-  .r-g-mid   { grid-template-columns: 1fr 1fr !important; }
-  .r-g-bot   { grid-template-columns: 1fr 1fr !important; }
-  .r-g-extra { grid-template-columns: 1fr !important; }
-  .r-g-stats { grid-template-columns: repeat(2,1fr) !important; }
-  .r-kpi-row { grid-template-columns: repeat(2, 1fr) !important; }
-
-  .r-cc canvas { height: 190px !important; }
-  .r-cvw canvas { height: 190px !important; }
-}
-
-@media (max-width: 480px) {
-  .r-topbar { padding: 0 10px; height: 50px; }
-  .r-logo { font-size: 14px; letter-spacing: 1px; }
-  .r-nav span { font-size: 11px; padding: 3px 6px; }
-
-  .r-canvas { padding: 8px 9px; }
-
-  .r-g-mid   { grid-template-columns: 1fr !important; }
-  .r-g-bot   { grid-template-columns: 1fr !important; }
-  .r-g-stats { grid-template-columns: 1fr 1fr !important; }
-  .r-kpi-row { grid-template-columns: 1fr 1fr !important; }
-
-  .r-kpi-val { font-size: 18px !important; }
-  .r-kpi { padding: 8px 10px !important; }
-
-  .r-stat-card-val { font-size: 22px; }
-  .r-cc canvas { height: 160px !important; }
-
-  .r-sb-btn { font-size: 10px; padding: 7px 10px; }
-  .r-sb-stats { grid-template-columns: 1fr 1fr; }
-}
-
 @media print{
   @page{size:A3 landscape;margin:4mm}
   *{box-sizing:border-box!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
@@ -240,9 +152,7 @@ body.report-body::before,body.report-body::after{display:none!important}
   <a href="dashboard.html">← Back to Dashboard</a>
 </div>
 <div id="rApp" style="display:none">
-  <div class="r-sidebar-overlay" id="rSbOverlay" onclick="closeRSidebar()"></div>
-<div class="r-topbar">
-  <button class="r-menu-btn" onclick="toggleRSidebar()" aria-label="Menu">☰</button>
+  <div class="r-topbar">
     <div class="r-logo" onclick="window.location.href='dashboard.html'">INSIGHTFLOW</div>
     <div class="r-nav">
       <span onclick="window.location.href='dashboard.html'">← Dashboard</span>
@@ -428,30 +338,7 @@ async function exportPDF(){
       '<div class="r-g-bot">'+replaceCanvases(gBotHTML)+'</div>'+
       '<div class="r-g-extra">'+replaceCanvases(gExtraHTML)+'</div>'+
       '<div class="r-g-stats">'+replaceCanvases(gStatsHTML)+'</div>'+
-      '
-<script>
-function toggleRSidebar(){
-  var sb=document.querySelector('.r-sidebar');
-  var ov=document.getElementById('rSbOverlay');
-  if(!sb) return;
-  var open=sb.classList.toggle('open');
-  if(ov) ov.classList.toggle('open',open);
-  document.body.style.overflow=open?'hidden':'';
-}
-function closeRSidebar(){
-  var sb=document.querySelector('.r-sidebar');
-  var ov=document.getElementById('rSbOverlay');
-  if(sb) sb.classList.remove('open');
-  if(ov) ov.classList.remove('open');
-  document.body.style.overflow='';
-}
-document.querySelectorAll('.r-sb-chip').forEach(function(el){
-  el.addEventListener('click',function(){
-    if(window.innerWidth<=900) setTimeout(closeRSidebar,200);
-  });
-});
-</script>
-</body></html>'
+      '</body></html>'
 
     doc.open()
     doc.write(cleanHTML)
@@ -518,29 +405,6 @@ function logout() {
   }
 }
 function goAccount() { window.location.href = 'account.html' }
-</script>
-
-<script>
-function toggleRSidebar(){
-  var sb=document.querySelector('.r-sidebar');
-  var ov=document.getElementById('rSbOverlay');
-  if(!sb) return;
-  var open=sb.classList.toggle('open');
-  if(ov) ov.classList.toggle('open',open);
-  document.body.style.overflow=open?'hidden':'';
-}
-function closeRSidebar(){
-  var sb=document.querySelector('.r-sidebar');
-  var ov=document.getElementById('rSbOverlay');
-  if(sb) sb.classList.remove('open');
-  if(ov) ov.classList.remove('open');
-  document.body.style.overflow='';
-}
-document.querySelectorAll('.r-sb-chip').forEach(function(el){
-  el.addEventListener('click',function(){
-    if(window.innerWidth<=900) setTimeout(closeRSidebar,200);
-  });
-});
 </script>
 </body>
 </html>
