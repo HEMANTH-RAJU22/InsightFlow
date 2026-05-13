@@ -1687,3 +1687,282 @@ body.report-body {
   .kpi-card p, .rpt-kpi-value { color: #333 !important; }
   .chart-area { height: auto !important; border: 1px solid #ddd !important; }
 }
+
+/* ════════════════════════════════════════════════════════════
+   ENHANCEMENTS v4 — broader device coverage
+   (fonts unchanged — Outfit / JetBrains Mono preserved)
+   Added:
+     • iOS input zoom prevention (16px form fields)
+     • Dynamic viewport height (100dvh) fallbacks
+     • Overscroll & momentum scroll hardening
+     • Extra breakpoints: ≤360px, ≤640px, large phones
+     • Landscape phone layout (short heights)
+     • Foldables / narrow tall (≤320px)
+     • High-DPI / Retina tweaks
+     • Tables → card layout fallback on phones
+     • Forms, modals, drawers hardening
+     • Focus-visible accessibility ring
+     • Dark/light scheme + scrollbar polish
+     • Sticky topbar safe-area + backdrop
+     • Hover-only effects gated behind (hover: hover)
+═══════════════════════════════════════════════════════════════ */
+
+/* ── A. GLOBAL HARDENING ────────────────────────────────────── */
+html, body {
+  overflow-x: hidden;
+  overscroll-behavior-y: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* Prevent iOS auto-zoom on input focus (must be ≥16px) — keep family */
+input, select, textarea {
+  font-size: 16px;
+  font-family: inherit;
+  max-width: 100%;
+}
+
+/* Long-word wrap to stop horizontal overflow */
+h1, h2, h3, h4, p, a, span, li {
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+/* Scroll containers get momentum + thinner bars */
+.scroll, .table-wrap, .chatbot-messages, .viz-controls,
+.mob-nav-drawer, .modal, .dialog {
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent-border, rgba(255,140,0,0.25)) transparent;
+}
+.scroll::-webkit-scrollbar,
+.table-wrap::-webkit-scrollbar,
+.chatbot-messages::-webkit-scrollbar,
+.viz-controls::-webkit-scrollbar { width: 6px; height: 6px; }
+.scroll::-webkit-scrollbar-thumb,
+.table-wrap::-webkit-scrollbar-thumb,
+.chatbot-messages::-webkit-scrollbar-thumb,
+.viz-controls::-webkit-scrollbar-thumb {
+  background: var(--accent-border, rgba(255,140,0,0.25));
+  border-radius: 8px;
+}
+
+/* Accessibility — visible focus for keyboard users */
+:focus-visible {
+  outline: 2px solid var(--accent, #ff8c00);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+:focus:not(:focus-visible) { outline: none; }
+
+/* Hover lifts only on real hover devices */
+@media (hover: hover) and (pointer: fine) {
+  .kpi-card:hover,
+  .card:hover,
+  .ai-cta-btn:hover { will-change: transform; }
+}
+
+/* Tables: ensure they live in a horizontal scroll wrapper */
+.table-wrap, .rpt-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: var(--radius-sm, 8px);
+}
+
+/* ── B. LARGE PHONES / PHABLETS  481–640px ──────────────────── */
+@media (min-width: 480px) and (max-width: 640px) {
+  .kpi-card { flex: 1 1 calc(50% - 6px); }
+  .download-btns { grid-template-columns: 1fr 1fr; }
+  .hero-title { font-size: clamp(46px, 12vw, 64px) !important; }
+}
+
+/* ── C. SMALL PHONES  ≤ 360px (iPhone SE 1st gen, Galaxy Fold cover) ── */
+@media (max-width: 360px) {
+  .topbar { padding: 0 8px; }
+  .logo { font-size: 13px; letter-spacing: 1px; }
+  .nav-links span { font-size: 10px; padding: 4px 6px; }
+
+  .dashboard { padding: 68px 8px 40px; }
+  .dashboard h1 { font-size: 16px; }
+
+  .kpi-container { gap: 8px; }
+  .kpi-card { flex: 1 1 100%; padding: 12px 10px; }
+  .kpi-card p { font-size: 18px; }
+
+  .hero { padding: 80px 14px 40px !important; }
+  .hero-title { font-size: 36px !important; letter-spacing: -1.5px !important; }
+  .hero-sub { font-size: 13px !important; }
+  .btn-go, .btn-more { font-size: 13px !important; padding: 14px 18px !important; }
+
+  .stats-strip { grid-template-columns: 1fr !important; }
+  .stat:nth-child(odd) { border-right: none !important; }
+  .stat { border-bottom: 1px solid rgba(255,140,0,0.08) !important; }
+  .stat:last-child { border-bottom: none !important; }
+
+  .nums-grid { grid-template-columns: 1fr !important; }
+  .num:nth-child(odd) { border-right: none !important; }
+
+  .cta-box { padding: 32px 14px !important; }
+  .cta-h { font-size: 24px !important; }
+
+  .chatbot-page { padding: 60px 6px 0; }
+  .message-bubble { max-width: 94%; font-size: 12px; padding: 7px 10px; }
+
+  .viz-page { padding: 60px 6px 32px; }
+  .chart-area { height: 240px; }
+  #myChart { height: 208px !important; }
+
+  .download-btns { grid-template-columns: 1fr; }
+}
+
+/* ── D. PHONE LANDSCAPE (short viewport) ────────────────────── */
+@media (max-width: 900px) and (orientation: landscape) and (max-height: 500px) {
+  .hero {
+    min-height: auto !important;
+    padding: 80px 24px 40px !important;
+  }
+  .hero-title { font-size: clamp(32px, 7vw, 48px) !important; margin-bottom: 12px !important; }
+  .hero-sub { margin-bottom: 20px !important; font-size: 13px !important; }
+  .hero-btns { flex-direction: row !important; gap: 10px !important; margin-bottom: 24px !important; }
+  .btn-go, .btn-more { width: auto !important; padding: 12px 22px !important; }
+
+  .topbar, nav { height: 52px !important; }
+  :root { --topbar-h: 52px; }
+
+  .dashboard, .viz-page, .chatbot-page { padding-top: 64px; }
+
+  .chatbot-page { height: 100vh; height: 100dvh; }
+  .chart-area { height: 220px; }
+  #myChart { height: 188px !important; }
+
+  .mob-nav-drawer { max-height: calc(100vh - 52px); overflow-y: auto; }
+}
+
+/* ── E. TABLET LANDSCAPE refinement (1024–1280) ─────────────── */
+@media (min-width: 1024px) and (max-width: 1280px) {
+  .dashboard, .viz-page, .chatbot-page { width: 92%; }
+  .chart-builder { grid-template-columns: 260px 1fr; }
+}
+
+/* ── F. ULTRA-WIDE clamp (≥1600px) ──────────────────────────── */
+@media (min-width: 1600px) {
+  .dashboard, .viz-page, .chatbot-page, .rpt-page { max-width: 1480px; margin-inline: auto; }
+}
+
+/* ── G. FORMS ───────────────────────────────────────────────── */
+@media (max-width: 767px) {
+  .form-row, .login-form, .signup-form, form .row {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="url"],
+  select,
+  textarea {
+    width: 100%;
+    min-height: 44px;
+    padding: 12px 14px;
+    border-radius: var(--radius-sm, 8px);
+  }
+  textarea { min-height: 96px; }
+  button[type="submit"], .btn-submit { width: 100%; min-height: 48px; }
+}
+
+/* ── H. MODALS / DIALOGS / DRAWERS on phones ───────────────── */
+@media (max-width: 767px) {
+  .modal, .dialog, [role="dialog"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 92vh;
+    max-height: 92dvh;
+    border-radius: 18px 18px 0 0 !important;
+    margin: 0 !important;
+    inset: auto 0 0 0 !important;
+    overflow-y: auto;
+    padding-bottom: max(20px, env(safe-area-inset-bottom));
+  }
+  .modal-overlay, .dialog-overlay { padding: 0 !important; align-items: flex-end !important; }
+}
+
+/* ── I. TABLES → mobile card fallback (opt-in via .table-cards) ── */
+@media (max-width: 600px) {
+  table.table-cards thead { display: none; }
+  table.table-cards, table.table-cards tbody,
+  table.table-cards tr, table.table-cards td { display: block; width: 100%; }
+  table.table-cards tr {
+    margin-bottom: 10px;
+    border: 1px solid var(--border, rgba(255,255,255,0.09));
+    border-radius: 12px;
+    padding: 10px 12px;
+    background: var(--bg-card, rgba(255,255,255,0.05));
+  }
+  table.table-cards td {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 6px 0;
+    border: none;
+    font-size: 13px;
+  }
+  table.table-cards td::before {
+    content: attr(data-label);
+    color: var(--text-3, rgba(160,180,220,0.45));
+    font-weight: 500;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+}
+
+/* ── J. STICKY TOPBAR + backdrop blur on mobile ─────────────── */
+@media (max-width: 767px) {
+  .topbar, nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    backdrop-filter: saturate(140%) blur(12px);
+    -webkit-backdrop-filter: saturate(140%) blur(12px);
+    background: rgba(7, 13, 26, 0.78);
+  }
+}
+
+/* ── K. IMAGES & MEDIA ──────────────────────────────────────── */
+img { display: block; }
+@media (max-width: 767px) {
+  iframe, video { width: 100% !important; height: auto; }
+}
+
+/* ── L. HIGH-DPI tweaks ─────────────────────────────────────── */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .logo, .stat-v, .num-v, .hero-title { -webkit-font-smoothing: antialiased; }
+}
+
+/* ── M. PRINT additions ─────────────────────────────────────── */
+@media print {
+  nav, .mob-menu-btn, .mob-nav-drawer, .hero-btns, .cta-box { display: none !important; }
+  a[href]::after { content: " (" attr(href) ")"; font-size: 10px; color: #555; }
+  .card, .kpi-card { break-inside: avoid; page-break-inside: avoid; }
+}
+
+/* ── N. FORCED-COLORS / Windows High Contrast ───────────────── */
+@media (forced-colors: active) {
+  .kpi-card, .card, .stat, .num, .step {
+    border: 1px solid CanvasText;
+    background: Canvas;
+  }
+  .btn-go, .ai-cta-btn, button[type="submit"] {
+    border: 1px solid CanvasText;
+  }
+}
