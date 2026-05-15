@@ -18,6 +18,10 @@
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden}
+/* ═══ MOBILE RESPONSIVE OVERRIDES ═══ */
+@media (max-width: 768px) {
+  html,body { height:auto !important; overflow:auto !important; overflow-x:hidden !important; }
+}
 
 /* ═══ BASE ═══ */
 body{
@@ -740,6 +744,271 @@ body::after{
 .security-warning{padding:12px 14px;border-radius:10px;background:rgba(255,77,109,0.07);border:1px solid rgba(255,77,109,0.2);margin-bottom:12px}
 .security-warning-title{font-size:10px;font-weight:700;color:var(--red);margin-bottom:5px;display:flex;align-items:center;gap:5px}
 .security-warning-body{font-size:11px;color:rgba(255,77,109,0.7);line-height:1.6}
+
+/* ════════════════════════════════════
+   MOBILE RESPONSIVE — admin.html
+════════════════════════════════════ */
+
+/* Hamburger button */
+.mob-menu-btn {
+  display: none;
+  width: 40px; height: 40px;
+  align-items: center; justify-content: center;
+  background: var(--glass-bg); border: 1px solid var(--glass-border);
+  border-radius: 10px; cursor: pointer; flex-shrink: 0;
+  transition: all 0.2s;
+}
+.mob-menu-btn:hover { background: var(--glass-hover); }
+.mob-menu-btn span {
+  display: block; width: 18px; height: 2px;
+  background: var(--text-2); border-radius: 2px;
+  position: relative; transition: all 0.3s;
+}
+.mob-menu-btn span::before,
+.mob-menu-btn span::after {
+  content: ''; position: absolute; left: 0;
+  width: 18px; height: 2px;
+  background: var(--text-2); border-radius: 2px; transition: all 0.3s;
+}
+.mob-menu-btn span::before { top: -5px; }
+.mob-menu-btn span::after  { top: 5px; }
+.mob-menu-btn.open span    { background: transparent; }
+.mob-menu-btn.open span::before { transform: rotate(45deg); top: 0; }
+.mob-menu-btn.open span::after  { transform: rotate(-45deg); top: 0; }
+
+/* Sidebar drawer overlay */
+.sidebar-overlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 199;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  opacity: 0; transition: opacity 0.3s;
+}
+.sidebar-overlay.open { opacity: 1; }
+
+/* Bottom mobile nav */
+.mob-bottom-nav {
+  display: none;
+  position: fixed; bottom: 0; left: 0; right: 0;
+  height: 64px; z-index: 200;
+  background: rgba(7,9,26,0.96);
+  backdrop-filter: blur(28px) saturate(1.4);
+  border-top: 1px solid var(--glass-border);
+  padding: 0 4px;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.mob-bottom-nav-inner {
+  display: flex; align-items: stretch;
+  height: 100%; gap: 2px;
+}
+.mob-nav-item {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 3px; cursor: pointer; border-radius: 10px;
+  padding: 6px 2px; transition: all 0.2s;
+  position: relative; border: 1px solid transparent;
+  font-size: 9px; font-weight: 600; letter-spacing: 0.3px;
+  color: var(--text-3); -webkit-tap-highlight-color: transparent;
+  min-width: 44px;
+}
+.mob-nav-item .mob-nav-icon { font-size: 18px; line-height: 1; }
+.mob-nav-item.active { color: var(--accent); background: rgba(255,140,0,0.08); border-color: rgba(255,140,0,0.15); }
+.mob-nav-item:active { background: var(--glass-hover); }
+.mob-nav-badge {
+  position: absolute; top: 4px; right: 6px;
+  font-size: 8px; font-weight: 700; padding: 1px 5px;
+  border-radius: 10px; background: var(--red); color: white;
+  min-width: 14px; text-align: center; line-height: 1.4;
+  display: none;
+}
+.mob-nav-badge.show { display: block; }
+
+@media (max-width: 768px) {
+  /* Show mobile elements */
+  .mob-menu-btn   { display: flex !important; }
+  .mob-bottom-nav { display: block !important; }
+
+  /* Topbar compact */
+  .topbar {
+    padding: 0 12px !important;
+    height: 56px !important; gap: 8px !important;
+  }
+  .logo { font-size: 13px !important; letter-spacing: 2px !important; }
+  .admin-pill { font-size: 7px !important; padding: 3px 8px !important; letter-spacing: 1.5px !important; }
+  .top-time   { display: none !important; }
+  .refresh-badge { font-size: 9px !important; padding: 4px 9px !important; }
+  .tbtn[href="dashboard.html"] { display: none !important; }
+  .tbtn.danger { display: none !important; }
+  .top-right { gap: 5px !important; }
+
+  /* Sidebar becomes drawer */
+  .sidebar {
+    position: fixed !important;
+    top: 0 !important; left: 0 !important; bottom: 0 !important;
+    width: 270px !important; z-index: 200 !important;
+    transform: translateX(-100%) !important;
+    transition: transform 0.32s cubic-bezier(0.4,0,0.2,1) !important;
+    box-shadow: 4px 0 40px rgba(0,0,0,0.6) !important;
+  }
+  .sidebar.open {
+    transform: translateX(0) !important;
+  }
+  .sidebar-overlay { display: block !important; }
+
+  /* Layout: no flex row */
+  .layout {
+    display: block !important;
+    overflow: visible !important;
+    min-height: 0 !important;
+  }
+
+  /* Canvas: full width, no overflow:auto */
+  .canvas {
+    padding: 72px 14px 88px !important;
+    overflow: visible !important;
+    height: auto !important;
+    min-height: 100vh !important;
+  }
+
+  /* KPI grid: 2 columns */
+  .kpi-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+  }
+  .kpi-card { padding: 14px 12px !important; }
+  .kpi-value { font-size: 22px !important; }
+  .kpi-label { font-size: 10px !important; }
+  .kpi-sub   { font-size: 10px !important; }
+  .sparkline { height: 22px !important; }
+
+  /* Two column → single column */
+  .two-col, .col-7-3 {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+
+  /* Stat row: 3 equal cols but compact */
+  .stat-row { grid-template-columns: repeat(3,1fr) !important; gap: 8px !important; }
+  .stat-mini { padding: 12px 8px !important; }
+  .stat-mini-val { font-size: 16px !important; }
+  .stat-mini-lbl { font-size: 8px !important; letter-spacing: 0.5px !important; }
+
+  /* Page head stack vertically */
+  .pg-head {
+    flex-direction: column !important; gap: 12px !important;
+    align-items: flex-start !important;
+  }
+  .pg-actions { width: 100%; display: flex; flex-wrap: wrap; gap: 7px; }
+  .pg-title { font-size: 18px !important; }
+  .pg-sub   { font-size: 11px !important; }
+  .pg-icon  { width: 40px !important; height: 40px !important; font-size: 18px !important; }
+
+  /* Inner tabs: scroll horizontally */
+  .inner-tabs {
+    overflow-x: auto !important; -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important; padding-bottom: 2px !important;
+    flex-wrap: nowrap !important; display: flex !important;
+  }
+  .inner-tab { white-space: nowrap !important; flex-shrink: 0 !important; }
+
+  /* Tables: horizontal scroll wrapper */
+  .tbl-wrap {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    border-radius: var(--r-sm) !important;
+  }
+  .gtable { min-width: 560px !important; }
+  .gtable th, .gtable td { padding: 9px 10px !important; font-size: 11.5px !important; }
+
+  /* Search bar: wrap */
+  .sbar { flex-wrap: wrap !important; gap: 8px !important; }
+  .sw { width: 100% !important; }
+  .sinput { font-size: 13px !important; }
+  .fsel { flex: 1 1 calc(50% - 4px) !important; font-size: 12px !important; }
+
+  /* Glass card padding */
+  .glass { padding: 16px 14px !important; border-radius: var(--r) !important; }
+  .glass-head { margin-bottom: 14px !important; padding-bottom: 12px !important; }
+  .glass-head h2 { font-size: 12px !important; }
+
+  /* CFG grid: single col */
+  .cfg-grid  { grid-template-columns: 1fr !important; gap: 12px !important; }
+  .mgrid     { grid-template-columns: 1fr !important; gap: 10px !important; }
+
+  /* Pag: compact */
+  .pag { flex-direction: column !important; gap: 8px !important; align-items: center !important; }
+  .pag-btn { width: 36px !important; height: 36px !important; }
+
+  /* Danger items: stack */
+  .danger-item {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+  }
+  .danger-item .btn { width: 100% !important; }
+
+  /* User info grid */
+  .user-info-grid { grid-template-columns: 1fr 1fr !important; }
+
+  /* Ticket detail buttons wrap */
+  #adminTicketDetail [style*="display:flex"] { flex-wrap: wrap !important; }
+
+  /* Toggle row */
+  .toggle-row { flex-wrap: wrap !important; gap: 8px !important; }
+
+  /* Modal: full width */
+  .modal { max-width: 100% !important; width: calc(100% - 24px) !important; padding: 22px 18px !important; border-radius: 18px !important; }
+
+  /* Section animation faster on mobile */
+  .sec.active { animation-duration: 0.25s !important; }
+
+  /* Donut chart compact */
+  .donut-box { width: 120px !important; height: 120px !important; }
+
+  /* Chart box height */
+  .chart-box { height: 200px !important; }
+
+  /* Quick reply pills wrap */
+  .qr-pills { gap: 6px !important; }
+  .qr-pill  { font-size: 10.5px !important; padding: 5px 11px !important; }
+
+  /* Announcement two-col */
+  .two-col .glass:last-child { display: none; }
+
+  /* Access denied full screen */
+  .access-denied { padding: 60px 20px !important; }
+  .access-denied .big-ico { font-size: 48px !important; }
+
+  /* Toast: full width bottom */
+  .toast {
+    bottom: 76px !important; right: 12px !important;
+    left: 12px !important; min-width: unset !important;
+    font-size: 12px !important;
+  }
+
+  /* Sec heading */
+  .sec { gap: 14px !important; }
+
+  /* Btn sizes on mobile */
+  .btn { font-size: 12px !important; padding: 9px 14px !important; min-height: 40px !important; }
+  .btn-sm { font-size: 11px !important; padding: 8px 12px !important; min-height: 36px !important; }
+}
+
+@media (max-width: 480px) {
+  .canvas { padding: 68px 10px 86px !important; }
+  .kpi-grid { gap: 8px !important; }
+  .kpi-card { padding: 12px 10px !important; }
+  .kpi-value { font-size: 18px !important; }
+  .stat-mini-val { font-size: 14px !important; }
+  .stat-row { grid-template-columns: repeat(3,1fr) !important; gap: 6px !important; }
+  .glass { padding: 12px 11px !important; }
+  .gtable { min-width: 480px !important; }
+  .kpi-grid[style*="repeat(4"] { grid-template-columns: 1fr 1fr !important; }
+  .pg-title { font-size: 16px !important; }
+  .mob-nav-item { font-size: 8px !important; }
+  .mob-nav-item .mob-nav-icon { font-size: 16px !important; }
+}
+
 </style>
 </head>
 <body>
@@ -798,8 +1067,12 @@ body::after{
 </div>
 
 <!-- TOPBAR -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 <div class="topbar">
   <div class="top-left">
+    <button class="mob-menu-btn" id="mobMenuBtn" onclick="toggleSidebar()" aria-label="Menu">
+      <span></span>
+    </button>
     <div class="logo">INSIGHTFLOW</div>
     <span class="admin-pill">ADMIN</span>
   </div>
@@ -1724,6 +1997,99 @@ function adminLogout(){
     window.location.replace('login.html')
   }catch(e){ window.location.replace('login.html') }
 }
+</script>
+
+<!-- MOBILE BOTTOM NAV -->
+<nav class="mob-bottom-nav">
+  <div class="mob-bottom-nav-inner">
+    <div class="mob-nav-item active" id="mbn-overview" onclick="mobileNav('overview')">
+      <span class="mob-nav-icon">📊</span>
+      <span>Dash</span>
+    </div>
+    <div class="mob-nav-item" id="mbn-analytics" onclick="mobileNav('analytics')">
+      <span class="mob-nav-icon">📈</span>
+      <span>Analytics</span>
+    </div>
+    <div class="mob-nav-item" id="mbn-management" onclick="mobileNav('management')">
+      <span class="mob-nav-icon">👥</span>
+      <span>Users</span>
+      <span class="mob-nav-badge" id="mbnUserBadge"></span>
+    </div>
+    <div class="mob-nav-item" id="mbn-tickets" onclick="mobileNav('tickets')">
+      <span class="mob-nav-icon">🎫</span>
+      <span>Tickets</span>
+      <span class="mob-nav-badge" id="mbnTicketBadge"></span>
+    </div>
+    <div class="mob-nav-item" id="mbn-settings" onclick="mobileNav('settings')">
+      <span class="mob-nav-icon">⚙️</span>
+      <span>Settings</span>
+    </div>
+  </div>
+</nav>
+
+<script>
+/* ── Mobile sidebar & nav helpers ── */
+function toggleSidebar(){
+  var sb  = document.querySelector('.sidebar')
+  var ov  = document.getElementById('sidebarOverlay')
+  var btn = document.getElementById('mobMenuBtn')
+  var open = sb.classList.toggle('open')
+  ov.classList.toggle('open', open)
+  btn.classList.toggle('open', open)
+  document.body.style.overflow = open ? 'hidden' : ''
+}
+function closeSidebar(){
+  var sb  = document.querySelector('.sidebar')
+  var ov  = document.getElementById('sidebarOverlay')
+  var btn = document.getElementById('mobMenuBtn')
+  sb.classList.remove('open')
+  ov.classList.remove('open')
+  btn.classList.remove('open')
+  document.body.style.overflow = ''
+}
+function mobileNav(name){
+  // Update bottom nav active state
+  document.querySelectorAll('.mob-nav-item').forEach(function(el){ el.classList.remove('active') })
+  var el = document.getElementById('mbn-'+name)
+  if(el) el.classList.add('active')
+  // Call existing showTab
+  showTab(name)
+  // Close sidebar if open
+  closeSidebar()
+  // Scroll to top
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+// Sync bottom nav when sidebar nav is used
+document.querySelectorAll('.nav-item[id^="tab-"]').forEach(function(item){
+  item.addEventListener('click', function(){
+    var name = item.id.replace('tab-','')
+    document.querySelectorAll('.mob-nav-item').forEach(function(el){ el.classList.remove('active') })
+    var mbn = document.getElementById('mbn-'+name)
+    if(mbn) mbn.classList.add('active')
+    closeSidebar()
+  })
+})
+// Sync user badge to bottom nav
+var _origLoadUsers = typeof loadUsers === 'function' ? loadUsers : null
+// Override showTab to also update bottom nav
+var _origShowTab = showTab
+showTab = function(name){
+  _origShowTab(name)
+  document.querySelectorAll('.mob-nav-item').forEach(function(el){ el.classList.remove('active') })
+  var mbn = document.getElementById('mbn-'+name)
+  if(mbn) mbn.classList.add('active')
+}
+// Show open ticket count on badge
+setInterval(function(){
+  var open = document.getElementById('tktOpen')
+  var badge = document.getElementById('mbnTicketBadge')
+  if(open && badge){
+    var v = open.textContent
+    if(v && v !== '—' && parseInt(v) > 0){
+      badge.textContent = v; badge.classList.add('show')
+    }
+  }
+}, 3000)
 </script>
 </body>
 </html>
