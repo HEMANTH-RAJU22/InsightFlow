@@ -1354,7 +1354,7 @@ body::after{
           <div class="glass-head"><div class="glass-head-ico">🔧</div><h2>Platform Config</h2></div>
           <div class="cfg-grid">
             <div class="cfg-group"><label class="cfg-label">Platform Name</label><input class="cfg-input" id="cfg-name" value="InsightFlow"></div>
-            <div class="cfg-group"><label class="cfg-label">API Base URL</label><input class="cfg-input" id="cfg-api" value="https://insightflow-backend-z3w0.onrender.com"></div>
+            <div class="cfg-group"><label class="cfg-label">API Base URL</label><input class="cfg-input" id="cfg-api" value="http://127.0.0.1:5000"></div>
             <div class="cfg-group"><label class="cfg-label">JWT Expiry (hours)</label><input class="cfg-input" id="cfg-jwt" type="number" value="8"></div>
             <div class="cfg-group"><label class="cfg-label">Max File Size (MB)</label><input class="cfg-input" id="cfg-size" type="number" value="15"></div>
             <div class="cfg-group"><label class="cfg-label">Rate Limit (req/hr)</label><input class="cfg-input" id="cfg-rate" type="number" value="200"></div>
@@ -1383,7 +1383,7 @@ body::after{
 
 <script>
 /* ═══ CONFIG ═══ */
-const API = 'https://insightflow-backend-z3w0.onrender.com'
+const API = 'http://127.0.0.1:5000'
 let allUsers=[], allDatasets=[], allCharts=[], allActivity=[], annList=[], allFaqCache=[]
 let uPage=1, dsPage=1, cPage=1
 const PER=15

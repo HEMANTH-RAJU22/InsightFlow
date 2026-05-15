@@ -404,7 +404,7 @@ body.account-body {
 .sb-hamburger {
   display: none;
   position: fixed;
-  top: 12px;
+  top: 9px;
   left: 14px;
   z-index: 1100;
   width: 38px; height: 38px;
@@ -424,49 +424,60 @@ body.account-body {
   display: none;
   position: fixed; inset: 0;
   background: rgba(0,0,0,0.6);
-  z-index: 900;
+  z-index: 1040;
   backdrop-filter: blur(2px);
 }
 .sb-overlay.open { display: block; }
 
 @media (max-width: 900px) {
-  /* Topbar compact */
-  .ac-topbar { padding: 0 14px 0 60px; height: 52px; }
+  /* Topbar: push logo right of hamburger, show only Logout */
+  .ac-topbar { padding: 0 14px 0 62px; height: 56px; }
   .ac-logo { font-size: 13px; letter-spacing: 2px; }
+  .ac-topnav-btn:nth-child(1),
+  .ac-topnav-btn:nth-child(2) { display: none; }
   .ac-topnav-btn { font-size: 11px; padding: 5px 10px; }
 
   /* Show hamburger */
   .sb-hamburger { display: flex; }
 
-  /* Sidebar becomes off-canvas drawer */
+  /* Sidebar: off-canvas drawer from left, covers full height */
   .ac-sidebar {
-    position: fixed;
-    top: 0; left: 0;
-    width: 240px !important;
-    height: 100vh;
-    z-index: 1000;
-    transform: translateX(-100%);
-    transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+    position: fixed !important;
+    top: 0 !important; left: 0 !important;
+    width: 260px !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    z-index: 1050 !important;
+    transform: translateX(-100%) !important;
+    transition: transform 0.28s cubic-bezier(0.4,0,0.2,1) !important;
     box-shadow: 4px 0 32px rgba(0,0,0,0.6);
+    overflow-y: auto;
+    flex-direction: column !important;
   }
-  .ac-sidebar.open { transform: translateX(0); }
+  .ac-sidebar.open { transform: translateX(0) !important; }
 
-  /* Layout: single column */
-  .ac-layout { flex-direction: column; }
+  /* Layout: stack vertically, canvas fills below topbar */
+  .ac-layout { flex-direction: column; overflow: visible; }
 
   .ac-canvas {
-    height: calc(100vh - 52px);
-    margin-top: 52px;
-    padding: 18px 14px 32px;
+    height: auto !important;
+    min-height: calc(100vh - 56px);
+    margin-top: 56px;
+    padding: 20px 14px 40px;
     width: 100%;
+    overflow-y: auto;
   }
 
-  /* Profile hero vertical on small screens */
+  /* Sections: show active, hide others */
+  .ac-sec { display: none !important; flex-direction: column; gap: 18px; width: 100%; }
+  .ac-sec.active { display: flex !important; }
+
+  /* Profile hero */
   .profile-hero { flex-direction: row; gap: 14px; padding: 14px 16px; }
   .profile-avatar { width: 56px; height: 56px; font-size: 20px; }
   .profile-name { font-size: 16px; }
 
-  /* Stats strip 3-col still fine on tablet */
+  /* Stats strip */
   .stats-strip { grid-template-columns: repeat(3,1fr); gap: 8px; }
 
   /* Session grid */
@@ -484,15 +495,21 @@ body.account-body {
   .pg-head { flex-wrap: wrap; gap: 10px; }
   .pg-head-title { font-size: 17px; }
   .session-pill { font-size: 10px; padding: 4px 10px; }
+
+  /* Charts grid: 2 col */
+  .charts-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
 }
 
 @media (max-width: 480px) {
-  .ac-topbar { padding: 0 10px 0 56px; height: 50px; }
+  .ac-topbar { padding: 0 10px 0 60px; height: 54px; }
   .ac-logo { font-size: 12px; letter-spacing: 1.5px; }
-  .ac-topnav-btn { font-size: 10px; padding: 4px 8px; }
-  .ac-topnav-btn:nth-child(2) { display: none; } /* hide AI Analyst on very small */
+  .sb-hamburger { top: 8px; }
 
-  .ac-canvas { padding: 14px 10px 28px; }
+  /* Hide both nav btns on very small, keep only logout */
+  .ac-topnav-btn { display: none !important; }
+  .ac-topnav-btn.danger { display: inline-flex !important; font-size: 10px; padding: 4px 8px; }
+
+  .ac-canvas { padding: 16px 10px 32px; margin-top: 54px; }
 
   .profile-hero { flex-direction: column; align-items: center; text-align: center; padding: 16px; }
   .profile-badges { justify-content: center; }
@@ -509,10 +526,40 @@ body.account-body {
   .pg-head-sub { font-size: 11px; }
 
   .card-head h2 { font-size: 13px; }
-
   .ac-card { padding: 15px; gap: 14px; }
-
   .btn { font-size: 12px; padding: 9px 16px; }
+
+  /* Charts grid: 2 col on small */
+  .charts-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+}
+</style>
+<!-- Override responsive.css rules that conflict with account sidebar drawer -->
+<style>
+/* responsive.css @767px forces .ac-sidebar horizontal — counter it */
+@media (max-width: 767px) {
+  .ac-sidebar {
+    width: 260px !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    flex-direction: column !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    position: fixed !important;
+    top: 0 !important; left: 0 !important;
+    transform: translateX(-100%) !important;
+    z-index: 1050 !important;
+    border-right: 1px solid rgba(255,255,255,0.055) !important;
+    border-bottom: none !important;
+    padding: 0 !important;
+  }
+  .ac-sidebar.open { transform: translateX(0) !important; }
+  .ac-layout { flex-direction: column !important; overflow: visible !important; }
+  .ac-canvas { height: auto !important; overflow-y: visible !important; }
+  /* Force active sections to show */
+  .ac-sec { display: none !important; }
+  .ac-sec.active { display: flex !important; flex-direction: column !important; }
+  /* sb-nav stays vertical inside drawer */
+  .sb-nav { flex-direction: column !important; flex-wrap: nowrap !important; overflow-y: auto !important; overflow-x: hidden !important; }
 }
 </style>
 </head>
@@ -877,7 +924,7 @@ body.account-body {
   </div>
 </div>
 <script>
-var API = 'https://insightflow-backend-z3w0.onrender.com'
+var API = 'http://127.0.0.1:5000'
 var userEmail = ''
 var activityData = []
 var _fixedExpiry = 0

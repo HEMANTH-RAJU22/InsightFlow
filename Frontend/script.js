@@ -205,7 +205,7 @@ function uploadFile(){
   var uploadHdrs = {}
   var _token = getToken()
   if(_token) uploadHdrs["Authorization"] = "Bearer " + _token
-  fetch("https://insightflow-backend-z3w0.onrender.com/upload", { method:"POST", headers: uploadHdrs, body:formData })
+  fetch("http://127.0.0.1:5000/upload", { method:"POST", headers: uploadHdrs, body:formData })
     .then(res => {
       if(!res.ok) throw new Error("HTTP " + res.status)
       return res.json()
@@ -352,7 +352,7 @@ function goToChatbot(){ window.location.href = "chatbot.html" }
 function login(){
   let email    = document.getElementById("emailInput").value
   let password = document.getElementById("passwordInput").value
-  fetch("https://insightflow-backend-z3w0.onrender.com/login", {
+  fetch("http://127.0.0.1:5000/login", {
     method:"POST", headers:{"Content-Type":"application/json"},
     body: JSON.stringify({email, password})
   })
@@ -386,7 +386,7 @@ function register(){
   if(!/[0-9]/.test(password)){ alert("Password must contain at least one number."); return }
   if(btn){ btn.disabled = true; btn.innerText = "Registering..." }
 
-  fetch("https://insightflow-backend-z3w0.onrender.com/register", {
+  fetch("http://127.0.0.1:5000/register", {
     method:"POST", headers:{"Content-Type":"application/json"},
     body: JSON.stringify({name, email, password})
   })
@@ -436,7 +436,7 @@ function toggleForm(){
 function loadAccount(){
   let email = getAuthEmail()
   if(!email) return
-  fetch(`https://insightflow-backend-z3w0.onrender.com/account/${email}`, { headers: authHeaders() })
+  fetch(`http://127.0.0.1:5000/account/${email}`, { headers: authHeaders() })
     .then(res => res.json())
     .then(data => {
       let u = document.getElementById("username")
@@ -522,7 +522,7 @@ function sendChat(){
   let typingId = appendTyping()
   chatHistory.push({role:"user", content:userMsg})
 
-  fetch("https://insightflow-backend-z3w0.onrender.com/chat", {
+  fetch("http://127.0.0.1:5000/chat", {
     method:"POST",
     headers: authHeaders(),
     body: JSON.stringify(withToken({
@@ -558,7 +558,7 @@ function sendChat(){
     chatHistory.pop()
     let msg = err.message || ""
     if(msg.includes("Failed to fetch") || msg.includes("NetworkError") || msg.includes("ERR_CONNECTION")){
-      appendBotMessage("⚠️ Cannot reach Flask server.\n\nMake sure you ran **python app.py** and it shows:\n`Running on https://insightflow-backend-z3w0.onrender.com`")
+      appendBotMessage("⚠️ Cannot reach Flask server.\n\nMake sure you ran **python app.py** and it shows:\n`Running on http://127.0.0.1:5000`")
     } else if(msg.includes("401")){
       appendBotMessage("⚠️ Session expired or not logged in.\n\nPlease log in again.")
     } else {
@@ -980,7 +980,7 @@ function saveChart(){
   var config = JSON.stringify({ chartType:chartType, xAxis:xAxisVal, yAxis:yAxisVal, color:chartColor, color2:chartColor2 })
   var btn = document.getElementById('saveChartBtn')
   if(btn){ btn.textContent = 'Saving...'; btn.disabled = true }
-  fetch('https://insightflow-backend-z3w0.onrender.com/charts/save', {
+  fetch('http://127.0.0.1:5000/charts/save', {
     method: 'POST',
     headers: authHeaders(),
     body: JSON.stringify(withToken({ chart_name:chartName, chart_type:chartType, config:config, thumbnail:thumbnail }))
@@ -1141,7 +1141,7 @@ function logout() {
   try { sessionStorage.removeItem('insightflow_redirect') } catch(e) {}
   try {
     var email = getAuthEmail()
-    if (email) fetch("https://insightflow-backend-z3w0.onrender.com/logout", {
+    if (email) fetch("http://127.0.0.1:5000/logout", {
       method: "POST", headers: authHeaders(),
       body: JSON.stringify(withToken({ email: email }))
     }).catch(function () {})
