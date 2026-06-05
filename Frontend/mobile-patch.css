@@ -1,71 +1,76 @@
 /* ════════════════════════════════════════════════════════════════
-   InsightFlow — mobile-patch.css
-   Apply AFTER style.css and responsive.css on every page:
-     <link rel="stylesheet" href="mobile-patch.css">
+   InsightFlow — mobile-patch.css  (v5 — conflict-resolved)
+   Load order:  style.css → responsive.css → mobile-patch.css
 
-   Fixes:
-   1. Landing page body overflow:hidden blocks page from scrolling
-   2. Duplicate body rules in style.css causing conflicts
-   3. Hamburger + drawer wiring (visual states)
-   4. Dashboard / chatbot / viz layout on narrow screens
-   5. KPI cards two-column on phone
-   6. Upload box full-width stacking on mobile
-   7. Chatbot dvh height fix for iOS Safari
-   8. Report sidebar drawer on mobile
-   9. Login panel stacking
-   10. Account sidebar horizontal scroll on mobile
+   Root cause fixes:
+   A) style.css has  body { display:flex; justify-content:center; align-items:center }
+      from the login page block — this breaks every non-login page
+   B) style.css has  body { overflow:hidden } from landing page block
+      — this kills scrolling on dashboard / account / support etc.
+   C) Hamburger button (.mob-ham) never existed in the HTML
+      → injected by mob-inject.js (add that script to every page)
 ════════════════════════════════════════════════════════════════ */
 
-/* ── GLOBAL ─────────────────────────────────────────────────── */
+/* ── GLOBAL BOX MODEL ────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
 
-/* Fix: landing page had overflow:hidden on body which killed scroll
-   on ALL pages because style.css has duplicate body declarations.
-   We scope the hidden overflow only to the landing body. */
+/* ── FIX A + B: reset body to block, scrollable by default ──── */
+/* Every page gets this baseline; page-specific classes override */
 body {
+  display: block !important;
+  align-items: unset !important;
+  justify-content: unset !important;
   overflow-x: hidden !important;
-  overflow-y: auto !important;      /* default: scrollable */
+  overflow-y: auto !important;
+  min-height: 100vh;
 }
 
-/* Landing page only — keep overflow hidden (it's a one-screen page) */
+/* ── LANDING ─────────────────────────────────────────────────── */
+/* One-screen page: keep overflow hidden */
 body.landing-body {
   overflow: hidden !important;
+  height: 100vh !important;
 }
 
-/* Chatbot — needs fixed height, no scroll on body */
+/* ── CHATBOT ─────────────────────────────────────────────────── */
+/* Fixed-height, no scroll on body, scroll inside chat window */
 body.chatbot-body {
   overflow: hidden !important;
   height: 100dvh !important;
-  height: 100vh !important;         /* fallback */
+  height: 100vh !important;   /* fallback */
 }
 
-/* Report — fixed layout */
+/* ── REPORT ──────────────────────────────────────────────────── */
+/* Fixed layout with internal scrollable canvas */
 body.report-body {
   overflow: hidden !important;
+  height: 100dvh !important;
+  height: 100vh !important;
+  animation: none !important;
+  background: #0e1117 !important;
 }
 
 /* ── TOPBAR ──────────────────────────────────────────────────── */
 .topbar {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  height: 60px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 40px;
+  position: fixed !important;
+  top: 0 !important; left: 0 !important; right: 0 !important;
+  height: 60px !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 0 40px !important;
   background: rgba(7,13,26,0.95) !important;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-  z-index: 1000;
-  gap: 12px;
-  box-sizing: border-box;
-  /* Prevent topbar from being wider than viewport */
-  max-width: 100vw;
+  border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+  z-index: 1000 !important;
+  gap: 12px !important;
+  box-sizing: border-box !important;
+  max-width: 100vw !important;
 }
 
 /* ── HAMBURGER BUTTON ────────────────────────────────────────── */
-/* Hidden on desktop, shown via media query below */
+/* Hidden on desktop — shown by media query below */
 .mob-ham {
   display: none;
   flex-direction: column;
@@ -73,17 +78,15 @@ body.report-body {
   align-items: center;
   gap: 5px;
   width: 40px; height: 40px;
+  min-width: 40px;
   background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.10);
   border-radius: 10px;
   cursor: pointer;
   flex-shrink: 0;
   padding: 0;
   transition: background 0.2s;
-  /* Make sure it doesn't shrink away */
-  min-width: 40px;
 }
-
 .mob-ham span {
   display: block;
   width: 18px; height: 2px;
@@ -92,26 +95,14 @@ body.report-body {
   transition: transform 0.25s, opacity 0.25s, background 0.2s;
   pointer-events: none;
 }
-
-.mob-ham:hover { background: rgba(255,255,255,0.1); }
-
-/* Open state — X icon */
-.mob-ham.open span:nth-child(1) {
-  transform: translateY(7px) rotate(45deg);
-  background: #ff8c00;
-}
-.mob-ham.open span:nth-child(2) {
-  opacity: 0;
-  transform: scaleX(0);
-}
-.mob-ham.open span:nth-child(3) {
-  transform: translateY(-7px) rotate(-45deg);
-  background: #ff8c00;
-}
+.mob-ham:hover { background: rgba(255,255,255,0.11); }
+.mob-ham.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); background: #ff8c00; }
+.mob-ham.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.mob-ham.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); background: #ff8c00; }
 
 /* ── MOBILE DRAWER ───────────────────────────────────────────── */
 .mob-drawer {
-  display: none;                    /* JS sets to flex when open */
+  display: none;                   /* mob-inject.js sets to flex on open */
   position: fixed;
   top: 60px; left: 0; right: 0;
   background: rgba(4,8,18,0.98);
@@ -122,19 +113,16 @@ body.report-body {
   z-index: 999;
   flex-direction: column;
   gap: 4px;
-  /* Start hidden for animation */
   transform: translateY(-8px);
   opacity: 0;
   pointer-events: none;
   transition: transform 0.22s ease, opacity 0.22s ease;
 }
-
 .mob-drawer.open {
   transform: translateY(0);
   opacity: 1;
   pointer-events: all;
 }
-
 .mob-drawer-item {
   display: flex;
   align-items: center;
@@ -142,60 +130,38 @@ body.report-body {
   padding: 13px 16px;
   border-radius: 10px;
   font-family: 'Outfit', 'Segoe UI', system-ui, sans-serif;
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 15px; font-weight: 600;
   color: rgba(220,230,255,0.65);
   cursor: pointer;
   border: none;
   background: transparent;
-  width: 100%;
-  text-align: left;
+  width: 100%; text-align: left;
+  min-height: 48px;
   transition: background 0.18s, color 0.18s;
 }
-
 .mob-drawer-item:hover,
-.mob-drawer-item:active {
-  background: rgba(255,140,0,0.09);
-  color: #ffb347;
-}
-
+.mob-drawer-item:active  { background: rgba(255,140,0,0.09); color: #ffb347; }
 .mob-drawer-item.danger:hover,
-.mob-drawer-item.danger:active {
-  background: rgba(255,80,80,0.08);
-  color: #ff9090;
-}
+.mob-drawer-item.danger:active { background: rgba(255,80,80,0.08); color: #ff9090; }
+.mob-drawer-divider { height: 1px; background: rgba(255,255,255,0.07); margin: 6px 4px; }
 
-.mob-drawer-divider {
-  height: 1px;
-  background: rgba(255,255,255,0.07);
-  margin: 6px 4px;
-}
-
-/* ── OVERLAY (dim content behind drawer) ─────────────────────── */
-.mob-overlay {
-  display: none;
-  position: fixed;
-  inset: 60px 0 0 0;
-  background: rgba(0,0,0,0.45);
-  z-index: 998;
-}
+/* ── OVERLAY ─────────────────────────────────────────────────── */
+.mob-overlay { display: none; position: fixed; inset: 60px 0 0 0; background: rgba(0,0,0,0.45); z-index: 998; }
 .mob-overlay.open { display: block; }
+
 
 /* ════════════════════════════════════════════════════════════════
    TABLET  768px – 1023px
 ════════════════════════════════════════════════════════════════ */
 @media (max-width: 1023px) {
-  .topbar { padding: 0 22px; }
-
-  /* Visualize: narrower controls panel */
+  .topbar { padding: 0 22px !important; }
   .chart-builder { grid-template-columns: 220px 1fr !important; gap: 12px; }
   .chart-area    { height: 440px !important; }
   #myChart       { height: 408px !important; }
   .viz-controls  { max-height: calc(100vh - 100px); }
-
-  /* Report */
   .rpt-charts-grid { grid-template-columns: 1fr !important; }
 }
+
 
 /* ════════════════════════════════════════════════════════════════
    MOBILE  ≤ 767px
@@ -203,13 +169,10 @@ body.report-body {
 @media (max-width: 767px) {
 
   /* ── TOPBAR ── */
-  .topbar {
-    padding: 0 14px !important;
-    height: 60px !important;
-  }
-  .logo { font-size: 15px !important; letter-spacing: 2px !important; }
+  .topbar { padding: 0 14px !important; height: 60px !important; }
+  .logo   { font-size: 15px !important; letter-spacing: 2px !important; }
 
-  /* Hide desktop nav, show hamburger */
+  /* Hide desktop nav links, show hamburger */
   .nav-links { display: none !important; }
   .mob-ham   { display: flex !important; }
 
@@ -217,7 +180,7 @@ body.report-body {
   .dashboard {
     width: 100% !important;
     padding: 80px 14px 60px !important;
-    box-sizing: border-box;
+    box-sizing: border-box !important;
   }
   .dashboard h1 { font-size: 18px !important; margin-bottom: 16px !important; }
 
@@ -238,7 +201,7 @@ body.report-body {
     box-sizing: border-box !important;
   }
 
-  /* KPI cards: 2 columns */
+  /* KPI cards: 2 per row */
   .kpi-container { gap: 10px !important; }
   .kpi-card {
     flex: 1 1 calc(50% - 5px) !important;
@@ -255,25 +218,16 @@ body.report-body {
     gap: 14px !important;
     padding: 18px !important;
   }
-  .ai-cta-btn {
-    width: 100% !important;
-    justify-content: center !important;
-  }
+  .ai-cta-btn { width: 100% !important; justify-content: center !important; }
 
-  /* Table scrolls horizontally */
-  .table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  /* Table */
+  .table-container { overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
   table { min-width: 420px; }
-
-  /* Pagination */
   .pagination { gap: 10px; }
   .pagination button { padding: 7px 14px; font-size: 12px; }
 
   /* ── CHATBOT ── */
-  body.chatbot-body {
-    overflow: hidden !important;
-    height: 100dvh !important;
-    height: 100vh !important;
-  }
+  body.chatbot-body { overflow: hidden !important; height: 100dvh !important; height: 100vh !important; }
   .chatbot-page {
     width: 100% !important;
     padding: 68px 10px 0 !important;
@@ -281,36 +235,40 @@ body.report-body {
     height: calc(100vh - 60px) !important;
     box-sizing: border-box !important;
   }
-  .chatbot-header { padding: 6px 8px !important; margin-bottom: 6px !important; }
-  .chatbot-title  { font-size: 16px !important; }
-  .ai-badge       { width: 30px !important; height: 30px !important; font-size: 8px !important; }
-  .message-bubble { max-width: 88% !important; font-size: 13px !important; }
-  .chat-input     { font-size: 16px !important; }  /* prevents iOS zoom */
+  .chatbot-header   { padding: 6px 8px !important; margin-bottom: 6px !important; }
+  .chatbot-title    { font-size: 16px !important; }
+  .ai-badge         { width: 30px !important; height: 30px !important; font-size: 8px !important; }
+  .message-bubble   { max-width: 88% !important; font-size: 13px !important; }
+  .chat-input       { font-size: 16px !important; }  /* prevents iOS auto-zoom */
   .chatbot-input-area { padding: 10px !important; }
-  .quick-btn      { font-size: 11px !important; padding: 6px 11px !important; }
-  .send-btn       { width: 42px !important; height: 42px !important; }
+  .quick-btn        { font-size: 11px !important; padding: 6px 11px !important; }
+  .send-btn         { width: 42px !important; height: 42px !important; }
+
+  /* Quick prompts: horizontal scroll strip on mobile */
+  .quick-prompts {
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+    padding-bottom: 4px !important;
+  }
+  .quick-prompts::-webkit-scrollbar { display: none !important; }
 
   /* ── VISUALIZE ── */
   .viz-page {
     width: 100% !important;
     padding: 76px 12px 40px !important;
-    box-sizing: border-box;
+    box-sizing: border-box !important;
   }
-  .chart-builder {
-    grid-template-columns: 1fr !important;
-    gap: 12px !important;
-  }
-  .viz-controls {
-    max-height: none !important;
-    overflow: visible !important;
-  }
-  .chart-area { height: 320px !important; }
-  #myChart    { height: 288px !important; }
-  .download-btns { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 8px; }
-  .color-dot { width: 28px !important; height: 28px !important; }
-  .viz-title  { font-size: 18px !important; }
+  .chart-builder   { grid-template-columns: 1fr !important; gap: 12px !important; }
+  .viz-controls    { max-height: none !important; overflow: visible !important; }
+  .chart-area      { height: 320px !important; }
+  #myChart         { height: 288px !important; }
+  .download-btns   { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 8px; }
+  .color-dot       { width: 28px !important; height: 28px !important; }
+  .viz-title       { font-size: 18px !important; }
 
-  /* ── REPORT PAGE: sidebar becomes slide-in drawer ── */
+  /* ── REPORT ── */
   .r-topbar { padding: 0 14px !important; height: 56px !important; }
   .r-logo   { font-size: 15px !important; }
   .r-nav    { display: none !important; }
@@ -322,10 +280,7 @@ body.report-body {
     transition: left 0.28s ease !important;
     overflow-y: auto !important;
   }
-  .r-sidebar.mob-open {
-    left: 0 !important;
-    box-shadow: 8px 0 32px rgba(0,0,0,0.65) !important;
-  }
+  .r-sidebar.mob-open { left: 0 !important; box-shadow: 8px 0 32px rgba(0,0,0,0.65) !important; }
   .r-mob-overlay { display: none; position: fixed; inset: 56px 0 0 0; background: rgba(0,0,0,0.5); z-index: 499; }
   .r-mob-overlay.open { display: block; }
   .r-body   { height: calc(100dvh - 56px) !important; height: calc(100vh - 56px) !important; }
@@ -340,9 +295,9 @@ body.report-body {
   .r-mob-toggle { display: flex !important; }
 
   /* ── LOGIN ── */
-  .layout { flex-direction: column !important; min-height: 100vh !important; }
-  .left-panel  { flex: 0 0 auto !important; padding: 24px 20px 18px !important; border-right: none !important; border-bottom: 1px solid rgba(255,255,255,0.07) !important; }
-  .right-panel { flex: 1 !important; padding: 20px 16px 32px !important; justify-content: flex-start !important; align-items: stretch !important; overflow-y: auto !important; }
+  .layout       { flex-direction: column !important; min-height: 100vh !important; }
+  .left-panel   { flex: 0 0 auto !important; padding: 24px 20px 18px !important; border-right: none !important; border-bottom: 1px solid rgba(255,255,255,0.07) !important; }
+  .right-panel  { flex: 1 !important; padding: 20px 16px 32px !important; justify-content: flex-start !important; align-items: stretch !important; overflow-y: auto !important; }
   .form-wrapper { max-width: 100% !important; width: 100% !important; }
   .form-card    { padding: 24px 18px !important; }
   .heading h1   { font-size: 26px !important; }
@@ -351,7 +306,7 @@ body.report-body {
   .form-actions { flex-direction: column !important; gap: 10px !important; }
   .form-actions .btn { width: 100% !important; justify-content: center !important; min-height: 48px !important; }
 
-  /* Prevent iOS auto-zoom on input focus */
+  /* Prevent iOS auto-zoom on any input */
   input[type="email"],
   input[type="password"],
   input[type="text"],
@@ -366,7 +321,7 @@ body.report-body {
   .tab  { flex-shrink: 0 !important; font-size: 12px !important; padding: 8px 14px !important; }
   .card { padding: 18px 14px !important; border-radius: 14px !important; }
 
-  /* Account sidebar → horizontal nav */
+  /* Account sidebar → horizontal scroll nav */
   .ac-layout  { flex-direction: column !important; overflow: visible !important; }
   .ac-sidebar {
     width: 100% !important; height: auto !important;
@@ -380,32 +335,27 @@ body.report-body {
     flex-shrink: 0 !important;
   }
   .ac-sidebar::-webkit-scrollbar { display: none !important; }
-  .ac-nav {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    gap: 4px !important;
-    padding: 0 !important;
-  }
+  .ac-nav { display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; gap: 4px !important; padding: 0 !important; }
   .ac-nav-item  { flex-shrink: 0 !important; white-space: nowrap !important; font-size: 12px !important; padding: 8px 13px !important; }
   .ac-sidebar-footer, .ac-sidebar-header { display: none !important; }
-  .ac-content   { flex: 1 !important; overflow-y: auto !important; width: 100% !important; padding: 16px 14px !important; }
+  .ac-content { flex: 1 !important; overflow-y: auto !important; width: 100% !important; padding: 16px 14px !important; }
 
   /* ── ANNOUNCEMENT TICKER ── */
   #annTicker { height: 34px !important; }
-  .t-msg     { font-size: 11px !important; padding: 0 18px !important; }
-  .t-icon    { padding: 0 10px !important; }
-  .t-badge   { font-size: 7px !important; padding: 1px 6px !important; }
+  .t-msg  { font-size: 11px !important; padding: 0 18px !important; }
+  .t-icon { padding: 0 10px !important; }
+  .t-badge{ font-size: 7px !important; padding: 1px 6px !important; }
   body.ticker-visible .dashboard,
   body.ticker-visible .viz-page,
   body.ticker-visible .chatbot-page { padding-top: 150px !important; }
 
-  /* ── LANDING PAGE (index.html) ── */
-  .home { padding: 16px; }
-  .title { font-size: clamp(36px, 11vw, 58px) !important; letter-spacing: 4px !important; }
+  /* ── LANDING PAGE ── */
+  .home    { padding: 16px; }
+  .title   { font-size: clamp(36px,11vw,58px) !important; letter-spacing: 4px !important; }
   .tagline { font-size: 12px !important; letter-spacing: 4px !important; }
   .start-btn { padding: 12px 28px; font-size: 14px; }
 }
+
 
 /* ════════════════════════════════════════════════════════════════
    PHONE  ≤ 479px  (extra small)
@@ -414,29 +364,30 @@ body.report-body {
   .topbar { padding: 0 12px !important; }
   .logo   { font-size: 13px !important; letter-spacing: 1.5px !important; }
 
-  .dashboard { padding: 72px 10px 48px !important; }
-  .kpi-card  { flex: 1 1 calc(50% - 5px) !important; min-width: 110px !important; padding: 14px 8px !important; }
-  .kpi-card h3 { font-size: 8px !important; }
-  .kpi-card p  { font-size: 18px !important; }
+  .dashboard  { padding: 72px 10px 48px !important; }
+  .kpi-card   { flex: 1 1 calc(50% - 5px) !important; min-width: 110px !important; padding: 14px 8px !important; }
+  .kpi-card h3{ font-size: 8px !important; }
+  .kpi-card p { font-size: 18px !important; }
 
-  .chatbot-page { padding: 64px 8px 0 !important; }
+  .chatbot-page  { padding: 64px 8px 0 !important; }
   .bot-avatar, .user-avatar { width: 26px !important; height: 26px !important; }
-  .message-bubble { max-width: 91% !important; font-size: 12.5px !important; }
-  .quick-btn  { font-size: 10px !important; padding: 5px 9px !important; }
+  .message-bubble{ max-width: 91% !important; font-size: 12.5px !important; }
+  .quick-btn     { font-size: 10px !important; padding: 5px 9px !important; }
 
-  .viz-page  { padding: 64px 9px 36px !important; }
-  .viz-title { font-size: 16px !important; }
+  .viz-page   { padding: 64px 9px 36px !important; }
+  .viz-title  { font-size: 16px !important; }
   .chart-area { height: 260px !important; }
   #myChart    { height: 228px !important; }
 
   .rpt-kpi-grid  { grid-template-columns: 1fr 1fr !important; gap: 6px !important; }
   .rpt-kpi-value { font-size: 20px !important; }
 
-  .title  { font-size: clamp(30px, 10vw, 44px) !important; letter-spacing: 3px !important; }
+  .title { font-size: clamp(30px,10vw,44px) !important; letter-spacing: 3px !important; }
 }
 
+
 /* ════════════════════════════════════════════════════════════════
-   SAFE AREAS — iPhone notch / home bar
+   SAFE AREAS — iPhone notch / Dynamic Island / home bar
 ════════════════════════════════════════════════════════════════ */
 @supports (padding: max(0px)) {
   .topbar {
@@ -459,24 +410,26 @@ body.report-body {
   }
 }
 
+
 /* ════════════════════════════════════════════════════════════════
-   TOUCH DEVICES — bigger tap targets
+   TOUCH DEVICES — bigger tap targets, no sticky hover
 ════════════════════════════════════════════════════════════════ */
 @media (hover: none) and (pointer: coarse) {
-  .mob-drawer-item        { min-height: 48px !important; }
-  .quick-btn              { min-height: 40px !important; min-width: 44px !important; }
-  .send-btn               { min-width: 44px !important; min-height: 44px !important; }
-  .ai-cta-btn             { min-height: 48px !important; }
+  .mob-drawer-item   { min-height: 48px !important; }
+  .quick-btn         { min-height: 40px !important; min-width: 44px !important; }
+  .send-btn          { min-width: 44px !important; min-height: 44px !important; }
+  .ai-cta-btn        { min-height: 48px !important; }
   .upload-box button,
-  .upload-label           { min-height: 48px !important; }
-  .pagination button      { min-height: 44px !important; min-width: 80px !important; }
-  /* Disable hover transforms (they feel sticky on touch) */
+  .upload-label      { min-height: 48px !important; }
+  .pagination button { min-height: 44px !important; min-width: 80px !important; }
+  /* Disable hover translate/scale (feels sticky on touch) */
   .kpi-card:hover,
   .ai-cta-btn:hover,
   .viz-dashboard-btn:hover,
   .upload-box button:hover,
-  .quick-btn:hover        { transform: none !important; }
+  .quick-btn:hover   { transform: none !important; }
 }
+
 
 /* ════════════════════════════════════════════════════════════════
    REDUCED MOTION
